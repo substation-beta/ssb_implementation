@@ -1,0 +1,57 @@
+[package]
+# Project information
+name = "ssb_renderer"
+version = "0.0.0"
+authors = ["Christoph 'Youka' Spanknebel"]
+description = "Renderer of ssb_parser results on images."
+# Project type
+workspace = ".."
+edition = "2018"
+# Documentation
+keywords = ["ssb", "renderer", "subtitle", "2d", "graphics"]
+categories = ["rendering::data-formats"]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/substation-beta/ssb_implementation"
+# Embed configuration by environment variables
+build = "config.rs"
+
+[badges]
+# Development status
+travis-ci = {repository = "substation-beta/ssb_implementation", branch = "master"}
+codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
+maintenance = {status = "actively-developed"}
+
+[lib]
+# Compile to Rust static library
+crate-type = ["rlib"]
+# Documentation embedded code doesn't need tests
+doctest = false
+
+[dependencies]
+# Depend on parser module
+ssb_parser = {path = "../ssb_parser", version = "0.0.0"}
+# Render targets
+glutin = "~0.19.0"   # https://crates.io/crates/glutin
+image = "~0.21.0"   # https://crates.io/crates/image
+# Graphics
+gl32 = "~0.1.1" # https://crates.io/crates/gl32
+# Fonts & text
+font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
+rusttype = "~0.7.5"  # https://crates.io/crates/rusttype
+glyph_brush = "~0.4.1"   # https://crates.io/crates/glyph_brush
+# Geometry
+cgmath = "~0.17.0"   # https://crates.io/crates/cgmath
+lyon = "~0.13.0" # https://crates.io/crates/lyon
+# Debugging
+log = "~0.4.6"  # https://crates.io/crates/log
+
+[[bench]]
+# File to execute
+name = "rendering_benches"
+# Disable standard benchmarking harness in favor of microbench
+harness = false
+
+[dev-dependencies]
+# Profiling
+microbench = "~0.4.0"   # https://crates.io/crates/microbench

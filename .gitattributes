@@ -1,0 +1,5 @@
+# Detect text files and set recommend formatting
+*	text=auto
+
+# Set pest grammar language compatible to rust
+*.pest linguist-language=Rust

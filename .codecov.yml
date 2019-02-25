@@ -1,0 +1,11 @@
+# See <https://docs.codecov.io/docs/codecov-yaml>
+codecov:
+  ci:
+    - travis
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  range: "50...80"
+  precision: 2
+  round: down

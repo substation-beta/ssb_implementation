@@ -1,0 +1,54 @@
+[package]
+# Project information
+name = "ssb_filter"
+version = "0.0.0"
+authors = ["Christoph 'Youka' Spanknebel"]
+description = "Video filter implementation of ssb_renderer."
+# Project type
+workspace = ".."
+edition = "2018"
+# Documentation
+keywords = ["ssb", "filter", "subtitle", "video", "processing"]
+categories = ["rendering::data-formats"]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/substation-beta/ssb_implementation"
+# Manifest embedding
+build = "manifest.rs"
+
+[badges]
+# Development status
+travis-ci = {repository = "substation-beta/ssb_implementation", branch = "master"}
+codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
+maintenance = {status = "actively-developed"}
+
+[lib]
+# Compile to C dynamic library
+crate-type = ["cdylib"]
+# Documentation embedded code doesn't need tests
+doctest = false
+
+[dependencies]
+# Depend on renderer module
+ssb_renderer = {path = "../ssb_renderer", version = "0.0.0"}
+# Debugging
+log = "~0.4.6"  # https://crates.io/crates/log
+env_logger = "~0.6.0"   # https://crates.io/crates/env_logger
+failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/failure
+# Interface frameworks
+vapoursynth = {version = "~0.2.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
+winapi = {version = "~0.3.6", optional = true}   # https://crates.io/crates/winapi
+gstreamer = {version = "~0.13.0", optional = true}   # https://crates.io/crates/gstreamer
+
+[features]
+# Just serve to modern media frameworks
+default = ["vapoursynth-interface"]
+vapoursynth-interface = ["vapoursynth", "failure"]
+mediafoundation-interface = ["winapi"]
+gstreamer-interface = ["gstreamer"]
+
+[target.'cfg(windows)'.build-dependencies]
+# Manifest
+embed-resource = "~1.1.4"   # https://crates.io/crates/embed-resource
+# Date & time
+chrono = "~0.4.6"   # https://crates.io/crates/chrono

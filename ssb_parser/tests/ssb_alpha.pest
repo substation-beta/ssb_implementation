@@ -1,0 +1,27 @@
+// Whole script
+script = _{SOI ~ sections ~ EOI}
+
+// Whitespaces and comments 
+WHITESPACE = _{" " | "\t"}   // Spaces or tabulators
+COMMENT = _{"//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE}    // From double-slash until newline
+
+// Sections
+sections = _{meta_section? ~ NEWLINE? ~ frame_section? ~ NEWLINE? ~ macros_section? ~ NEWLINE? ~ events_section?}   // Optional sections in order
+
+// Meta section
+meta_section = _{"# META" ~ NEWLINE ~ meta_entry*}   // Meta header
+meta_entry = ${meta_entry_key ~ ": " ~ meta_entry_value}   // Meta entry pair
+meta_entry_key = ${ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_" | "-")*}  // Meta key format
+meta_entry_value = ${(!NEWLINE ~ ANY)* ~ NEWLINE}  // Meta value format
+
+// Frame section
+frame_section = _{"# FRAME" ~ NEWLINE ~ frame_entry*}    // Frame header
+frame_entry = ${frame_entry_key ~ ": " ~ frame_entry_value}   // Frame entry pair
+frame_entry_key = ${"width" | "height"} // Frame entry key options
+frame_entry_value = ${ASCII_DIGIT{1, 4} ~ NEWLINE} // Frame entry value as short integer
+
+// Macros section
+macros_section = _{"# MACROS" ~ NEWLINE} // Macros header
+
+// Events section
+events_section = _{"# EVENTS" ~ NEWLINE} // Events header

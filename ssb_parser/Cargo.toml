@@ -1,0 +1,34 @@
+[package]
+# Project information
+name = "ssb_parser"
+version = "0.0.0"
+authors = ["Christoph 'Youka' Spanknebel"]
+description = "Parser for *.ssb files."
+# Project type
+workspace = ".."
+edition = "2018"
+# Documentation
+keywords = ["ssb", "parser", "subtitle", "text"]
+categories = ["parsing"]
+readme = "README.md"
+license = "Apache-2.0"
+repository = "https://github.com/substation-beta/ssb_implementation"
+
+[badges]
+# Development status
+travis-ci = {repository = "substation-beta/ssb_implementation", branch = "master"}
+codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
+maintenance = {status = "actively-developed"}
+
+[lib]
+# Compile to Rust static library
+crate-type = ["rlib"]
+# Documentation embedded code doesn't need tests
+doctest = false
+
+[dependencies]
+# Text parsing
+pest = "~2.1.0" # https://crates.io/crates/pest
+pest_derive = "~2.1.0"  # https://crates.io/crates/pest_derive
+# Debugging
+log = "~0.4.6"  # https://crates.io/crates/log

@@ -1,0 +1,12 @@
+# Compile output
+/target/
+
+# Cargo dependencies lock
+Cargo.lock
+
+# Rust backups
+**/*.rs.bk
+
+# Editor configurations
+.idea/
+.vscode/

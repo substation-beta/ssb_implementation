@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "ssb_parser",
+    "ssb_renderer",
+    "ssb_filter"
+]
+
+[profile.release]
+# Link-time-optimization for smaller binaries but longer build time
+lto = true
+# Just one build thread (=no parallel building) but chance for additional optimization
+codegen-units = 1
+# No expensive stack unwinding, release should be safe and without bloating
+panic = "abort"
