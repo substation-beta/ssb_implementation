@@ -14,7 +14,7 @@ matrix:
 # Cache build dependencies
 cache: cargo
 
-# Add X Virtual Framebuffer for GUI
+# Add X Virtual Framebuffer for system graphics layer
 services:
   - xvfb
 
@@ -39,10 +39,9 @@ addons:
       - libiberty-dev
 
 # Fix Vapoursynth-Script library link
-before_script:
-  - sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
+before_script: sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
 
-# Execute builds & tests
+# Execute rust builds & tests
 script:
   - cargo build --verbose
   - cargo test --verbose
@@ -66,5 +65,5 @@ deploy:
   provider: script  # Script execution
   script: cargo login $CRATES_TOKEN; cargo publish --manifest-path ssb_parser/Cargo.toml || true; cargo publish --manifest-path ssb_renderer/Cargo.toml || true; cargo publish --manifest-path ssb_filter/Cargo.toml || true # Link to crates.io and publish ssb_* projects
   on:
-    tags: true  # Commit must be tagged!
     rust: stable  # Just for build with stable rust!
+    tags: true  # Commit must be tagged!
