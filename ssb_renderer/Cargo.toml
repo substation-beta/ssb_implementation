@@ -13,6 +13,8 @@ categories = ["rendering::data-formats"]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/substation-beta/ssb_implementation"
+# Don't package development stuff
+exclude = ["tests/**/*", "benches/**/*"]
 # Embed configuration by environment variables
 build = "config.rs"
 
