@@ -1,3 +1,5 @@
+# See <https://docs.travis-ci.com/user/job-lifecycle/>
+
 # Ubuntu (xenial) as operating system
 dist: xenial
 

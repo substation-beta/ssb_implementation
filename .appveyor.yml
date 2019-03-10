@@ -1,3 +1,5 @@
+# See <https://www.appveyor.com/docs/build-configuration/>
+
 # Windows with MSVC 2015 (minimal requirement for rust MSVC compiler)
 os: Visual Studio 2015
 
@@ -26,6 +28,13 @@ matrix:
   allow_failures:
     - channel: nightly
 
+# Cache build dependencies
+cache:
+  # Cargo global index
+  - C:\Users\appveyor\.cargo\registry
+  # Build output
+  - target
+
 # Install software
 install:
   # Load rust installer
@@ -38,10 +47,8 @@ install:
   - rustc -Vv
   - cargo -Vv
 
-# Disable warning of missing MSVC project files in build directory
-build: false
+# Run build by scripting (instead of default MSVC project search & execute)
+build_script: cargo build -p ssb_parser --verbose
 
-# Run rust build by scripting (in later test stage)
-test_script:
-  - cargo build -p ssb_parser --verbose
-  - cargo test -p ssb_parser --verbose
+# Run tests by scripting
+test_script: cargo test -p ssb_parser --verbose
