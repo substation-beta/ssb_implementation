@@ -21,6 +21,7 @@ build = "config.rs"
 [badges]
 # Development status
 travis-ci = {repository = "substation-beta/ssb_implementation", branch = "master"}
+appveyor = {repository = "Youka/ssb_implementation", branch = "master", service = "github"}
 codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
 maintenance = {status = "actively-developed"}
 
