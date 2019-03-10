@@ -1,7 +1,7 @@
 // Imports
 use std::thread;
 use std::sync::mpsc::{sync_channel, SyncSender, Receiver};
-use glutin::{WindowBuilder, ContextBuilder, GlRequest, Api, GlProfile, EventsLoop, GlWindow, GlContext};
+use glutin::{WindowBuilder, ContextBuilder, GlRequest, Api, GlProfile, EventsLoop, ContextTrait};
 use glutin::dpi::LogicalSize;
 use log::info;
 use super::error::GlError;
@@ -28,15 +28,15 @@ impl<DataTypeIn, DataTypeOut> GlEnvironment<DataTypeIn, DataTypeOut> {
             worker_thread: Some(thread::spawn(move ||{
                 info!("Started GlEnvironment thread.");
                 // Create OpenGL context
-                let gl_window = GlWindow::new(
-                    WindowBuilder::new()
-                        .with_dimensions(LogicalSize::new(1.0, 1.0))
-                        .with_visibility(false),
-                    ContextBuilder::new()
-                        .with_gl(GlRequest::Specific(Api::OpenGl, version))
-                        .with_gl_profile(GlProfile::Core),
-                    &EventsLoop::new()
-                ).expect(&format!("Unsupported GL version: {:?}!", &version));
+                let gl_window = ContextBuilder::new()
+                    .with_gl(GlRequest::Specific(Api::OpenGl, version))
+                    .with_gl_profile(GlProfile::Core)
+                    .build_windowed(
+                        WindowBuilder::new()
+                            .with_dimensions(LogicalSize::new(1.0, 1.0))
+                            .with_visibility(false),
+                        &EventsLoop::new()
+                    ).expect(&format!("Unsupported GL version: {:?}!", &version));
                 unsafe {
                     gl_window.make_current().expect("GL context binding not possible!");
                 }

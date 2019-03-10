@@ -1,4 +1,4 @@
-# Windows with MSVC 2015 (minimal requirement for Rust MSVC compiler)
+# Windows with MSVC 2015 (minimal requirement for rust MSVC compiler)
 os: Visual Studio 2015
 
 # Set environment variables for jobs

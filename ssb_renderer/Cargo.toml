@@ -34,7 +34,7 @@ doctest = false
 # Depend on parser module
 ssb_parser = {path = "../ssb_parser", version = "0.0.0"}
 # Render targets
-glutin = "~0.19.0"   # https://crates.io/crates/glutin
+glutin = "~0.20.0"   # https://crates.io/crates/glutin
 image = "~0.21.0"   # https://crates.io/crates/image
 # Graphics
 gl32 = "~0.1.1" # https://crates.io/crates/gl32
