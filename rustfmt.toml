@@ -1,4 +1,5 @@
 # See <https://github.com/rust-lang/rustfmt/blob/master/Configurations.md>
+
 # Stable
 use_small_heuristics = "Default"
 force_explicit_abi = true
@@ -13,6 +14,7 @@ tab_spaces = 4
 use_field_init_shorthand = true
 use_try_shorthand = true
 edition = "2018"
+
 # Unstable
 unstable_features = true
 disable_all_formatting = false
