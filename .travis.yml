@@ -23,10 +23,15 @@ matrix:
   include:
     # Stable
     - rust: stable
-      # CodeCov / kcov upload
+      # Add system dependencies
       addons:
         apt:
+          sources:
+            - sourceline: 'ppa:djcj/vapoursynth'
           packages:
+            - python3
+            - vapoursynth
+            # kcov requirements
             - libcurl4-openssl-dev
             - libelf-dev
             - libdw-dev
@@ -34,6 +39,7 @@ matrix:
             - gcc
             - binutils-dev
             - libiberty-dev
+      # CodeCov upload
       after_success: |
         wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz && # Download kcov sources
         tar xzf master.tar.gz && cd kcov-master &&  # Unzip kcov sources
@@ -52,15 +58,14 @@ matrix:
           tags: true  # Commit must be tagged!
     # Nightly
     - rust: nightly
-
-# Add system dependencies
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:djcj/vapoursynth'
-    packages:
-      - python3
-      - vapoursynth
+      # Add system dependencies
+      addons:
+        apt:
+          sources:
+            - sourceline: 'ppa:djcj/vapoursynth'
+          packages:
+            - python3
+            - vapoursynth
 
 # Fix Vapoursynth-Script library link
 before_script: sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
