@@ -37,6 +37,7 @@ cache:
 
 # Install software
 install:
+  # RUST
   # Load rust installer
   - curl -fsS -o rustup-init.exe https://win.rustup.rs
   # Install rust toolchain
@@ -46,9 +47,21 @@ install:
   # Show rust version (detailed)
   - rustc -Vv
   - cargo -Vv
+  # PYTHON
+  # Add global access to python binaries (already installed)
+  - set PATH=%PATH%;C:\Python37-x64
+  # Show python version (detailed)
+  - python -VV
+  # VAPOURSYNTH
+  # Load vapoursynth installer
+  - curl -fsS -o VapourSynth-R45.exe https://github.com/vapoursynth/vapoursynth/releases/download/R45/VapourSynth-R45.exe
+  # Install vapoursynth toolkit
+  - VapourSynth-R45 /SP- /VERYSILENT /SUPPRESSMSGBOXES /NOCANCEL /NORESTART /RESTARTEXITCODE=1 /NOCLOSEAPPLICATIONS /NORESTARTAPPLICATIONS /LANG="en" /NOICONS /COMPONENTS="vs64,sdk,vsruntimes"
+  # Show vapoursynth version
+  - python -c "import vapoursynth; print(vapoursynth.core.version())"
 
 # Run build by scripting (instead of default MSVC project search & execute)
-build_script: cargo build -p ssb_parser -p ssb_renderer --verbose
+build_script: cargo build --verbose
 
 # Run tests by scripting
-test_script: cargo test -p ssb_parser -p ssb_renderer --verbose
+test_script: cargo test --verbose
