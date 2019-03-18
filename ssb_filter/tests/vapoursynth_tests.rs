@@ -1,5 +1,4 @@
-// Vapoursynth exclusive
-#[cfg(all(feature = "vapoursynth-interface", test))]
+#[cfg(all(feature = "vapoursynth-interface"))]
 mod vapoursynth_tests {
     // Imports
     use vapoursynth::prelude::*;

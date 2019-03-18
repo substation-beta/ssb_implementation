@@ -1,4 +1,3 @@
-#[cfg(test)]
 mod grammar_tests {
     // Test 1
     mod simple {
