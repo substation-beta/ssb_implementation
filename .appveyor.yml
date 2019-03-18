@@ -48,7 +48,7 @@ install:
   - cargo -Vv
 
 # Run build by scripting (instead of default MSVC project search & execute)
-build_script: cargo build -p ssb_parser --verbose
+build_script: cargo build -p ssb_parser -p ssb_renderer --verbose
 
 # Run tests by scripting
-test_script: cargo test -p ssb_parser --verbose
+test_script: cargo test -p ssb_parser -p ssb_renderer --verbose

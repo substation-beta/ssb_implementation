@@ -6,7 +6,7 @@ mod vapoursynth_tests {
     use std::process::Command;
     use std::path::Path;
 
-    // Helpers
+    // Platform properties
     #[cfg(target_os = "windows")]
     mod platform {
         pub const PYTHON_CMD: &str = "python";

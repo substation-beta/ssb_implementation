@@ -53,11 +53,6 @@ matrix:
     # Nightly
     - rust: nightly
 
-
-# Add X Virtual Framebuffer for system graphics layer
-services:
-  - xvfb
-
 # Add system dependencies
 addons:
   apt:
@@ -66,9 +61,6 @@ addons:
     packages:
       - python3
       - vapoursynth
-      # Fix X server plugins for OpenGL
-      - libxrandr-dev
-      - libxinerama-dev
 
 # Fix Vapoursynth-Script library link
 before_script: sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
