@@ -2,6 +2,10 @@
 
 # Windows with MSVC 2015 (minimal requirement for rust MSVC compiler)
 os: Visual Studio 2015
+# Just for 'master' branch
+branches:
+  only:
+    - master
 
 # Set environment variables
 environment:
@@ -62,7 +66,7 @@ install:
   # Show vapoursynth version
   - python -c "import vapoursynth; print(vapoursynth.core.version())"
   # Add compiler access to vapoursynth sdk (not coming with portable edition, retrieved from installer)
-  - set VAPOURSYNTH_LIB_DIR=%cd%/ssb_renderer/vendor/Vapoursynth-R45/sdk/lib64
+  - set VAPOURSYNTH_LIB_DIR=%cd%/ssb_filter/vendor/Vapoursynth-R45/sdk/lib64
 
 # Run build by scripting (instead of default MSVC project search & execute)
 build_script: echo %target% | findstr msvc >nul && cargo build --verbose || cargo build -p ssb_parser -p ssb_renderer --verbose

@@ -14,7 +14,7 @@ readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/substation-beta/ssb_implementation"
 # Don't package development stuff
-exclude = ["tests/**/*", "benches/**/*"]
+exclude = ["tests/**/*", "benches/**/*", "vendor/**/*"]
 # Manifest embedding
 build = "manifest.rs"
 

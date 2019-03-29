@@ -4,6 +4,10 @@
 dist: xenial
 # Rust as project language
 language: rust
+# Just for 'master' branch
+branches:
+  only:
+    - master
 
 # Add environment variable to show rust backtrace on error
 env:
