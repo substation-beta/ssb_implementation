@@ -37,15 +37,6 @@ mod grammar_tests {
 
     // Test 2
     mod ssb_alpha {
-        // Imports
-        use pest_derive::Parser;    // Macro
-        use pest::Parser;   // Trait
-
-        // Test resource
-        #[derive(Parser)]
-        #[grammar = "../tests/ssb_alpha.pest"]
-        struct ScriptParser;
-
         const TEST_SCRIPT: &str =
 "// Hello from comment!
 # META
@@ -64,47 +55,7 @@ height: 720
         // Tester
         #[test]
         fn test_ssb_alpha() {
-            // Parse script and panic on fail
-            let pairs = ScriptParser::parse(Rule::script, TEST_SCRIPT).unwrap_or_else(|e| panic!("{}", e));
-            // Iterate through section entries
-            for section_entry_pair in pairs {
-                match section_entry_pair.as_rule() {
-                    // Meta entry
-                    Rule::meta_entry => for meta_entry_pair in section_entry_pair.into_inner() {
-                        match meta_entry_pair.as_rule() {
-                            // Meta entry key
-                            Rule::meta_entry_key => {
-                                println!("Meta key: {}", meta_entry_pair.as_str());
-                            }
-                            // Meta entry value
-                            Rule::meta_entry_value => {
-                                println!("Meta value: {}", meta_entry_pair.as_str());
-                            }
-                            // Nothing more in this scope
-                            _ => unreachable!()
-                        }
-                    }
-                    // Frame entry
-                    Rule::frame_entry => for frame_entry_pair in section_entry_pair.into_inner() {
-                        match frame_entry_pair.as_rule() {
-                            // Frame entry key
-                            Rule::frame_entry_key => {
-                                println!("Frame key: {}", frame_entry_pair.as_str());
-                            }
-                            // Frame entry value
-                            Rule::frame_entry_value => {
-                                println!("Frame value: {}", frame_entry_pair.as_str());
-                            }
-                            // Nothing more in this scope
-                            _ => unreachable!()
-                        }
-                    }
-                    // "End of input" not of interest
-                    Rule::EOI => (),
-                    // Nothing more in this scope
-                    _ => unreachable!()
-                }
-            }
+            ssb_parser::processors::SsbParser::parse(TEST_SCRIPT);
         }
     }
 }
