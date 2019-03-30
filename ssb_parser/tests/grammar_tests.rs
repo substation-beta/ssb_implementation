@@ -55,7 +55,7 @@ height: 720
         // Tester
         #[test]
         fn test_ssb_alpha() {
-            ssb_parser::processors::SsbParser::parse(TEST_SCRIPT);
+            ssb_parser::processors::SsbParser::new(TEST_SCRIPT);
         }
     }
 }

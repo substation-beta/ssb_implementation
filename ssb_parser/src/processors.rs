@@ -6,14 +6,15 @@ use pest::Parser;   // Trait
 // PEG parser
 #[derive(Parser)]
 #[grammar = "ssb.pest"]
-pub struct SsbPegParser;
+struct SsbPegParser;
 
 // Stream parser for ssb data
 pub struct SsbParser {
-    data : Ssb
+    data: Ssb
 }
 impl SsbParser {
-    pub fn parse(script: &str) {
+    // Constructor
+    pub fn new(script: &str) -> Self {
         // Parse script and panic on fail
         let pairs = SsbPegParser::parse(Rule::script, script).unwrap_or_else(|e| panic!("{}", e));
         // Iterate through section entries
@@ -54,6 +55,10 @@ impl SsbParser {
                 // Nothing more in this scope
                 _ => unreachable!()
             }
+        }
+        // Return instance
+        Self {
+            data: Ssb {}
         }
     }
 }
