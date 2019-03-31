@@ -1,13 +1,9 @@
 // Imports
-use std::convert::From;
 use super::base::{Degree, Point};
 
 // PATH BASE
-trait PathBase<SegmentType> {
-    fn new() -> Self;
-    fn new_by_segments(segments: Vec<SegmentType>) -> Self;
-
-    fn get_segments(&self) -> &Vec<SegmentType>;
+trait PathBase<SegmentType> : Default + AsRef<[SegmentType]> {
+    fn new(segments: Vec<SegmentType>) -> Self;
 
     fn move_to(&mut self, point: Point) -> &mut Self;
     fn line_to(&mut self, point: Point) -> &mut Self;
@@ -24,24 +20,20 @@ pub enum FlatPathSegment {
 }
 
 // Flat path of 2d geometry
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FlatPath {
     segments: Vec<FlatPathSegment>
 }
-impl PathBase<FlatPathSegment> for FlatPath {
-    fn new() -> Self {
-        Self {
-            segments: vec!()
-        }
+impl AsRef<[FlatPathSegment]> for FlatPath {
+    fn as_ref(&self) -> &[FlatPathSegment] {
+        &self.segments
     }
-    fn new_by_segments(segments: Vec<FlatPathSegment>) -> Self {
+}
+impl PathBase<FlatPathSegment> for FlatPath {
+    fn new(segments: Vec<FlatPathSegment>) -> Self {
         Self {
             segments
         }
-    }
-
-    fn get_segments(&self) -> &Vec<FlatPathSegment> {
-        &self.segments
     }
 
     fn move_to(&mut self, point: Point) -> &mut Self {
@@ -59,7 +51,7 @@ impl PathBase<FlatPathSegment> for FlatPath {
 }
 impl From<Path> for FlatPath {
     fn from(path: Path) -> Self {
-        let mut flat_segments = Vec::with_capacity(path.get_segments().len());
+        let mut flat_segments = Vec::with_capacity(path.as_ref().len());
         path.segments.into_iter().for_each(|segment| {
             match segment {
                 PathSegment::Flat(flat_segment) => flat_segments.push(flat_segment),
@@ -67,7 +59,7 @@ impl From<Path> for FlatPath {
                 PathSegment::ArcBy(center_point, angle) => unimplemented!()
             }
         });
-        Self::new_by_segments(flat_segments)
+        Self::new(flat_segments)
     }
 }
 
@@ -80,24 +72,20 @@ pub enum PathSegment {
     ArcBy(Point, Degree),  // Orientation/center point + angle
 }
 // Path of 2d geometry
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Path {
     segments: Vec<PathSegment>
 }
-impl PathBase<PathSegment> for Path {
-    fn new() -> Self {
-        Self {
-            segments: vec!()
-        }
+impl AsRef<[PathSegment]> for Path {
+    fn as_ref(&self) -> &[PathSegment] {
+        &self.segments
     }
-    fn new_by_segments(segments: Vec<PathSegment>) -> Self {
+}
+impl PathBase<PathSegment> for Path {
+    fn new(segments: Vec<PathSegment>) -> Self {
         Self {
             segments
         }
-    }
-
-    fn get_segments(&self) -> &Vec<PathSegment> {
-        &self.segments
     }
 
     fn move_to(&mut self, point: Point) -> &mut Self {
@@ -115,7 +103,7 @@ impl PathBase<PathSegment> for Path {
 }
 impl From<FlatPath> for Path {
     fn from(flat_path: FlatPath) -> Self {
-        Self::new_by_segments(flat_path.segments.into_iter().map(|flat_segment| PathSegment::Flat(flat_segment)).collect())
+        Self::new(flat_path.segments.into_iter().map(|flat_segment| PathSegment::Flat(flat_segment)).collect())
     }
 }
 impl Path {
