@@ -1,5 +1,8 @@
 // Imports
-use super::base::{Degree, Point};
+use super::{
+    base::{Degree, Point},
+    flatten::{flatten_curve, flatten_arc}
+};
 
 // PATH BASE
 trait PathBase<SegmentType> : Default + AsRef<[SegmentType]> {
@@ -51,14 +54,42 @@ impl PathBase<FlatPathSegment> for FlatPath {
 }
 impl From<Path> for FlatPath {
     fn from(path: Path) -> Self {
+        // Result buffer
         let mut flat_segments = Vec::with_capacity(path.as_ref().len());
-        path.segments.into_iter().for_each(|segment| {
+        // Flatten path segments
+        path.segments.into_iter().fold(None, |last_point, segment| {
             match segment {
-                PathSegment::Flat(flat_segment) => flat_segments.push(flat_segment),
-                PathSegment::CurveTo(control_point1, control_point2, end_point) => unimplemented!(),
-                PathSegment::ArcBy(center_point, angle) => unimplemented!()
+                // Repack already flat segments
+                PathSegment::Flat(flat_segment) => {
+                    let new_last_point = match flat_segment {
+                        FlatPathSegment::MoveTo(point) => Some(point),
+                        FlatPathSegment::LineTo(point) => Some(point),
+                        FlatPathSegment::Close => last_point
+                    };
+                    flat_segments.push(flat_segment);
+                    new_last_point
+                }
+                // Flatten curve
+                PathSegment::CurveTo(control_point1, control_point2, end_point) => {
+                    let curve_points = flatten_curve(last_point.unwrap_or_default(), control_point1, control_point2, end_point);
+
+                    // TODO: points to lines
+                    unimplemented!();
+
+                    Some(end_point)
+                }
+                // Flatten arc
+                PathSegment::ArcBy(center_point, angle) => {
+                    let arc_points = flatten_arc(last_point.unwrap_or_default(), center_point, angle);
+
+                    // TODO: points to lines
+                    unimplemented!();
+
+                    arc_points.last().map_or(last_point, |point| Some(*point))
+                }
             }
         });
+        // Create flat path
         Self::new(flat_segments)
     }
 }
@@ -103,7 +134,9 @@ impl PathBase<PathSegment> for Path {
 }
 impl From<FlatPath> for Path {
     fn from(flat_path: FlatPath) -> Self {
-        Self::new(flat_path.segments.into_iter().map(|flat_segment| PathSegment::Flat(flat_segment)).collect())
+        Self::new(
+            flat_path.segments.into_iter().map(|flat_segment| PathSegment::Flat(flat_segment)).collect()
+        )
     }
 }
 impl Path {
