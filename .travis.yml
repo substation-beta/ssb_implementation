@@ -57,8 +57,13 @@ addons:
       - python3
       - vapoursynth
 
-# Fix Vapoursynth-Script library link
-before_script: sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
+# Preparations for compilation
+before_script:
+  # Fix Vapoursynth-Script library link
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
+  # Add test fonts
+  - echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
+  - sudo apt-get install ttf-mscorefonts-installer
 
 # Execute rust builds & tests
 script:
