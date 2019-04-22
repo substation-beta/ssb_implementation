@@ -33,10 +33,10 @@ doctest = false
 # Depend on parser module
 # RESERVATION: ssb_parser = {path = "../ssb_parser", version = "0.0.0"}
 # Render targets
-image = "~0.21.0"   # https://crates.io/crates/image
+image = "~0.21.1"   # https://crates.io/crates/image
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
-rusttype = "~0.7.5"  # https://crates.io/crates/rusttype
+rusttype = "~0.7.6"  # https://crates.io/crates/rusttype
 glyph_brush_layout = "~0.1.5"   # https://crates.io/crates/glyph_brush_layout
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
@@ -49,4 +49,4 @@ harness = false
 
 [dev-dependencies]
 # Profiling
-microbench = "~0.4.0"   # https://crates.io/crates/microbench
+microbench = "~0.5.0"   # https://crates.io/crates/microbench
