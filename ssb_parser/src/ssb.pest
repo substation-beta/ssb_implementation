@@ -1,27 +1,81 @@
+// Constants
+next_line = @{NEWLINE | EOI}
+no_next_line = @{!NEWLINE ~ ANY}
+section_start = @{"#"}
+entry_assign = @{": "}
+custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
+dimension_value = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
+tag_assign = @{"="}
+font_name = @{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
+color_value = @{ASCII_HEX_DIGIT{1,6}}
+alpha_value = @{ASCII_HEX_DIGIT{1,2}}
+
+
+// Whitespaces and comments
+WHITESPACE = _{NEWLINE}   // Remaining newlines
+COMMENT = _{"//" ~ no_next_line* ~ next_line}    // From double-slash until next line
+
+
 // Whole script
 script = _{SOI ~ sections ~ EOI}
 
-// Whitespaces and comments 
-WHITESPACE = _{" " | "\t"}   // Spaces or tabulators
-COMMENT = _{"//" ~ (!NEWLINE ~ ANY)* ~ NEWLINE}    // From double-slash until newline
-
 // Sections
-sections = _{meta_section? ~ NEWLINE? ~ frame_section? ~ NEWLINE? ~ macros_section? ~ NEWLINE? ~ events_section?}   // Optional sections in order
+sections = _{info_section? ~ target_section? ~ macros_section? ~ events_section? ~ resources_section?}   // Optional sections in order
 
-// Meta section
-meta_section = _{"# META" ~ NEWLINE ~ meta_entry*}   // Meta header
-meta_entry = ${meta_entry_key ~ ": " ~ meta_entry_value}   // Meta entry pair
-meta_entry_key = ${ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_" | "-")*}  // Meta key format
-meta_entry_value = ${(!NEWLINE ~ ANY)* ~ NEWLINE}  // Meta value format
+// Info section
+info_section = _{info_header ~ info_entry*}
+info_header = @{section_start ~ "Info" ~ next_line}
+info_entry = @{(info_title_entry | info_author_entry | info_desc_entry | info_version_entry | info_custom_entry) ~ next_line}
+info_title_entry = @{"Title" ~ entry_assign ~ info_title_value}
+info_title_value = ${no_next_line+}
+info_author_entry = @{"Author" ~ entry_assign ~ info_author_value}
+info_author_value = ${no_next_line+}
+info_desc_entry = @{"Description" ~ entry_assign ~ info_desc_value}
+info_desc_value = ${no_next_line+}
+info_version_entry = @{"Version" ~ entry_assign ~ info_version_value}
+info_version_value = ${no_next_line+}
+info_custom_entry = @{info_custom_key ~ entry_assign ~ info_custom_value}
+info_custom_key = ${custom_key}
+info_custom_value = ${no_next_line+}
 
-// Frame section
-frame_section = _{"# FRAME" ~ NEWLINE ~ frame_entry*}    // Frame header
-frame_entry = ${frame_entry_key ~ ": " ~ frame_entry_value}   // Frame entry pair
-frame_entry_key = ${"width" | "height"} // Frame entry key options
-frame_entry_value = ${ASCII_DIGIT{1, 4} ~ NEWLINE} // Frame entry value as short integer
+// Target section
+target_section = _{target_header ~ target_entry*}
+target_header = @{section_start ~ "Target" ~ next_line}
+target_entry = @{(target_width_entry | target_height_entry | target_depth_entry | target_view_entry) ~ next_line}
+target_width_entry = @{"Width" ~ entry_assign ~ target_width_value}
+target_width_value = ${dimension_value}
+target_height_entry = @{"Height" ~ entry_assign ~ target_height_value}
+target_height_value = ${dimension_value}
+target_depth_entry = @{"Depth" ~ entry_assign ~ target_depth_value}
+target_depth_value = ${dimension_value}
+target_view_entry = @{"View" ~ entry_assign ~ target_view_value}
+target_view_value = ${"perspective" | "orthogonal"}
 
 // Macros section
-macros_section = _{"# MACROS" ~ NEWLINE} // Macros header
+macros_section = _{macros_header ~ macros_entry*}
+macros_header = @{section_start ~ "Macros" ~ next_line}
+macros_entry = @{macros_key ~ entry_assign ~ macros_value ~ next_line}
+macros_key = ${custom_key}
+macros_value = ${tags}
 
 // Events section
-events_section = _{"# EVENTS" ~ NEWLINE} // Events header
+events_section = _{events_header ~ events_entry*}
+events_header = @{section_start ~ "Events" ~ next_line}
+events_entry = @{(ASCII_DIGIT+) ~ next_line}
+
+// Resources section
+resources_section = _{resources_header ~ resources_entry*}
+resources_header = @{section_start ~ "Resources" ~ next_line}
+resources_entry = @{(resources_font_entry | resources_texture_entry) ~ next_line}
+resources_font_entry = @{entry_assign}
+resources_texture_entry = @{entry_assign}
+
+// Tags
+tags = @{tag? ~ (";" ~ tag)*}
+tag = ${font_tag | font_size_tag | color_tag}
+font_tag = @{"font" ~ tag_assign ~ font_tag_value}
+font_tag_value = ${font_name}
+font_size_tag = @{"font-size" ~ tag_assign ~ font_size_tag_value}
+font_size_tag_value = ${ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
+color_tag = @{"color" ~ tag_assign ~ color_tag_value}
+color_tag_value = ${color_value}

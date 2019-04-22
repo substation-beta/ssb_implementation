@@ -1,0 +1,25 @@
+// Test script for ssb development
+#Info
+// Documentation is important!
+Title: test
+Author: Youka
+Description: Just some test data.
+Version: 1
+// Custom entry
+Foo: Bar
+
+#Target
+Width: 1280
+Height: 720
+// 2.5D supported
+Depth: 1000
+View: orthogonal
+
+#Macros
+default: font=Open Sans;font-size=12
+green: color=00FF00
+
+#Events
+
+#Resources
+// Successfully parsed till end :)

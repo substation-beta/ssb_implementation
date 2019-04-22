@@ -10,13 +10,16 @@ struct SsbPegParser;
 
 // Stream parser for ssb data
 pub struct SsbParser {
-    data: Ssb
+    _data: Ssb
 }
 impl SsbParser {
     // Constructor
     pub fn new(script: &str) -> Self {
         // Parse script and panic on fail
-        let pairs = SsbPegParser::parse(Rule::script, script).unwrap_or_else(|e| panic!("{}", e));
+        let _pairs = SsbPegParser::parse(Rule::script, script).unwrap_or_else(|exception|
+            panic!("{}", exception)
+        );
+        /*
         // Iterate through section entries
         for section_entry_pair in pairs {
             match section_entry_pair.as_rule() {
@@ -56,9 +59,10 @@ impl SsbParser {
                 _ => unreachable!()
             }
         }
+        */
         // Return instance
         Self {
-            data: Ssb {}
+            _data: Ssb{}
         }
     }
 }
