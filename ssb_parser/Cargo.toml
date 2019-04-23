@@ -31,7 +31,7 @@ doctest = false
 
 [dependencies]
 # Text parsing
-pest = "~2.1.0" # https://crates.io/crates/pest
+pest = "~2.1.1" # https://crates.io/crates/pest
 pest_derive = "~2.1.0"  # https://crates.io/crates/pest_derive
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log

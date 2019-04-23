@@ -12,9 +12,23 @@ struct SsbPegParser;
 pub struct SsbParser {
     _data: Ssb
 }
+impl Default for SsbParser {
+    fn default() -> Self {
+        Self {
+            _data: Ssb{}
+        }
+    }
+}
 impl SsbParser {
     // Constructor
     pub fn new(script: &str) -> Self {
+        let mut instance = Self::default();
+        instance.parse(script);
+        instance
+    }
+
+    // Parsing / modifying instance
+    pub fn parse(&mut self, script: &str) -> &mut Self {
         // Parse script and panic on fail
         let _pairs = SsbPegParser::parse(Rule::script, script).unwrap_or_else(|exception|
             panic!("{}", exception)
@@ -60,9 +74,7 @@ impl SsbParser {
             }
         }
         */
-        // Return instance
-        Self {
-            _data: Ssb{}
-        }
+        // Pass instance further
+        self
     }
 }

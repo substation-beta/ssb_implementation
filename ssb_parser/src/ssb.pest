@@ -34,7 +34,7 @@ info_desc_entry = @{"Description" ~ entry_assign ~ info_desc_value}
 info_desc_value = ${no_next_line+}
 info_version_entry = @{"Version" ~ entry_assign ~ info_version_value}
 info_version_value = ${no_next_line+}
-info_custom_entry = @{info_custom_key ~ entry_assign ~ info_custom_value}
+info_custom_entry = ${info_custom_key ~ entry_assign ~ info_custom_value}
 info_custom_key = ${custom_key}
 info_custom_value = ${no_next_line+}
 
@@ -54,28 +54,36 @@ target_view_value = ${"perspective" | "orthogonal"}
 // Macros section
 macros_section = _{macros_header ~ macros_entry*}
 macros_header = @{section_start ~ "Macros" ~ next_line}
-macros_entry = @{macros_key ~ entry_assign ~ macros_value ~ next_line}
+macros_entry = ${macros_key ~ entry_assign ~ macros_value ~ next_line}
 macros_key = ${custom_key}
 macros_value = ${tags}
 
 // Events section
 events_section = _{events_header ~ events_entry*}
 events_header = @{section_start ~ "Events" ~ next_line}
-events_entry = @{(ASCII_DIGIT+) ~ next_line}
+// TODO starts here
+events_entry = ${(ASCII_DIGIT+) ~ next_line}
+
 
 // Resources section
 resources_section = _{resources_header ~ resources_entry*}
 resources_header = @{section_start ~ "Resources" ~ next_line}
 resources_entry = @{(resources_font_entry | resources_texture_entry) ~ next_line}
-resources_font_entry = @{entry_assign}
-resources_texture_entry = @{entry_assign}
+resources_font_entry = ${entry_assign}
+resources_texture_entry = ${entry_assign}
 
 // Tags
-tags = @{tag? ~ (";" ~ tag)*}
-tag = ${font_tag | font_size_tag | color_tag}
+tags = ${tag? ~ (";" ~ tag)*}
+tag = @{font_tag | font_size_tag | color_tag}
 font_tag = @{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = ${font_name}
 font_size_tag = @{"font-size" ~ tag_assign ~ font_size_tag_value}
 font_size_tag_value = ${ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
 color_tag = @{"color" ~ tag_assign ~ color_tag_value}
 color_tag_value = ${color_value}
+
+// Geometries
+geometries = ${text | points | shape}
+text = @{"abc"}
+points = @{"def"}
+shape = @{"ghi"}
