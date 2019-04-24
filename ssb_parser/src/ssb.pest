@@ -3,9 +3,10 @@ next_line = @{NEWLINE | EOI}
 no_next_line = @{!NEWLINE ~ ANY}
 section_start = @{"#"}
 entry_assign = @{": "}
+tag_assign = @{"="}
+event_separator = @{"|"}
 custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
 dimension_value = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
-tag_assign = @{"="}
 font_name = @{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
 color_value = @{ASCII_HEX_DIGIT{1,6}}
 alpha_value = @{ASCII_HEX_DIGIT{1,2}}
@@ -61,11 +62,23 @@ macros_value = ${tags}
 // Events section
 events_section = _{events_header ~ events_entry*}
 events_header = @{section_start ~ "Events" ~ next_line}
-// TODO starts here
-events_entry = ${(ASCII_DIGIT+) ~ next_line}
-
+events_entry = ${events_trigger ~ event_separator ~ events_macro ~ event_separator ~ events_note ~ event_separator ~ events_data ~ next_line}
+events_trigger = @{events_id | events_time}
+events_id = ${"'" ~ custom_key ~ "'"}
+events_time = @{events_start_time ~ "-" ~ events_end_time}
+events_start_time = ${time_value}
+events_end_time = ${time_value}
+time_value = @{((time_h ~ ":" ~ time_m ~ ":") | (time_m ~ ":"))? ~ (time_s ~ ".")? ~ time_ms}
+time_ms = ${ASCII_DIGIT{0,3}}
+time_s = ${'0'..'5'? ~ ASCII_DIGIT?}
+time_m = ${'0'..'5'? ~ ASCII_DIGIT?}
+time_h = ${ASCII_DIGIT{0,2}}
+events_macro = ${macros_key}
+events_note = ${(!(event_separator | next_line) ~ ANY)*}
+events_data = @{(("[" ~ tags ~ "]")? ~ geometries)*}
 
 // Resources section
+// TODO: define below
 resources_section = _{resources_header ~ resources_entry*}
 resources_header = @{section_start ~ "Resources" ~ next_line}
 resources_entry = @{(resources_font_entry | resources_texture_entry) ~ next_line}
@@ -74,16 +87,18 @@ resources_texture_entry = ${entry_assign}
 
 // Tags
 tags = ${tag? ~ (";" ~ tag)*}
-tag = @{font_tag | font_size_tag | color_tag}
+tag = @{font_tag | font_size_tag | color_tag | mode_tag}
 font_tag = @{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = ${font_name}
 font_size_tag = @{"font-size" ~ tag_assign ~ font_size_tag_value}
 font_size_tag_value = ${ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
 color_tag = @{"color" ~ tag_assign ~ color_tag_value}
 color_tag_value = ${color_value}
+mode_tag = @{"mode" ~ tag_assign ~ mode_tag_value}
+mode_tag_value = ${"shape" | "points" | "text"}
 
 // Geometries
-geometries = ${text | points | shape}
-text = @{"abc"}
+geometries = ${shape | points | text}
+shape = @{"abc"}
 points = @{"def"}
-shape = @{"ghi"}
+text = @{(!"[" ~ ANY)+}
