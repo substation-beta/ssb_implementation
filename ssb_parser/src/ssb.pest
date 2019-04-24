@@ -5,8 +5,10 @@ section_start = @{"#"}
 entry_assign = @{": "}
 tag_assign = @{"="}
 event_separator = @{"|"}
-custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
+resource_separator = @{","}
 dimension_value = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
+base64_value = @{(ASCII_ALPHANUMERIC | "+" | "/")*}
+custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
 font_name = @{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
 color_value = @{ASCII_HEX_DIGIT{1,6}}
 alpha_value = @{ASCII_HEX_DIGIT{1,2}}
@@ -57,7 +59,7 @@ macros_section = _{macros_header ~ macros_entry*}
 macros_header = @{section_start ~ "Macros" ~ next_line}
 macros_entry = ${macros_key ~ entry_assign ~ macros_value ~ next_line}
 macros_key = ${custom_key}
-macros_value = ${tags}
+macros_value = ${no_next_line+}
 
 // Events section
 events_section = _{events_header ~ events_entry*}
@@ -78,14 +80,21 @@ events_note = ${(!(event_separator | next_line) ~ ANY)*}
 events_data = @{(("[" ~ tags ~ "]")? ~ geometries)*}
 
 // Resources section
-// TODO: define below
 resources_section = _{resources_header ~ resources_entry*}
 resources_header = @{section_start ~ "Resources" ~ next_line}
 resources_entry = @{(resources_font_entry | resources_texture_entry) ~ next_line}
-resources_font_entry = ${entry_assign}
-resources_texture_entry = ${entry_assign}
+resources_font_entry = ${"Font" ~ entry_assign ~ resources_font_family ~ resource_separator ~ resources_font_style ~ resource_separator ~ resources_font_data}
+resources_font_family = ${custom_key}
+resources_font_style = ${"regular" | "bold" | "italic" | "bold-italic"}
+resources_font_data = ${base64_value}
+resources_texture_entry = ${"Texture" ~ entry_assign ~ resources_texture_id ~ resource_separator ~ resources_texture_data}
+resources_texture_id = ${custom_key}
+resources_texture_data = @{resources_texture_data_raw | resources_texture_data_url}
+resources_texture_data_raw = ${"data" ~ resource_separator ~ base64_value}
+resources_texture_data_url = ${"url" ~ resource_separator ~ no_next_line+}
 
 // Tags
+// TODO: define below
 tags = ${tag? ~ (";" ~ tag)*}
 tag = @{font_tag | font_size_tag | color_tag | mode_tag}
 font_tag = @{"font" ~ tag_assign ~ font_tag_value}
@@ -101,4 +110,4 @@ mode_tag_value = ${"shape" | "points" | "text"}
 geometries = ${shape | points | text}
 shape = @{"abc"}
 points = @{"def"}
-text = @{(!"[" ~ ANY)+}
+text = @{(!("[" | next_line) ~ ANY)+}
