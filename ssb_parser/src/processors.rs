@@ -1,5 +1,8 @@
 // Imports
-use super::data::Ssb;
+use super::{
+    error::ParseError,
+    data::Ssb
+};
 use pest::Parser;
 
 // PEG parsers
@@ -29,18 +32,16 @@ impl Default for SsbParser {
 }
 impl SsbParser {
     // Constructor
-    pub fn new(script: &str) -> Self {
+    pub fn new(script: &str) -> Result<Self, ParseError> {
         let mut instance = Self::default();
-        instance.parse(script);
-        instance
+        instance.parse(script)?;
+        Ok(instance)
     }
 
     // Parsing / modifying instance
-    pub fn parse(&mut self, script: &str) -> &mut Self {
+    pub fn parse(&mut self, script: &str) -> Result<&mut Self, ParseError> {
         // Parse script and panic on fail
-        let _pairs = ssb_peg::Parser::parse(ssb_peg::Rule::script, script).unwrap_or_else(|exception|
-            panic!("{}", exception)
-        );
+        let _pairs = ssb_peg::Parser::parse(ssb_peg::Rule::script, script)?;
         /*
         // Iterate through section entries
         for section_entry_pair in pairs {
@@ -83,6 +84,6 @@ impl SsbParser {
         }
         */
         // Pass instance further
-        self
+        Ok(self)
     }
 }

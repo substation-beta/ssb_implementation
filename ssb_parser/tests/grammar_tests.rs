@@ -2,6 +2,7 @@ mod grammar_tests {
     // Imports
     use pest_derive::Parser;    // Macro
     use pest::Parser;   // Trait
+    use ssb_parser::processors::SsbParser;
 
     // Test resource
     #[derive(Parser)]
@@ -34,8 +35,8 @@ mod grammar_tests {
 
     #[test]
     fn test_ssb() {
-        let _ssb = ssb_parser::processors::SsbParser::new(
-            include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))
-        );
+        let _ssb = SsbParser::new(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))).unwrap_or_else(|exception| {
+            panic!("Parsing error: {}", exception)
+        });
     }
 }
