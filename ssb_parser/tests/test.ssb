@@ -4,7 +4,7 @@
 Title: test
 Author: Youka
 Description: Just some test data.
-Version: 1
+Version: 1.0.0
 // Custom entry
 Foo: Bar
 
@@ -12,7 +12,7 @@ Foo: Bar
 Width: 1280
 Height: 720
 // 2.5D supported
-Depth: 1000
+Depth: 800
 View: orthogonal
 
 #Macros

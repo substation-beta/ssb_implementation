@@ -1,13 +1,13 @@
 // Constants
-next_line = @{NEWLINE | EOI}
-no_next_line = @{!NEWLINE ~ ANY}
-section_start = @{"#"}
-entry_assign = @{": "}
-event_separator = @{"|"}
-resource_separator = @{","}
-dimension_value = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
-custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
-base64_value = @{(ASCII_ALPHANUMERIC | "+" | "/")*}
+next_line = _{NEWLINE | EOI}
+no_next_line = _{!NEWLINE ~ ANY}
+section_start = _{"#"}
+entry_assign = _{": "}
+event_separator = _{"|"}
+resource_separator = _{","}
+dimension_value = _{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
+custom_key = _{(ASCII_ALPHANUMERIC | "_" | "-")+}
+base64_value = _{(ASCII_ALPHANUMERIC | "+" | "/")*}
 
 
 // Whitespaces and comments
@@ -24,67 +24,67 @@ sections = _{info_section? ~ target_section? ~ macros_section? ~ events_section?
 // Info section
 info_section = _{info_header ~ info_entry*}
 info_header = @{section_start ~ "Info" ~ next_line}
-info_entry = @{(info_title_entry | info_author_entry | info_desc_entry | info_version_entry | info_custom_entry) ~ next_line}
-info_title_entry = @{"Title" ~ entry_assign ~ info_title_value}
-info_title_value = ${no_next_line+}
-info_author_entry = @{"Author" ~ entry_assign ~ info_author_value}
-info_author_value = ${no_next_line+}
-info_desc_entry = @{"Description" ~ entry_assign ~ info_desc_value}
-info_desc_value = ${no_next_line+}
-info_version_entry = @{"Version" ~ entry_assign ~ info_version_value}
-info_version_value = ${no_next_line+}
-info_custom_entry = ${info_custom_key ~ entry_assign ~ info_custom_value}
-info_custom_key = ${custom_key}
-info_custom_value = ${no_next_line+}
+info_entry = ${(info_title_entry | info_author_entry | info_desc_entry | info_version_entry | info_custom_entry) ~ next_line}
+info_title_entry = _{"Title" ~ entry_assign ~ info_title_value}
+info_title_value = {no_next_line+}
+info_author_entry = _{"Author" ~ entry_assign ~ info_author_value}
+info_author_value = {no_next_line+}
+info_desc_entry = _{"Description" ~ entry_assign ~ info_desc_value}
+info_desc_value = {no_next_line+}
+info_version_entry = _{"Version" ~ entry_assign ~ info_version_value}
+info_version_value = {no_next_line+}
+info_custom_entry = {info_custom_key ~ entry_assign ~ info_custom_value}
+info_custom_key = {custom_key}
+info_custom_value = {no_next_line+}
 
 // Target section
 target_section = _{target_header ~ target_entry*}
 target_header = @{section_start ~ "Target" ~ next_line}
-target_entry = @{(target_width_entry | target_height_entry | target_depth_entry | target_view_entry) ~ next_line}
-target_width_entry = @{"Width" ~ entry_assign ~ target_width_value}
-target_width_value = ${dimension_value}
-target_height_entry = @{"Height" ~ entry_assign ~ target_height_value}
-target_height_value = ${dimension_value}
-target_depth_entry = @{"Depth" ~ entry_assign ~ target_depth_value}
-target_depth_value = ${dimension_value}
-target_view_entry = @{"View" ~ entry_assign ~ target_view_value}
-target_view_value = ${"perspective" | "orthogonal"}
+target_entry = ${(target_width_entry | target_height_entry | target_depth_entry | target_view_entry) ~ next_line}
+target_width_entry = _{"Width" ~ entry_assign ~ target_width_value}
+target_width_value = {dimension_value}
+target_height_entry = _{"Height" ~ entry_assign ~ target_height_value}
+target_height_value = {dimension_value}
+target_depth_entry = _{"Depth" ~ entry_assign ~ target_depth_value}
+target_depth_value = {dimension_value}
+target_view_entry = _{"View" ~ entry_assign ~ target_view_value}
+target_view_value = {"perspective" | "orthogonal"}
 
 // Macros section
 macros_section = _{macros_header ~ macros_entry*}
 macros_header = @{section_start ~ "Macros" ~ next_line}
 macros_entry = ${macros_key ~ entry_assign ~ macros_value ~ next_line}
-macros_key = ${custom_key}
-macros_value = ${no_next_line+}
+macros_key = {custom_key}
+macros_value = {no_next_line+}
 
 // Events section
 events_section = _{events_header ~ events_entry*}
 events_header = @{section_start ~ "Events" ~ next_line}
 events_entry = ${events_trigger ~ event_separator ~ events_macro ~ event_separator ~ events_note ~ event_separator ~ events_data ~ next_line}
-events_trigger = @{events_id | events_time}
-events_id = ${"'" ~ custom_key ~ "'"}
-events_time = @{events_start_time ~ "-" ~ events_end_time}
-events_start_time = ${time_value}
-events_end_time = ${time_value}
-time_value = @{((time_h ~ ":" ~ time_m ~ ":") | (time_m ~ ":"))? ~ (time_s ~ ".")? ~ time_ms}
-time_ms = ${ASCII_DIGIT{0,3}}
-time_s = ${'0'..'5'? ~ ASCII_DIGIT?}
-time_m = ${'0'..'5'? ~ ASCII_DIGIT?}
-time_h = ${ASCII_DIGIT{0,2}}
-events_macro = ${macros_key}
-events_note = ${(!(event_separator | next_line) ~ ANY)*}
-events_data = ${no_next_line+}
+events_trigger = _{events_id | events_time}
+events_id = {"'" ~ custom_key ~ "'"}
+events_time = _{events_start_time ~ "-" ~ events_end_time}
+events_start_time = {time_value}
+events_end_time = {time_value}
+time_value = _{((time_h ~ ":" ~ time_m ~ ":") | (time_m ~ ":"))? ~ (time_s ~ ".")? ~ time_ms}
+time_ms = {ASCII_DIGIT{0,3}}
+time_s = {'0'..'5'? ~ ASCII_DIGIT?}
+time_m = {'0'..'5'? ~ ASCII_DIGIT?}
+time_h = {ASCII_DIGIT{0,2}}
+events_macro = {macros_key}
+events_note = {(!(event_separator | next_line) ~ ANY)*}
+events_data = {no_next_line+}
 
 // Resources section
 resources_section = _{resources_header ~ resources_entry*}
 resources_header = @{section_start ~ "Resources" ~ next_line}
-resources_entry = @{(resources_font_entry | resources_texture_entry) ~ next_line}
-resources_font_entry = ${"Font" ~ entry_assign ~ resources_font_family ~ resource_separator ~ resources_font_style ~ resource_separator ~ resources_font_data}
-resources_font_family = ${custom_key}
-resources_font_style = ${"regular" | "bold" | "italic" | "bold-italic"}
-resources_font_data = ${base64_value}
-resources_texture_entry = ${"Texture" ~ entry_assign ~ resources_texture_id ~ resource_separator ~ resources_texture_data}
-resources_texture_id = ${custom_key}
-resources_texture_data = @{resources_texture_data_raw | resources_texture_data_url}
-resources_texture_data_raw = ${"data" ~ resource_separator ~ base64_value}
-resources_texture_data_url = ${"url" ~ resource_separator ~ no_next_line+}
+resources_entry = ${(resources_font_entry | resources_texture_entry) ~ next_line}
+resources_font_entry = {"Font" ~ entry_assign ~ resources_font_family ~ resource_separator ~ resources_font_style ~ resource_separator ~ resources_font_data}
+resources_font_family = {custom_key}
+resources_font_style = {"regular" | "bold" | "italic" | "bold-italic"}
+resources_font_data = {base64_value}
+resources_texture_entry = {"Texture" ~ entry_assign ~ resources_texture_id ~ resource_separator ~ resources_texture_data}
+resources_texture_id = {custom_key}
+resources_texture_data = _{resources_texture_data_raw | resources_texture_data_url}
+resources_texture_data_raw = {"data" ~ resource_separator ~ base64_value}
+resources_texture_data_url = {"url" ~ resource_separator ~ no_next_line+}
