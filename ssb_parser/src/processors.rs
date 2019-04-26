@@ -26,7 +26,7 @@ pub struct SsbParser {
 impl Default for SsbParser {
     fn default() -> Self {
         Self {
-            _data: Ssb{}
+            _data: Ssb::default()
         }
     }
 }
