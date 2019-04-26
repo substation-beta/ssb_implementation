@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 
 // Sub types
+#[derive(Debug)]
 pub enum View {
     Perspective,
     Orthogonal
@@ -16,22 +17,25 @@ impl View {
         }
     }
 }
+#[derive(Debug)]
 pub struct Event {
+    pub script_line: u32,
     pub trigger: EventTrigger,
     pub macro_: Option<String>,
     pub note: Option<String>,
     pub data: String
 }
+#[derive(Debug)]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))
 }
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct FontFace {
     family: String,
     style: FontStyle
 }
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum FontStyle {
     Regular,
     Bold,
@@ -51,12 +55,14 @@ impl FontStyle {
 }
 pub type FontData = String;
 pub type TextureId = String;
+#[derive(Debug)]
 pub enum TextureData {
     Url(String),
     Raw(String)
 }
 
 // Raw data
+#[derive(Debug)]
 pub struct Ssb {
     // Info section
     pub info_title: Option<String>,

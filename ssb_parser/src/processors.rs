@@ -1,7 +1,10 @@
 // Imports
 use super::{
     error::ParseError,
-    data::Ssb
+    data::{
+        Ssb,
+        View
+    }
 };
 use pest::Parser;
 
@@ -21,12 +24,12 @@ mod ssb_event_data_peg {
 
 // Stream parser for ssb data
 pub struct SsbParser {
-    _data: Ssb
+    data: Ssb
 }
 impl Default for SsbParser {
     fn default() -> Self {
         Self {
-            _data: Ssb::default()
+            data: Ssb::default()
         }
     }
 }
@@ -40,50 +43,60 @@ impl SsbParser {
 
     // Parsing / modifying instance
     pub fn parse(&mut self, script: &str) -> Result<&mut Self, ParseError> {
-        // Parse script and panic on fail
-        let _pairs = ssb_peg::Parser::parse(ssb_peg::Rule::script, script)?;
-        /*
+        use ssb_peg::{Parser, Rule};
+        // Parse script and throw possible error
+        let pairs = Parser::parse(Rule::script, script)?;
         // Iterate through section entries
         for section_entry_pair in pairs {
+            println!("{:?}", section_entry_pair.as_rule());
             match section_entry_pair.as_rule() {
-                // Meta entry
-                Rule::meta_entry => for meta_entry_pair in section_entry_pair.into_inner() {
-                    match meta_entry_pair.as_rule() {
-                        // Meta entry key
-                        Rule::meta_entry_key => {
-                            println!("Meta key: {}", meta_entry_pair.as_str());
-                        }
-                        // Meta entry value
-                        Rule::meta_entry_value => {
-                            println!("Meta value: {}", meta_entry_pair.as_str());
-                        }
-                        // Nothing more in this scope
-                        _ => unreachable!()
+                // Info entries
+                Rule::info_title_value => self.data.info_title = Some(section_entry_pair.as_span().as_str().to_string()),
+                Rule::info_author_value => self.data.info_author = Some(section_entry_pair.as_span().as_str().to_string()),
+                Rule::info_desc_value => self.data.info_description = Some(section_entry_pair.as_span().as_str().to_string()),
+                Rule::info_version_value => self.data.info_version = Some(section_entry_pair.as_span().as_str().to_string()),
+                Rule::info_custom_entry => {
+                    let mut info_custom_entry_pair = section_entry_pair.into_inner();
+                    if let (Some(info_custom_key), Some(info_custom_value)) = (info_custom_entry_pair.next(), info_custom_entry_pair.next()) {
+                        self.data.info_custom.insert(info_custom_key.as_str().to_string(), info_custom_value.as_str().to_string());
                     }
                 }
-                // Frame entry
-                Rule::frame_entry => for frame_entry_pair in section_entry_pair.into_inner() {
-                    match frame_entry_pair.as_rule() {
-                        // Frame entry key
-                        Rule::frame_entry_key => {
-                            println!("Frame key: {}", frame_entry_pair.as_str());
-                        }
-                        // Frame entry value
-                        Rule::frame_entry_value => {
-                            println!("Frame value: {}", frame_entry_pair.as_str());
-                        }
-                        // Nothing more in this scope
-                        _ => unreachable!()
+                // Target entries
+                Rule::target_width_value => if let Ok(width) = section_entry_pair.as_span().as_str().parse::<u16>() {
+                    self.data.target_width = Some(width);
+                }
+                Rule::target_height_value => if let Ok(height) = section_entry_pair.as_span().as_str().parse::<u16>() {
+                    self.data.target_height = Some(height);
+                }
+                Rule::target_depth_value => if let Ok(depth) = section_entry_pair.as_span().as_str().parse::<u16>() {
+                    self.data.target_width = Some(depth);
+                }
+                Rule::target_view_value => if let Ok(view) = View::from_str(section_entry_pair.as_span().as_str()) {
+                    self.data.target_view = view;
+                }
+                // Macros entries
+                Rule::macros_entry => {
+                    let mut macros_entry_pair = section_entry_pair.into_inner();
+                    if let (Some(macros_key), _, Some(macros_value)) = (macros_entry_pair.next(), macros_entry_pair.next(), macros_entry_pair.next()) {
+                        self.data.macros.insert(macros_key.as_str().to_string(), macros_value.as_str().to_string());
                     }
                 }
-                // "End of input" not of interest
-                Rule::EOI => (),
-                // Nothing more in this scope
-                _ => unreachable!()
+                // Events entries
+                // TODO: implement rest below
+                Rule::events_entry => (),
+                // Resources entries
+                Rule::resources_font_entry => (),
+                Rule::resources_texture_entry => (),
+                // Unrelevant catches
+                _ => ()
             }
         }
-        */
         // Pass instance further
         Ok(self)
+    }
+
+    // View on internal data
+    pub fn data(&self) -> &Ssb {
+        &self.data
     }
 }
