@@ -94,8 +94,8 @@ resources_texture_data_raw = ${"data" ~ resource_separator ~ base64_value}
 resources_texture_data_url = ${"url" ~ resource_separator ~ no_next_line+}
 
 // Tags
-// TODO: define below
 tags = ${tag? ~ (";" ~ tag)*}
+// TODO: define below
 tag = @{font_tag | font_size_tag | color_tag | mode_tag}
 font_tag = @{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = ${font_name}
@@ -107,7 +107,15 @@ mode_tag = @{"mode" ~ tag_assign ~ mode_tag_value}
 mode_tag_value = ${"shape" | "points" | "text"}
 
 // Geometries
-geometries = ${shape | points | text}
-shape = @{"abc"}
-points = @{"def"}
-text = @{(!("[" | next_line) ~ ANY)+}
+geometries = @{shape | points | text}
+shape = ${move_type ~ " " ~ point ~ (" " ~ (point_type | point))*}
+point_type = @{move_type | line_type | curve_type | arc_type | close_type}
+move_type = ${"m"}
+line_type = ${"l"}
+curve_type = ${"b"}
+arc_type = ${"a"}
+close_type = ${"c"}
+point = ${coordinate ~ " " ~ coordinate}
+coordinate = ${"-"? ~ ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+}
+points = ${point ~ (" " ~ point)*}
+text = ${("\\[" | (!("[" | next_line) ~ ANY))+}
