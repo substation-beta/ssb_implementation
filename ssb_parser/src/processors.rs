@@ -1,12 +1,20 @@
 // Imports
 use super::data::Ssb;
-use pest_derive::Parser;    // Macro
-use pest::Parser;   // Trait
+use pest::Parser;
 
-// PEG parser
-#[derive(Parser)]
-#[grammar = "ssb.pest"]
-struct SsbPegParser;
+// PEG parsers
+mod ssb_peg{
+    use pest_derive::Parser;
+    #[derive(Parser)]
+    #[grammar = "ssb.pest"]
+    pub struct Parser;
+}
+mod ssb_event_data_peg {
+    use pest_derive::Parser;
+    #[derive(Parser)]
+    #[grammar = "ssb_event_data.pest"]
+    pub struct _Parser;
+}
 
 // Stream parser for ssb data
 pub struct SsbParser {
@@ -30,7 +38,7 @@ impl SsbParser {
     // Parsing / modifying instance
     pub fn parse(&mut self, script: &str) -> &mut Self {
         // Parse script and panic on fail
-        let _pairs = SsbPegParser::parse(Rule::script, script).unwrap_or_else(|exception|
+        let _pairs = ssb_peg::Parser::parse(ssb_peg::Rule::script, script).unwrap_or_else(|exception|
             panic!("{}", exception)
         );
         /*

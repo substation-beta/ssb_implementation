@@ -1,0 +1,36 @@
+// Constants
+tag_assign = @{"="}
+font_name = @{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
+color_value = @{ASCII_HEX_DIGIT{1,6}}
+alpha_value = @{ASCII_HEX_DIGIT{1,2}}
+
+
+// Whole event data
+events_data = ${SOI ~ (("[" ~ tags ~ "]")? ~ geometries)* ~ EOI}
+
+// Geometries
+geometries = @{shape | points | text}
+shape = ${move_type ~ " " ~ point ~ (" " ~ (point_type | point))*}
+point_type = @{move_type | line_type | curve_type | arc_type | close_type}
+move_type = ${"m"}
+line_type = ${"l"}
+curve_type = ${"b"}
+arc_type = ${"a"}
+close_type = ${"c"}
+point = ${coordinate ~ " " ~ coordinate}
+coordinate = ${"-"? ~ ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+}
+points = ${point ~ (" " ~ point)*}
+text = ${("\\[" | (!"[" ~ ANY))+}
+
+// Tags
+tags = ${tag? ~ (";" ~ tag)*}
+// TODO: define below
+tag = @{font_tag | font_size_tag | color_tag | mode_tag}
+font_tag = @{"font" ~ tag_assign ~ font_tag_value}
+font_tag_value = ${font_name}
+font_size_tag = @{"font-size" ~ tag_assign ~ font_size_tag_value}
+font_size_tag_value = ${ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
+color_tag = @{"color" ~ tag_assign ~ color_tag_value}
+color_tag_value = ${color_value}
+mode_tag = @{"mode" ~ tag_assign ~ mode_tag_value}
+mode_tag_value = ${"shape" | "points" | "text"}

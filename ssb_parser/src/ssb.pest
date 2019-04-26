@@ -3,15 +3,11 @@ next_line = @{NEWLINE | EOI}
 no_next_line = @{!NEWLINE ~ ANY}
 section_start = @{"#"}
 entry_assign = @{": "}
-tag_assign = @{"="}
 event_separator = @{"|"}
 resource_separator = @{","}
 dimension_value = @{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
-base64_value = @{(ASCII_ALPHANUMERIC | "+" | "/")*}
 custom_key = @{(ASCII_ALPHANUMERIC | "_" | "-")+}
-font_name = @{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
-color_value = @{ASCII_HEX_DIGIT{1,6}}
-alpha_value = @{ASCII_HEX_DIGIT{1,2}}
+base64_value = @{(ASCII_ALPHANUMERIC | "+" | "/")*}
 
 
 // Whitespaces and comments
@@ -77,7 +73,7 @@ time_m = ${'0'..'5'? ~ ASCII_DIGIT?}
 time_h = ${ASCII_DIGIT{0,2}}
 events_macro = ${macros_key}
 events_note = ${(!(event_separator | next_line) ~ ANY)*}
-events_data = @{(("[" ~ tags ~ "]")? ~ geometries)*}
+events_data = ${no_next_line+}
 
 // Resources section
 resources_section = _{resources_header ~ resources_entry*}
@@ -92,30 +88,3 @@ resources_texture_id = ${custom_key}
 resources_texture_data = @{resources_texture_data_raw | resources_texture_data_url}
 resources_texture_data_raw = ${"data" ~ resource_separator ~ base64_value}
 resources_texture_data_url = ${"url" ~ resource_separator ~ no_next_line+}
-
-// Tags
-tags = ${tag? ~ (";" ~ tag)*}
-// TODO: define below
-tag = @{font_tag | font_size_tag | color_tag | mode_tag}
-font_tag = @{"font" ~ tag_assign ~ font_tag_value}
-font_tag_value = ${font_name}
-font_size_tag = @{"font-size" ~ tag_assign ~ font_size_tag_value}
-font_size_tag_value = ${ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
-color_tag = @{"color" ~ tag_assign ~ color_tag_value}
-color_tag_value = ${color_value}
-mode_tag = @{"mode" ~ tag_assign ~ mode_tag_value}
-mode_tag_value = ${"shape" | "points" | "text"}
-
-// Geometries
-geometries = @{shape | points | text}
-shape = ${move_type ~ " " ~ point ~ (" " ~ (point_type | point))*}
-point_type = @{move_type | line_type | curve_type | arc_type | close_type}
-move_type = ${"m"}
-line_type = ${"l"}
-curve_type = ${"b"}
-arc_type = ${"a"}
-close_type = ${"c"}
-point = ${coordinate ~ " " ~ coordinate}
-coordinate = ${"-"? ~ ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+}
-points = ${point ~ (" " ~ point)*}
-text = ${("\\[" | (!("[" | next_line) ~ ANY))+}
