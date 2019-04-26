@@ -60,6 +60,7 @@ mod font_tests {
                 last_glyph.position().x +
                 last_glyph.unpositioned().h_metrics().advance_width
             ).ceil() as u32
+            + 1 // Pass last pixel to get real width
         } else {
             0
         };
@@ -74,7 +75,7 @@ mod font_tests {
                         LumaA {
                             data: [std::u8::MAX >> 1, (opacity * std::u8::MAX as f32) as u8]
                         }
-                );
+                    );
                 });
             }
         }
