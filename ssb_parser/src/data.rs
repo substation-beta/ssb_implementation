@@ -26,6 +26,12 @@ pub struct Event {
     pub data: String
 }
 #[derive(Debug)]
+pub struct EventRender {
+    pub trigger: EventTrigger,
+    // TODO: split data into tags & geometries
+    pub data: String
+}
+#[derive(Debug)]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))
@@ -54,12 +60,14 @@ impl FontStyle {
     }
 }
 pub type FontData = String;
+pub type FontDataRender = Vec<u8>;
 pub type TextureId = String;
 #[derive(Debug)]
 pub enum TextureData {
     Url(String),
     Raw(String)
 }
+pub type TextureDataRender = Vec<u8>;
 
 // Raw data
 #[derive(Debug)]
@@ -101,4 +109,19 @@ impl Default for Ssb {
             textures: HashMap::default()
         }
     }
+}
+
+// Processed data
+#[derive(Debug)]
+pub struct SsbRender {
+    // Target section
+    pub target_width: Option<u16>,
+    pub target_height: Option<u16>,
+    pub target_depth: u16,
+    pub target_view: View,
+    // Events section
+    pub events: Vec<EventRender>,
+    // Resources section
+    pub fonts: HashMap<FontFace, FontDataRender>,
+    pub textures: HashMap<TextureId, TextureDataRender>
 }

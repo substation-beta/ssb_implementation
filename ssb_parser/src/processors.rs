@@ -4,6 +4,7 @@ use super::{
     data::*
 };
 use pest::Parser;
+use std::convert::TryFrom;
 
 // PEG parsers
 mod ssb_peg{
@@ -202,6 +203,32 @@ impl SsbParser {
     // View on internal data
     pub fn data(&self) -> &Ssb {
         &self.data
+    }
+}
+
+// Ssb data processing for rendering
+impl TryFrom<Ssb> for SsbRender {
+    type Error = ParseError;
+    fn try_from(origin: Ssb) -> Result<Self, Self::Error> {
+        Ok(Self {
+            target_width: origin.target_width,
+            target_height: origin.target_height,
+            target_depth: origin.target_depth,
+            target_view: origin.target_view,
+            // TODO: convert correctly below
+            events: origin.events.into_iter().map(|entry| {
+                EventRender {
+                    trigger: entry.trigger,
+                    data: entry.data
+                }
+            }).collect(),
+            fonts: origin.fonts.into_iter().map(|(key, value)| {
+                (key, value.into_bytes())
+            }).collect(),
+            textures: origin.textures.into_iter().map(|(key, value)| {
+                (key, format!("{:?}", value).into_bytes())
+            }).collect()
+        })
     }
 }
 
