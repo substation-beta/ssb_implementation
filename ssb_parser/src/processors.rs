@@ -105,15 +105,41 @@ impl SsbParser {
                     let mut events_entry_pair = section_entry_pair.into_inner();
                     if let (Some(events_trigger), Some(events_macro), Some(events_note), Some(events_data))
                         = (events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next()) {
+                        // Add event
                         self.data.events.push(Event {
+                            // Script line
                             script_line: events_trigger.as_span().start_pos().line_col().0,
+                            // Events trigger
                             trigger: match events_trigger.as_rule() {
+                                // Id
                                 Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_string()),
-                                Rule::events_time => EventTrigger::Id("TODO".to_string()),  // TODO: implement correctly
+                                // Time
+                                Rule::events_time => {
+                                    let mut time = (0, 0);
+                                    let mut events_time_pair = events_trigger.into_inner();
+                                    if let (Some(events_start_time), Some(events_end_time)) = (events_time_pair.next(), events_time_pair.next()) {
+                                        // Start time
+                                        for events_start_time_pair in events_start_time.into_inner() {
+                                            if let Ok(unit) = events_start_time_pair.as_str().parse::<u32>() {
+                                                time.0 += unit * rule_to_ms(events_start_time_pair.as_rule());
+                                            }
+                                        }
+                                        // End time
+                                        for events_end_time_pair in events_end_time.into_inner() {
+                                            if let Ok(unit) = events_end_time_pair.as_str().parse::<u32>() {
+                                                time.1 += unit * rule_to_ms(events_end_time_pair.as_rule());
+                                            }
+                                        }
+                                    }
+                                    EventTrigger::Time(time)
+                                },
                                 _ => EventTrigger::Id("".to_string())
                             },
+                            // Events macro
                             macro_: Some(events_macro.as_str().to_string()),
+                            // Events note
                             note: Some(events_note.as_str().to_string()),
+                            // Events data
                             data: events_data.as_str().to_string()
                         });
                     }
@@ -145,5 +171,16 @@ impl SsbParser {
     // View on internal data
     pub fn data(&self) -> &Ssb {
         &self.data
+    }
+}
+
+// Helpers
+fn rule_to_ms(rule: ssb_peg::Rule) -> u32 {
+    match rule {
+        ssb_peg::Rule::time_ms => 1,
+        ssb_peg::Rule::time_s => 1000,
+        ssb_peg::Rule::time_m => 60 * 1000,
+        ssb_peg::Rule::time_h => 60 * 60 * 1000,
+        _ => 0
     }
 }
