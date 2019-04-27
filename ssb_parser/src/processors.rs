@@ -144,9 +144,9 @@ impl SsbParser {
                                     _ => EventTrigger::Id("".to_string())
                                 },
                                 // Events macro
-                                macro_: Some(events_macro.as_str().to_string()),
+                                macro_: Some(events_macro.as_str().to_string()).filter(|s| !s.is_empty()),
                                 // Events note
-                                note: Some(events_note.as_str().to_string()),
+                                note: Some(events_note.as_str().to_string()).filter(|s| !s.is_empty()),
                                 // Events data
                                 data: events_data.as_str().to_string()
                             }
