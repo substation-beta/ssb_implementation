@@ -1,10 +1,7 @@
 // Imports
 use super::{
     error::ParseError,
-    data::{
-        Ssb,
-        View
-    }
+    data::*
 };
 use pest::Parser;
 
@@ -51,12 +48,17 @@ impl SsbParser {
             match section_entry_pair.as_rule() {
                 // Info entries
                 Rule::info_entry => {
-                    for info_entry_pair in section_entry_pair.into_inner() {
+                    if let Some(info_entry_pair) = section_entry_pair.into_inner().next() {
                         match info_entry_pair.as_rule() {
-                            Rule::info_title_value => self.data.info_title = Some(info_entry_pair.as_span().as_str().to_string()),
-                            Rule::info_author_value => self.data.info_author = Some(info_entry_pair.as_span().as_str().to_string()),
-                            Rule::info_desc_value => self.data.info_description = Some(info_entry_pair.as_span().as_str().to_string()),
-                            Rule::info_version_value => self.data.info_version = Some(info_entry_pair.as_span().as_str().to_string()),
+                            // Title
+                            Rule::info_title_value => self.data.info_title = Some(info_entry_pair.as_str().to_string()),
+                            // Author
+                            Rule::info_author_value => self.data.info_author = Some(info_entry_pair.as_str().to_string()),
+                            // Description
+                            Rule::info_desc_value => self.data.info_description = Some(info_entry_pair.as_str().to_string()),
+                            // Version
+                            Rule::info_version_value => self.data.info_version = Some(info_entry_pair.as_str().to_string()),
+                            // Custom
                             Rule::info_custom_entry => {
                                 let mut info_custom_entry_pair = info_entry_pair.into_inner();
                                 if let (Some(info_custom_key), Some(info_custom_value)) = (info_custom_entry_pair.next(), info_custom_entry_pair.next()) {
@@ -69,18 +71,22 @@ impl SsbParser {
                 }
                 // Target entries
                 Rule::target_entry => {
-                    for target_entry_pair in section_entry_pair.into_inner() {
+                    if let Some(target_entry_pair) = section_entry_pair.into_inner().next() {
                         match target_entry_pair.as_rule() {
-                            Rule::target_width_value => if let Ok(width) = target_entry_pair.as_span().as_str().parse::<u16>() {
+                            // Width
+                            Rule::target_width_value => if let Ok(width) = target_entry_pair.as_str().parse::<u16>() {
                                 self.data.target_width = Some(width);
                             }
-                            Rule::target_height_value => if let Ok(height) = target_entry_pair.as_span().as_str().parse::<u16>() {
+                            // Height
+                            Rule::target_height_value => if let Ok(height) = target_entry_pair.as_str().parse::<u16>() {
                                 self.data.target_height = Some(height);
                             }
-                            Rule::target_depth_value => if let Ok(depth) = target_entry_pair.as_span().as_str().parse::<u16>() {
+                            // Depth
+                            Rule::target_depth_value => if let Ok(depth) = target_entry_pair.as_str().parse::<u16>() {
                                 self.data.target_depth = depth;
                             }
-                            Rule::target_view_value => if let Ok(view) = View::from_str(target_entry_pair.as_span().as_str()) {
+                            // View
+                            Rule::target_view_value => if let Ok(view) = View::from_str(target_entry_pair.as_str()) {
                                 self.data.target_view = view;
                             }
                             _ => ()
@@ -95,10 +101,39 @@ impl SsbParser {
                     }
                 }
                 // Events entries
-                // TODO: implement rest below
-                Rule::events_entry => (),
+                Rule::events_entry => {
+                    let mut events_entry_pair = section_entry_pair.into_inner();
+                    if let (Some(events_trigger), Some(events_macro), Some(events_note), Some(events_data))
+                        = (events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next()) {
+                        self.data.events.push(Event {
+                            script_line: events_trigger.as_span().start_pos().line_col().0,
+                            trigger: match events_trigger.as_rule() {
+                                Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_string()),
+                                Rule::events_time => EventTrigger::Id("TODO".to_string()),  // TODO: implement correctly
+                                _ => EventTrigger::Id("".to_string())
+                            },
+                            macro_: Some(events_macro.as_str().to_string()),
+                            note: Some(events_note.as_str().to_string()),
+                            data: events_data.as_str().to_string()
+                        });
+                    }
+                }
                 // Resources entries
-                Rule::resources_entry => (),
+                Rule::resources_entry => {
+                    if let Some(resources_entry_pair) = section_entry_pair.into_inner().next() {
+                        match resources_entry_pair.as_rule() {
+                            // Font
+                            Rule::resources_font_entry => {
+                                // TODO: implement
+                            }
+                            // Texture
+                            Rule::resources_texture_entry => {
+                                // TODO: implement
+                            }
+                            _ => ()
+                        }
+                    }
+                }
                 // Unrelevant matches
                 _ => ()
             }

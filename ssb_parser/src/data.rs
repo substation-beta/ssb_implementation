@@ -19,7 +19,7 @@ impl View {
 }
 #[derive(Debug)]
 pub struct Event {
-    pub script_line: u32,
+    pub script_line: usize,
     pub trigger: EventTrigger,
     pub macro_: Option<String>,
     pub note: Option<String>,
