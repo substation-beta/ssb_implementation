@@ -26,6 +26,7 @@ green: color=00FF00
 'show-something'|Default||This will only be shown when the tag is given.
 
 #Resources
+Font: Rabi-Ribi,bold,+B3nny/
 Texture: cute,url,./cute.png
 
 

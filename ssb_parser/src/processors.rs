@@ -62,7 +62,10 @@ impl SsbParser {
                             Rule::info_custom_entry => {
                                 let mut info_custom_entry_pair = info_entry_pair.into_inner();
                                 if let (Some(info_custom_key), Some(info_custom_value)) = (info_custom_entry_pair.next(), info_custom_entry_pair.next()) {
-                                    self.data.info_custom.insert(info_custom_key.as_str().to_string(), info_custom_value.as_str().to_string());
+                                    self.data.info_custom.insert(
+                                        info_custom_key.as_str().to_string(),
+                                        info_custom_value.as_str().to_string()
+                                    );
                                 }
                             }
                             _ => ()
@@ -95,53 +98,58 @@ impl SsbParser {
                 }
                 // Macros entries
                 Rule::macros_entry => {
-                    let mut macros_entry_pair = section_entry_pair.into_inner();
-                    if let (Some(macros_key), Some(macros_value)) = (macros_entry_pair.next(), macros_entry_pair.next()) {
-                        self.data.macros.insert(macros_key.as_str().to_string(), macros_value.as_str().to_string());
+                    let mut macros_entry_pairs = section_entry_pair.into_inner();
+                    if let (Some(macros_key), Some(macros_value)) = (macros_entry_pairs.next(), macros_entry_pairs.next()) {
+                        self.data.macros.insert(
+                            macros_key.as_str().to_string(),
+                            macros_value.as_str().to_string()
+                        );
                     }
                 }
                 // Events entries
                 Rule::events_entry => {
-                    let mut events_entry_pair = section_entry_pair.into_inner();
+                    let mut events_entry_pairs = section_entry_pair.into_inner();
                     if let (Some(events_trigger), Some(events_macro), Some(events_note), Some(events_data))
-                        = (events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next(), events_entry_pair.next()) {
+                        = (events_entry_pairs.next(), events_entry_pairs.next(), events_entry_pairs.next(), events_entry_pairs.next()) {
                         // Add event
-                        self.data.events.push(Event {
-                            // Script line
-                            script_line: events_trigger.as_span().start_pos().line_col().0,
-                            // Events trigger
-                            trigger: match events_trigger.as_rule() {
-                                // Id
-                                Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_string()),
-                                // Time
-                                Rule::events_time => {
-                                    let mut time = (0, 0);
-                                    let mut events_time_pair = events_trigger.into_inner();
-                                    if let (Some(events_start_time), Some(events_end_time)) = (events_time_pair.next(), events_time_pair.next()) {
-                                        // Start time
-                                        for events_start_time_pair in events_start_time.into_inner() {
-                                            if let Ok(unit) = events_start_time_pair.as_str().parse::<u32>() {
-                                                time.0 += unit * rule_to_ms(events_start_time_pair.as_rule());
+                        self.data.events.push(
+                            Event {
+                                // Script line
+                                script_line: events_trigger.as_span().start_pos().line_col().0,
+                                // Events trigger
+                                trigger: match events_trigger.as_rule() {
+                                    // Id
+                                    Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_string()),
+                                    // Time
+                                    Rule::events_time => {
+                                        let mut time = (0, 0);
+                                        let mut events_time_pairs = events_trigger.into_inner();
+                                        if let (Some(events_start_time), Some(events_end_time)) = (events_time_pairs.next(), events_time_pairs.next()) {
+                                            // Start time
+                                            for events_start_time_pair in events_start_time.into_inner() {
+                                                if let Ok(unit) = events_start_time_pair.as_str().parse::<u32>() {
+                                                    time.0 += unit * rule_to_ms(events_start_time_pair.as_rule());
+                                                }
+                                            }
+                                            // End time
+                                            for events_end_time_pair in events_end_time.into_inner() {
+                                                if let Ok(unit) = events_end_time_pair.as_str().parse::<u32>() {
+                                                    time.1 += unit * rule_to_ms(events_end_time_pair.as_rule());
+                                                }
                                             }
                                         }
-                                        // End time
-                                        for events_end_time_pair in events_end_time.into_inner() {
-                                            if let Ok(unit) = events_end_time_pair.as_str().parse::<u32>() {
-                                                time.1 += unit * rule_to_ms(events_end_time_pair.as_rule());
-                                            }
-                                        }
-                                    }
-                                    EventTrigger::Time(time)
+                                        EventTrigger::Time(time)
+                                    },
+                                    _ => EventTrigger::Id("".to_string())
                                 },
-                                _ => EventTrigger::Id("".to_string())
-                            },
-                            // Events macro
-                            macro_: Some(events_macro.as_str().to_string()),
-                            // Events note
-                            note: Some(events_note.as_str().to_string()),
-                            // Events data
-                            data: events_data.as_str().to_string()
-                        });
+                                // Events macro
+                                macro_: Some(events_macro.as_str().to_string()),
+                                // Events note
+                                note: Some(events_note.as_str().to_string()),
+                                // Events data
+                                data: events_data.as_str().to_string()
+                            }
+                        );
                     }
                 }
                 // Resources entries
@@ -150,11 +158,34 @@ impl SsbParser {
                         match resources_entry_pair.as_rule() {
                             // Font
                             Rule::resources_font_entry => {
-                                // TODO: implement
+                                let mut resources_font_entry_pairs = resources_entry_pair.into_inner();
+                                if let (Some(resources_font_family), Some(resources_font_style), Some(resources_font_data))
+                                    = (resources_font_entry_pairs.next(), resources_font_entry_pairs.next(), resources_font_entry_pairs.next()) {
+                                    // Add font
+                                    self.data.fonts.insert(
+                                        FontFace {
+                                            family: resources_font_family.as_str().to_string(),
+                                            style: FontStyle::from_str(resources_font_style.as_str()).unwrap_or(FontStyle::Regular)
+                                        },
+                                        resources_font_data.as_str().to_string()
+                                    );
+                                }
                             }
                             // Texture
                             Rule::resources_texture_entry => {
-                                // TODO: implement
+                                let mut resources_texture_entry_pairs = resources_entry_pair.into_inner();
+                                if let(Some(resources_texture_id), Some(resources_texture_data))
+                                    = (resources_texture_entry_pairs.next(), resources_texture_entry_pairs.next()) {
+                                    // Add texture
+                                    self.data.textures.insert(
+                                        resources_texture_id.as_str().to_string(),
+                                        match resources_texture_data.as_rule() {
+                                            Rule::resources_texture_data_url => TextureData::Url(resources_texture_data.as_str().to_string()),
+                                            Rule::resources_texture_data_raw => TextureData::Raw(resources_texture_data.as_str().to_string()),
+                                            _ => TextureData::Url("".to_string())
+                                        }
+                                    );
+                                }
                             }
                             _ => ()
                         }
@@ -175,6 +206,7 @@ impl SsbParser {
 }
 
 // Helpers
+#[inline]
 fn rule_to_ms(rule: ssb_peg::Rule) -> u32 {
     match rule {
         ssb_peg::Rule::time_ms => 1,

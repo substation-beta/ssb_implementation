@@ -32,8 +32,8 @@ pub enum EventTrigger {
 }
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub struct FontFace {
-    family: String,
-    style: FontStyle
+    pub family: String,
+    pub style: FontStyle
 }
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum FontStyle {
