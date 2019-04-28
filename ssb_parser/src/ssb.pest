@@ -73,7 +73,7 @@ time_m = {'0'..'5'? ~ ASCII_DIGIT?}
 time_h = {ASCII_DIGIT{0,2}}
 events_macro = {macros_key}
 events_note = {(!(event_separator | next_line) ~ ANY)*}
-events_data = {no_next_line+}
+events_data = {no_next_line*}
 
 // Resources section
 resources_section = _{resources_header ~ resources_entry*}

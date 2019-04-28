@@ -6,10 +6,10 @@ alpha_value = _{ASCII_HEX_DIGIT{1,2}}
 
 
 // Whole event data
-events_data = ${SOI ~ (("[" ~ tags ~ "]")? ~ geometries)* ~ EOI}
+events_data = ${SOI ~ (("[" ~ tags ~ "]") | geometry)* ~ EOI}
 
 // Geometries
-geometries = _{shape | points | text}
+geometry = _{shape | points | text}
 shape = {move_type ~ " " ~ point ~ (" " ~ (point_type | point))*}
 point_type = _{move_type | line_type | curve_type | arc_type | close_type}
 move_type = {"m"}
