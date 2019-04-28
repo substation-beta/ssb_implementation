@@ -35,11 +35,16 @@ mod grammar_tests {
 
     #[test]
     fn test_ssb() {
-        print!(
-            "{:?}",
-            SsbParser::new(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))).unwrap_or_else(|exception| {
-                panic!("Parsing error: {}", exception)
-            }).data()
-        );
+        // Parse 1st phase
+        let parser = SsbParser::new(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))).unwrap_or_else(|exception| {
+            panic!("SSB parsing error: {}", exception)
+        });
+        // Show data
+        println!("{:?}", parser.data());
+        // Parse 2nd phase + show render data
+        let render_data = parser.render_data().unwrap_or_else(|exception| {
+            panic!("SSB parsing error: {}", exception)
+        });
+        println!("{:?}", render_data);
     }
 }

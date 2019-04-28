@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 
 // Sub types
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum View {
     Perspective,
     Orthogonal

@@ -4,7 +4,7 @@ use super::{
     data::*
 };
 use pest::Parser;
-use std::convert::TryFrom;
+
 
 // PEG parsers
 mod ssb_peg{
@@ -204,30 +204,38 @@ impl SsbParser {
     pub fn data(&self) -> &Ssb {
         &self.data
     }
-}
 
-// Ssb data processing for rendering
-impl TryFrom<Ssb> for SsbRender {
-    type Error = ParseError;
-    fn try_from(origin: Ssb) -> Result<Self, Self::Error> {
-        Ok(Self {
-            target_width: origin.target_width,
-            target_height: origin.target_height,
-            target_depth: origin.target_depth,
-            target_view: origin.target_view,
+    // Generate data relevant for rendering
+    pub fn render_data(&self) -> Result<SsbRender, ParseError> {
+        use std::collections::HashMap;
+        Ok(SsbRender {
+            target_width: self.data.target_width,
+            target_height: self.data.target_height,
+            target_depth: self.data.target_depth,
+            target_view: self.data.target_view.clone(),
             // TODO: convert correctly below
-            events: origin.events.into_iter().map(|entry| {
+            events: vec!(),
+            fonts: HashMap::new(),
+            textures: HashMap::new()
+            /*
+            events: self.data.events.into_iter().map(|entry| {
+                use ssb_event_data_peg::{Parser, Rule};
+                // Parse script and throw possible error
+                let _pairs = Parser::parse(Rule::events_data, &entry.data).unwrap_or_else(|exception| {
+                    panic!("{}", exception);
+                });
                 EventRender {
                     trigger: entry.trigger,
                     data: entry.data
                 }
             }).collect(),
-            fonts: origin.fonts.into_iter().map(|(key, value)| {
+            fonts: self.data.fonts.into_iter().map(|(key, value)| {
                 (key, value.into_bytes())
             }).collect(),
-            textures: origin.textures.into_iter().map(|(key, value)| {
+            textures: self.data.textures.into_iter().map(|(key, value)| {
                 (key, format!("{:?}", value).into_bytes())
             }).collect()
+            */
         })
     }
 }
