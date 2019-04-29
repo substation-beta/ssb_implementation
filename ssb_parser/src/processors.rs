@@ -17,7 +17,7 @@ mod ssb_event_data_peg {
     use pest_derive::Parser;
     #[derive(Parser)]
     #[grammar = "ssb_event_data.pest"]
-    pub struct _Parser;
+    pub struct Parser;
 }
 
 // Stream parser for ssb data
@@ -208,34 +208,65 @@ impl SsbParser {
     // Generate data relevant for rendering
     pub fn render_data(&self) -> Result<SsbRender, ParseError> {
         use std::collections::HashMap;
+        // Evaluate events
+        let mut events = Vec::with_capacity(self.data.events.len());
+        for event in &self.data.events {
+            use ssb_event_data_peg::{Parser, Rule};
+
+            // TODO: insert macros, parse tags & geometries, pack into structure
+
+            let _pairs = Parser::parse(Rule::events_data, &event.data).unwrap_or_else(|exception| {
+                panic!("{}", exception);
+            });
+            events.push(
+                EventRender {
+                    trigger: event.trigger.clone(),
+                    data: event.data.clone()
+                }
+            );
+        }
+        // Decode fonts
+        let mut fonts = HashMap::with_capacity(self.data.fonts.len());
+        for (font_face, font_data) in &self.data.fonts {
+            fonts.insert(font_face.clone(), base64::decode(&font_data).map_err(|err| {
+                ParseError::new(&format!("Base64 decoding of font '{}' failed: {}", font_face, err))
+            })?);
+        }
+        // Decode textures
+        let mut textures = HashMap::with_capacity(self.data.textures.len());
+        for (texture_id, texture_data) in &self.data.textures {
+            textures.insert(
+                texture_id.clone(),
+                match texture_data {
+                    // Raw (base64)
+                    TextureData::Raw(data) => {
+                        base64::decode(data).map_err(|err| {
+                            ParseError::new(&format!("Base64 decoding of texture '{}' failed: {}", texture_id, err))
+                        })
+                    }
+                    // Url
+                    TextureData::Url(path) => {
+                        std::fs::read(path).map_err(|err| {
+                            ParseError::new(&format!(
+                                "File reading of texture '{}' in working directory '{}' failed: {}",
+                                texture_id,
+                                std::env::current_dir().map(|path| path.to_str().unwrap_or("").to_string()).unwrap_or("".to_string()),
+                                err
+                            ))
+                        })
+                    }
+                }?
+            );
+        }
+        // Return result
         Ok(SsbRender {
             target_width: self.data.target_width,
             target_height: self.data.target_height,
             target_depth: self.data.target_depth,
             target_view: self.data.target_view.clone(),
-            // TODO: convert correctly below
-            events: vec!(),
-            fonts: HashMap::new(),
-            textures: HashMap::new()
-            /*
-            events: self.data.events.into_iter().map(|entry| {
-                use ssb_event_data_peg::{Parser, Rule};
-                // Parse script and throw possible error
-                let _pairs = Parser::parse(Rule::events_data, &entry.data).unwrap_or_else(|exception| {
-                    panic!("{}", exception);
-                });
-                EventRender {
-                    trigger: entry.trigger,
-                    data: entry.data
-                }
-            }).collect(),
-            fonts: self.data.fonts.into_iter().map(|(key, value)| {
-                (key, value.into_bytes())
-            }).collect(),
-            textures: self.data.textures.into_iter().map(|(key, value)| {
-                (key, format!("{:?}", value).into_bytes())
-            }).collect()
-            */
+            events,
+            fonts,
+            textures
         })
     }
 }

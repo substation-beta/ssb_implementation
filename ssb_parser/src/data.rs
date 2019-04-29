@@ -1,5 +1,6 @@
 // Imports
 use std::collections::HashMap;
+use std::fmt;
 
 
 // Sub types
@@ -28,20 +29,27 @@ pub struct Event {
 #[derive(Debug)]
 pub struct EventRender {
     pub trigger: EventTrigger,
+    
     // TODO: split data into tags & geometries
+
     pub data: String
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))
 }
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct FontFace {
     pub family: String,
     pub style: FontStyle
 }
-#[derive(Debug, PartialEq, Eq, Hash)]
+impl fmt::Display for FontFace {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({:?})", self.family, self.style)
+    }
+}
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum FontStyle {
     Regular,
     Bold,

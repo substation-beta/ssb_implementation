@@ -26,8 +26,9 @@ green: color=00FF00
 'show-something'|Default||This will only be shown when the tag is given.
 
 #Resources
-Font: Rabi-Ribi,bold,+B3nny/
-Texture: cute,url,./cute.png
+Font: Rabi-Ribi,bold,UmFiaS1SaWJp
+Texture: Jitter,data,Sml0dGVy
+Texture: cute,url,./tests/cute.png
 
 
 // Successfully parsed till end :)

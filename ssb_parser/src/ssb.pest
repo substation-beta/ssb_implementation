@@ -7,7 +7,7 @@ event_separator = _{"|"}
 resource_separator = _{","}
 dimension_value = _{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
 custom_key = _{(ASCII_ALPHANUMERIC | "_" | "-")+}
-base64_value = _{(ASCII_ALPHANUMERIC | "+" | "/")*}
+base64_value = _{(ASCII_ALPHANUMERIC | "+" | "/")* ~ "="{0,2}}
 
 
 // Whitespaces and comments
