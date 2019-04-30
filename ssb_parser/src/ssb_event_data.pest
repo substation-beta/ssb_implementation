@@ -1,4 +1,5 @@
 // Constants
+custom_key = _{(ASCII_ALPHANUMERIC | "_" | "-")+}   // See also <ssb.pest>
 tag_assign = _{"="}
 font_name = _{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
 color_value = _{ASCII_HEX_DIGIT{1,6}}
@@ -25,12 +26,16 @@ text = {("\\[" | (!"[" ~ ANY))+}
 // Tags
 tags = {tag? ~ (";" ~ tag)*}
 // TODO: define below
-tag = _{font_tag | font_size_tag | color_tag | mode_tag}
+tag = _{font_tag | font_size_tag | bold_tag | color_tag | mode_tag | texture_tag}
 font_tag = _{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = {font_name}
 font_size_tag = _{"font-size" ~ tag_assign ~ font_size_tag_value}
 font_size_tag_value = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
+bold_tag = _{"bold" ~ tag_assign ~ bold_tag_value}
+bold_tag_value = {"y" | "n"}
 color_tag = _{"color" ~ tag_assign ~ color_tag_value}
 color_tag_value = {color_value}
 mode_tag = _{"mode" ~ tag_assign ~ mode_tag_value}
 mode_tag_value = {"shape" | "points" | "text"}
+texture_tag = _{"texture" ~ tag_assign ~ texture_tag_value}
+texture_tag_value = {custom_key}
