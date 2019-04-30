@@ -208,6 +208,17 @@ impl SsbParser {
     // Generate data relevant for rendering
     pub fn render_data(&self) -> Result<SsbRender, ParseError> {
         use std::collections::HashMap;
+        // Flatten macros & detect infinite recursion
+        let mut flat_macros = HashMap::with_capacity(self.data.macros.len());
+        for (macro_name, macro_value) in &self.data.macros {
+
+            // TODO: detect loop with path memory
+
+            flat_macros.insert(
+                macro_name,
+                macro_value
+            );
+        }
         // Evaluate events
         let mut events = Vec::with_capacity(self.data.events.len());
         for event in &self.data.events {
