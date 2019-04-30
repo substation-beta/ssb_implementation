@@ -1,13 +1,15 @@
 // Constants
 custom_key = _{(ASCII_ALPHANUMERIC | "_" | "-")+}   // See also <ssb.pest>
 tag_assign = _{"="}
-font_name = _{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
-color_value = _{ASCII_HEX_DIGIT{1,6}}
-alpha_value = _{ASCII_HEX_DIGIT{1,2}}
+tag_value_separator = _{","}
+coordinate = {("-" | "+")? ~ (ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
+duration = {("-" | "+")? ~ ASCII_DIGIT+}
+color_value = {ASCII_HEX_DIGIT{1,6}}
+alpha_value = {ASCII_HEX_DIGIT{1,2}}
 
 
 // Whole event data
-events_data = ${SOI ~ (("[" ~ tags ~ "]") | geometry)* ~ EOI}
+events_data = ${SOI ~ (tags | geometry)* ~ EOI}
 
 // Geometries
 geometry = _{shape | points | text}
@@ -19,23 +21,30 @@ curve_type = {"b"}
 arc_type = {"a"}
 close_type = {"c"}
 point = {coordinate ~ " " ~ coordinate}
-coordinate = {"-"? ~ ASCII_DIGIT* ~ "."? ~ ASCII_DIGIT+}
 points = {point ~ (" " ~ point)*}
 text = {("\\[" | (!"[" ~ ANY))+}
 
 // Tags
-tags = {tag? ~ (";" ~ tag)*}
+tags = {"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
 // TODO: define below
-tag = _{font_tag | font_size_tag | bold_tag | color_tag | mode_tag | texture_tag}
+tag = _{font_tag | font_size_tag | bold_tag | position_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
 font_tag = _{"font" ~ tag_assign ~ font_tag_value}
-font_tag_value = {font_name}
+font_tag_value = {(ASCII_ALPHANUMERIC | " " | "_" | "-")+}  // Same as in <ssb.pest>
 font_size_tag = _{"font-size" ~ tag_assign ~ font_size_tag_value}
 font_size_tag_value = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
 bold_tag = _{"bold" ~ tag_assign ~ bold_tag_value}
 bold_tag_value = {"y" | "n"}
+position_tag = _{"position" ~ tag_assign ~ position_tag_value}
+position_tag_value = {coordinate ~ tag_value_separator ~ coordinate ~ (tag_value_separator ~ coordinate)?}
+scale_tag = _{"scale" ~ tag_assign ~ scale_tag_value}
+scale_tag_value = {coordinate ~ (tag_value_separator ~ coordinate){0,2}}
+rotate_z_tag = _{"rotate-z" ~ tag_assign ~ rotate_z_tag_value}
+rotate_z_tag_value = {coordinate}
 color_tag = _{"color" ~ tag_assign ~ color_tag_value}
 color_tag_value = {color_value}
 mode_tag = _{"mode" ~ tag_assign ~ mode_tag_value}
 mode_tag_value = {"shape" | "points" | "text"}
 texture_tag = _{"texture" ~ tag_assign ~ texture_tag_value}
 texture_tag_value = {custom_key}
+animate_tag = _{"animate" ~ tag_assign ~ animate_tag_value}
+animate_tag_value = {duration ~ tag_value_separator ~ duration ~ tag_value_separator ~ tags}
