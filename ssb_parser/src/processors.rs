@@ -1,9 +1,10 @@
 // Imports
 use super::{
-    error::ParseError,
+    error::*,
     data::*
 };
 use pest::Parser;
+use std::collections::{HashMap, HashSet};
 
 
 // PEG parsers
@@ -207,17 +208,12 @@ impl SsbParser {
 
     // Generate data relevant for rendering
     pub fn render_data(&self) -> Result<SsbRender, ParseError> {
-        use std::collections::HashMap;
         // Flatten macros & detect infinite recursion
         let mut flat_macros = HashMap::with_capacity(self.data.macros.len());
-        for (macro_name, macro_value) in &self.data.macros {
-
-            // TODO: detect loop with path memory
-
-            flat_macros.insert(
-                macro_name,
-                macro_value
-            );
+        for macro_name in self.data.macros.keys() {
+            if let Err(err) = flatten_macros(macro_name, &mut HashSet::new(), &self.data.macros, &mut flat_macros) {
+                return Err(ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)));
+            }
         }
         // Evaluate events
         let mut events = Vec::with_capacity(self.data.events.len());
@@ -292,4 +288,28 @@ fn rule_to_ms(rule: ssb_peg::Rule) -> u32 {
         ssb_peg::Rule::time_h => 60 * 60 * 1000,
         _ => 0
     }
+}
+fn flatten_macros<'top>(macro_name: &'top str, history: &mut HashSet<&'top str>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<&'top str, String>) -> Result<(), MacroError> {
+    // Macro already flattened?
+    if flat_macros.contains_key(macro_name) {
+        return Ok(());
+    }
+    // Macro already in history (avoid infinite loop!)
+    if history.contains(macro_name) {
+        return Err(MacroError::InfiniteLoop(macro_name.to_string()));
+    } else {
+        history.insert(macro_name);
+    }
+    // Process macro value
+    let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_string()))?.clone();
+
+
+
+    // Register flat macro
+    flat_macros.insert(
+        macro_name,
+        flat_macro_value
+    );
+    // Everything alright
+    Ok(())
 }

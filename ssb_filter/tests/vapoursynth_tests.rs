@@ -32,7 +32,7 @@ mod vapoursynth_tests {
         // Get core functions
         let core = environment.get_core().expect("Couldn't create the VapourSynth core!");
         // Output version
-        print!("Core version: {}", core.info().version_string);
+        println!("Core version: {}", core.info().version_string);
     }
 
     #[test]

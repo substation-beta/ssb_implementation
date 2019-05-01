@@ -77,3 +77,10 @@ impl ParseError {
         }
     }
 }
+
+// Error identifiers
+#[derive(Debug)]
+pub enum MacroError {
+    NotFound(String),
+    InfiniteLoop(String)
+}
