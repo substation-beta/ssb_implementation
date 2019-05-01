@@ -18,7 +18,7 @@ pub struct ParseError {
 }
 impl Error for ParseError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        if let Some(ref src) = self.src {
+        if let Some(src) = &self.src {
             Some(src.as_ref())
         } else {
             None

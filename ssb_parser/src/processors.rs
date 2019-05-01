@@ -227,7 +227,12 @@ impl SsbParser {
         for event in &self.data.events {
             use ssb_event_data_peg::{Parser, Rule};
             // Insert macros
-            let event_data = event.data.clone();
+            let mut event_data = event.data.clone();
+            if let Some(macro_name) = &event.macro_ {
+                event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| {
+                    ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.script_line))
+                })?);
+            }
 
             // TODO: insert macros, parse tags & geometries, pack into structure
 
