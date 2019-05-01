@@ -226,15 +226,25 @@ impl SsbParser {
         let mut events = Vec::with_capacity(self.data.events.len());
         for event in &self.data.events {
             use ssb_event_data_peg::{Parser, Rule};
-            // Insert macros
+            // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_ {
                 event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| {
                     ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.script_line))
                 })?);
             }
+            // Insert inline macros
+            while let Some(found) = MACRO_PATTERN.find(&event_data) {
+                let macro_name = &event_data[found.start()+2..found.end()-1];
+                event_data.replace_range(
+                    found.start()..found.end(),
+                    flat_macros.get(macro_name).ok_or_else(|| {
+                        ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.script_line))
+                    })?
+                );
+            }
 
-            // TODO: insert macros, parse tags & geometries, pack into structure
+            // TODO: parse tags & geometries, pack into structure
 
             let _pairs = Parser::parse(Rule::events_data, &event.data).unwrap_or_else(|exception| {
                 panic!("{}", exception);
@@ -318,13 +328,13 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
     let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_string()))?.clone();
     while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
         // Insert sub-macro
-        let sub_macro_name = flat_macro_value[found.start()+2..found.end()-1].to_string();
-        if !flat_macros.contains_key(&sub_macro_name) {
+        let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
+        if !flat_macros.contains_key(sub_macro_name) {
             flatten_macros(&sub_macro_name, history, macros, flat_macros)?;
         }
         flat_macro_value.replace_range(
             found.start()..found.end(),
-            flat_macros.get(&sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name))?
+            flat_macros.get(sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name.to_string()))?
         );
     }
     // Register flat macro
