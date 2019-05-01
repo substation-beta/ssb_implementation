@@ -18,7 +18,7 @@ View: orthogonal
 #Macros
 Default: [bold=y]
 Mine: [bold=n;color=FF0000]
-Another: [Mine;position=100,200,-1;rotate-z=180]I'm a
+Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a
 
 #Events
 //0-2.0|||This line is a comment over 2 seconds!

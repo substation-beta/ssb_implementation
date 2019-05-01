@@ -5,6 +5,8 @@ use super::{
 };
 use pest::Parser;
 use std::collections::{HashMap, HashSet};
+use lazy_static::lazy_static;
+use regex::*;
 
 
 // PEG parsers
@@ -19,6 +21,11 @@ mod ssb_event_data_peg {
     #[derive(Parser)]
     #[grammar = "ssb_event_data.pest"]
     pub struct Parser;
+}
+
+// RegEx pattern
+lazy_static! {
+    static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }
 
 // Stream parser for ssb data
@@ -219,6 +226,8 @@ impl SsbParser {
         let mut events = Vec::with_capacity(self.data.events.len());
         for event in &self.data.events {
             use ssb_event_data_peg::{Parser, Rule};
+            // Insert macros
+            let event_data = event.data.clone();
 
             // TODO: insert macros, parse tags & geometries, pack into structure
 
@@ -228,7 +237,7 @@ impl SsbParser {
             events.push(
                 EventRender {
                     trigger: event.trigger.clone(),
-                    data: event.data.clone()
+                    data: event_data
                 }
             );
         }
@@ -289,7 +298,7 @@ fn rule_to_ms(rule: ssb_peg::Rule) -> u32 {
         _ => 0
     }
 }
-fn flatten_macros<'top>(macro_name: &'top str, history: &mut HashSet<&'top str>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<&'top str, String>) -> Result<(), MacroError> {
+fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
     // Macro already flattened?
     if flat_macros.contains_key(macro_name) {
         return Ok(());
@@ -298,16 +307,24 @@ fn flatten_macros<'top>(macro_name: &'top str, history: &mut HashSet<&'top str>,
     if history.contains(macro_name) {
         return Err(MacroError::InfiniteLoop(macro_name.to_string()));
     } else {
-        history.insert(macro_name);
+        history.insert(macro_name.to_string());
     }
     // Process macro value
     let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_string()))?.clone();
-
-
-
+    while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
+        // Insert sub-macro
+        let sub_macro_name = flat_macro_value[found.start()+2..found.end()-1].to_string();
+        if !flat_macros.contains_key(&sub_macro_name) {
+            flatten_macros(&sub_macro_name, history, macros, flat_macros)?;
+        }
+        flat_macro_value.replace_range(
+            found.start()..found.end(),
+            flat_macros.get(&sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name))?
+        );
+    }
     // Register flat macro
     flat_macros.insert(
-        macro_name,
+        macro_name.to_string(),
         flat_macro_value
     );
     // Everything alright
