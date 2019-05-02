@@ -31,7 +31,7 @@ Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a
 #Resources
 Font: Rabi-Ribi,bold,UmFiaS1SaWJp
 Texture: Jitter,data,Sml0dGVy
-Texture: cute,url,./tests/cute.png
+Texture: cute,url,tests/cute.png
 
 
 // Successfully parsed till end :)

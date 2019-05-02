@@ -4,7 +4,10 @@ use super::{
     data::*
 };
 use pest::Parser;
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path
+};
 use lazy_static::lazy_static;
 use regex::*;
 
@@ -214,7 +217,7 @@ impl SsbParser {
     }
 
     // Generate data relevant for rendering
-    pub fn render_data(&self) -> Result<SsbRender, ParseError> {
+    pub fn render_data(&self, search_path: Option<&Path>) -> Result<SsbRender, ParseError> {
         // Flatten macros & detect infinite recursion
         let mut flat_macros = HashMap::with_capacity(self.data.macros.len());
         for macro_name in self.data.macros.keys() {
@@ -277,11 +280,12 @@ impl SsbParser {
                     }
                     // Url
                     TextureData::Url(path) => {
-                        std::fs::read(path).map_err(|err| {
+                        let full_path = search_path.unwrap_or(Path::new(".")).join(path);
+                        std::fs::read(&full_path).map_err(|err| {
                             ParseError::new(&format!(
-                                "File reading of texture '{}' in working directory '{}' failed: {}",
+                                "File reading of texture '{}' with path '{}' failed: {}",
                                 texture_id,
-                                std::env::current_dir().map(|path| path.to_str().unwrap_or("").to_string()).unwrap_or("".to_string()),
+                                full_path.display(),
                                 err
                             ))
                         })

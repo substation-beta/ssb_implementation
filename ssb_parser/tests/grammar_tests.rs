@@ -3,6 +3,7 @@ mod grammar_tests {
     use pest_derive::Parser;    // Macro
     use pest::Parser;   // Trait
     use ssb_parser::processors::SsbParser;
+    use std::path::Path;
 
     // Test resource
     #[derive(Parser)]
@@ -42,7 +43,9 @@ mod grammar_tests {
         // Show data
         println!("{:?}", parser.data());
         // Parse 2nd phase + show render data
-        let render_data = parser.render_data().unwrap_or_else(|exception| {
+        let render_data = parser.render_data(
+            Some(Path::new(env!("CARGO_MANIFEST_DIR")))
+        ).unwrap_or_else(|exception| {
             panic!("SSB parsing error: {}", exception)
         });
         println!("{:?}", render_data);
