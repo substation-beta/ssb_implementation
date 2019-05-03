@@ -2,7 +2,7 @@ mod grammar_tests {
     // Imports
     use pest_derive::Parser;    // Macro
     use pest::Parser;   // Trait
-    use ssb_parser::processors::SsbParser;
+    use ssb_parser::processing::SsbParser;
     use std::path::Path;
 
     // Test resource
