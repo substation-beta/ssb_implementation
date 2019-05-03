@@ -3,28 +3,20 @@ use super::{
     error::*,
     data::*
 };
-use pest::Parser;
+use pest::Parser;   // Trait
+use pest_derive::Parser;    // Derive macro
+use lazy_static::lazy_static;
+use regex::*;
 use std::{
     collections::{HashMap, HashSet},
     path::Path
 };
-use lazy_static::lazy_static;
-use regex::*;
 
 
-// PEG parsers
-mod ssb_peg{
-    use pest_derive::Parser;
-    #[derive(Parser)]
-    #[grammar = "ssb.pest"]
-    pub struct Parser;
-}
-mod ssb_event_data_peg {
-    use pest_derive::Parser;
-    #[derive(Parser)]
-    #[grammar = "ssb_event_data.pest"]
-    pub struct Parser;
-}
+// PEG parser
+#[derive(Parser)]
+#[grammar = "ssb.pest"]
+pub struct SsbPegParser;
 
 // RegEx pattern
 lazy_static! {
@@ -52,9 +44,8 @@ impl SsbParser {
 
     // Parsing / modifying instance
     pub fn parse(&mut self, script: &str) -> Result<&mut Self, ParseError> {
-        use ssb_peg::{Parser, Rule};
         // Parse script and throw possible error
-        let pairs = Parser::parse(Rule::script, script)?;
+        let pairs = SsbPegParser::parse(Rule::script, script)?;
         // Iterate through section entries
         for section_entry_pair in pairs {
             match section_entry_pair.as_rule() {
@@ -228,7 +219,6 @@ impl SsbParser {
         // Evaluate events
         let mut events = Vec::with_capacity(self.data.events.len());
         for event in &self.data.events {
-            use ssb_event_data_peg::{Parser, Rule};
             // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_ {
@@ -249,7 +239,7 @@ impl SsbParser {
 
             // TODO: parse tags & geometries, pack into structure
 
-            let _pairs = Parser::parse(Rule::events_data, &event.data).unwrap_or_else(|exception| {
+            let _pairs = SsbPegParser::parse(Rule::event_data, &event.data).unwrap_or_else(|exception| {
                 panic!("{}", exception);
             });
             events.push(
@@ -308,12 +298,12 @@ impl SsbParser {
 
 // Helpers
 #[inline]
-fn rule_to_ms(rule: ssb_peg::Rule) -> u32 {
+fn rule_to_ms(rule: Rule) -> u32 {
     match rule {
-        ssb_peg::Rule::time_ms => 1,
-        ssb_peg::Rule::time_s => 1000,
-        ssb_peg::Rule::time_m => 60 * 1000,
-        ssb_peg::Rule::time_h => 60 * 60 * 1000,
+        Rule::time_ms => 1,
+        Rule::time_s => 1000,
+        Rule::time_m => 60 * 1000,
+        Rule::time_h => 60 * 60 * 1000,
         _ => 0
     }
 }

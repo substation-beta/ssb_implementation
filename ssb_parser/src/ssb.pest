@@ -1,3 +1,4 @@
+// PHASE 1
 // Constants
 next_line = _{NEWLINE | EOI}
 no_next_line = _{!NEWLINE ~ ANY}
@@ -7,6 +8,7 @@ event_separator = _{"|"}
 resource_separator = _{","}
 dimension_value = _{ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,4}}
 custom_key = _{(ASCII_ALPHANUMERIC | "_" | "-")+}
+font_name = _{(ASCII_ALPHANUMERIC | " " | "_" | "-")+}
 base64_value = _{(ASCII_ALPHANUMERIC | "+" | "/")* ~ "="{0,2}}
 
 
@@ -80,7 +82,7 @@ resources_section = _{resources_header ~ resources_entry*}
 resources_header = @{section_start ~ "Resources" ~ next_line}
 resources_entry = ${(resources_font_entry | resources_texture_entry) ~ next_line}
 resources_font_entry = {"Font" ~ entry_assign ~ resources_font_family ~ resource_separator ~ resources_font_style ~ resource_separator ~ resources_font_data}
-resources_font_family = {(ASCII_ALPHANUMERIC | " " | "_" | "-")+}   // Same as in <ssb_event_data.pest>
+resources_font_family = {font_name}
 resources_font_style = {"regular" | "bold" | "italic" | "bold-italic"}
 resources_font_data = {base64_value}
 resources_texture_entry = {"Texture" ~ entry_assign ~ resources_texture_id ~ resource_separator ~ resources_texture_data}
@@ -88,3 +90,56 @@ resources_texture_id = {custom_key}
 resources_texture_data = _{("data" ~ resource_separator ~ resources_texture_data_raw) | ("url" ~ resource_separator ~ resources_texture_data_url)}
 resources_texture_data_raw = {base64_value}
 resources_texture_data_url = {no_next_line+}
+
+
+
+// PHASE 2
+// Constants
+tag_assign = _{"="}
+tag_value_separator = _{","}
+coordinate = {("-" | "+")? ~ (ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
+duration = {("-" | "+")? ~ ASCII_DIGIT+}
+color_value = {ASCII_HEX_DIGIT{1,6}}
+alpha_value = {ASCII_HEX_DIGIT{1,2}}
+
+
+// Whole event data
+event_data = ${SOI ~ (tags | geometry)* ~ EOI}
+
+// Geometries
+geometry = _{shape | points | text}
+shape = {move_type ~ " " ~ point ~ (" " ~ (point_type | point))*}
+point_type = _{move_type | line_type | curve_type | arc_type | close_type}
+move_type = {"m"}
+line_type = {"l"}
+curve_type = {"b"}
+arc_type = {"a"}
+close_type = {"c"}
+point = {coordinate ~ " " ~ coordinate}
+points = {point ~ (" " ~ point)*}
+text = {("\\[" | (!"[" ~ ANY))+}
+
+// Tags
+tags = {"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
+// TODO: define below
+tag = _{font_tag | font_size_tag | bold_tag | position_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
+font_tag = _{"font" ~ tag_assign ~ font_tag_value}
+font_tag_value = {font_name}
+font_size_tag = _{"font-size" ~ tag_assign ~ font_size_tag_value}
+font_size_tag_value = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
+bold_tag = _{"bold" ~ tag_assign ~ bold_tag_value}
+bold_tag_value = {"y" | "n"}
+position_tag = _{"position" ~ tag_assign ~ position_tag_value}
+position_tag_value = {coordinate ~ tag_value_separator ~ coordinate ~ (tag_value_separator ~ coordinate)?}
+scale_tag = _{"scale" ~ tag_assign ~ scale_tag_value}
+scale_tag_value = {coordinate ~ (tag_value_separator ~ coordinate){0,2}}
+rotate_z_tag = _{"rotate-z" ~ tag_assign ~ rotate_z_tag_value}
+rotate_z_tag_value = {coordinate}
+color_tag = _{"color" ~ tag_assign ~ color_tag_value}
+color_tag_value = {color_value}
+mode_tag = _{"mode" ~ tag_assign ~ mode_tag_value}
+mode_tag_value = {"shape" | "points" | "text"}
+texture_tag = _{"texture" ~ tag_assign ~ texture_tag_value}
+texture_tag_value = {custom_key}
+animate_tag = _{"animate" ~ tag_assign ~ animate_tag_value}
+animate_tag_value = {duration ~ tag_value_separator ~ duration ~ tag_value_separator ~ tags}
