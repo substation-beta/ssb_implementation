@@ -34,7 +34,7 @@ pub struct EventRender {
 
     pub data: String
 }
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))

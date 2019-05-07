@@ -2,7 +2,10 @@ mod grammar_tests {
     // Imports
     use pest_derive::Parser;    // Macro
     use pest::Parser;   // Trait
-    use ssb_parser::processing::SsbParser;
+    use ssb_parser::{
+        data::EventTrigger,
+        processing::SsbParser
+    };
     use std::path::Path;
 
     // Test resource
@@ -40,14 +43,18 @@ mod grammar_tests {
         let parser = SsbParser::new(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))).unwrap_or_else(|exception| {
             panic!("SSB parsing error: {}", exception)
         });
+        let data = parser.data();
+        assert_eq!(data.info_title.as_ref().expect("Info title should be available!"), "test");
         // Show data
-        println!("{:?}", parser.data());
-        // Parse 2nd phase + show render data
+        println!("{:?}", data);
+        // Parse 2nd phase
         let render_data = parser.render_data(
             Some(Path::new(env!("CARGO_MANIFEST_DIR")))
         ).unwrap_or_else(|exception| {
             panic!("SSB parsing error: {}", exception)
         });
+        assert_eq!(render_data.events.get(0).expect("First event missing!").trigger, EventTrigger::Time((2000, 300000)));
+        // Show render data
         println!("{:?}", render_data);
     }
 }
