@@ -339,3 +339,21 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
     // Everything alright
     Ok(())
 }
+
+
+// Tests
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn rule_to_ms() {
+        use super::{rule_to_ms, Rule};
+        assert_eq!(
+            rule_to_ms(Rule::time_ms) +
+            rule_to_ms(Rule::time_s) +
+            rule_to_ms(Rule::time_m) +
+            rule_to_ms(Rule::time_h) +
+            rule_to_ms(Rule::script),
+            3_661_001
+        );
+    }
+}

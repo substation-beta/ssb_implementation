@@ -4,7 +4,7 @@ use std::fmt;
 
 
 // Sub types
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum View {
     Perspective,
     Orthogonal
@@ -132,4 +132,16 @@ pub struct SsbRender {
     // Resources section
     pub fonts: HashMap<FontFace, FontDataRender>,
     pub textures: HashMap<TextureId, TextureDataRender>
+}
+
+
+// Tests
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn convert() {
+        use super::{View, FontStyle};
+        assert_eq!(View::from_str("orthogonal").expect("View instance expected!"), View::Orthogonal);
+        assert_eq!(FontStyle::from_str("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
+    }
 }
