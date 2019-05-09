@@ -79,7 +79,7 @@ impl ParseError {
 }
 
 // Error identifiers
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MacroError {
     NotFound(String),
     InfiniteLoop(String)

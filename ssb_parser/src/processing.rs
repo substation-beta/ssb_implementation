@@ -212,7 +212,7 @@ impl SsbParser {
         // Flatten macros & detect infinite recursion
         let mut flat_macros = HashMap::with_capacity(self.data.macros.len());
         for macro_name in self.data.macros.keys() {
-            if let Err(err) = flatten_macros(macro_name, &mut HashSet::new(), &self.data.macros, &mut flat_macros) {
+            if let Err(err) = flatten_macro(macro_name, &mut HashSet::new(), &self.data.macros, &mut flat_macros) {
                 return Err(ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)));
             }
         }
@@ -307,7 +307,7 @@ fn rule_to_ms(rule: Rule) -> u32 {
         _ => 0
     }
 }
-fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
+fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
     // Macro already flattened?
     if flat_macros.contains_key(macro_name) {
         return Ok(());
@@ -324,7 +324,7 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
         // Insert sub-macro
         let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
         if !flat_macros.contains_key(sub_macro_name) {
-            flatten_macros(&sub_macro_name, history, macros, flat_macros)?;
+            flatten_macro(&sub_macro_name, history, macros, flat_macros)?;
         }
         flat_macro_value.replace_range(
             found.start()..found.end(),
@@ -344,9 +344,14 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
 // Tests
 #[cfg(test)]
 mod tests {
+    use super::{
+        rule_to_ms, Rule,
+        super::error::MacroError
+    };
+    use std::collections::{HashMap, HashSet};
+
     #[test]
-    fn rule_to_ms() {
-        use super::{rule_to_ms, Rule};
+    fn rule_to_ms_all() {
         assert_eq!(
             rule_to_ms(Rule::time_ms) +
             rule_to_ms(Rule::time_s) +
@@ -355,5 +360,30 @@ mod tests {
             rule_to_ms(Rule::script),
             3_661_001
         );
+    }
+    #[test]
+    fn flatten_macro_success() {
+        // Test data
+        let mut macros = HashMap::new();
+        macros.insert("a".to_owned(), "Hello ${b} test!".to_owned());
+        macros.insert("b".to_owned(), "fr${c}".to_owned());
+        macros.insert("c".to_owned(), "om".to_owned());
+        let mut flat_macros = HashMap::new();
+        // Test execution
+        super::flatten_macro("a", &mut HashSet::new(), &macros, &mut flat_macros).unwrap();
+        assert_eq!(flat_macros.get("a").unwrap(), "Hello from test!");
+    }
+    #[test]
+    fn flatten_macro_infinite() {
+        // Test data
+        let mut macros = HashMap::new();
+        macros.insert("a".to_owned(), "foo ${b}".to_owned());
+        macros.insert("b".to_owned(), "${a} bar".to_owned());
+        // Test execution
+        assert_eq!(super::flatten_macro("a", &mut HashSet::new(), &macros, &mut HashMap::new()).unwrap_err(), MacroError::InfiniteLoop("a".to_owned()));
+    }
+    #[test]
+    fn flatten_macro_notfound() {
+        assert_eq!(super::flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
     }
 }
