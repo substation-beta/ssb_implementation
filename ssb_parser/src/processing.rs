@@ -54,20 +54,20 @@ impl SsbParser {
                     if let Some(info_entry_pair) = section_entry_pair.into_inner().next() {
                         match info_entry_pair.as_rule() {
                             // Title
-                            Rule::info_title_value => self.data.info_title = Some(info_entry_pair.as_str().to_string()),
+                            Rule::info_title_value => self.data.info_title = Some(info_entry_pair.as_str().to_owned()),
                             // Author
-                            Rule::info_author_value => self.data.info_author = Some(info_entry_pair.as_str().to_string()),
+                            Rule::info_author_value => self.data.info_author = Some(info_entry_pair.as_str().to_owned()),
                             // Description
-                            Rule::info_desc_value => self.data.info_description = Some(info_entry_pair.as_str().to_string()),
+                            Rule::info_desc_value => self.data.info_description = Some(info_entry_pair.as_str().to_owned()),
                             // Version
-                            Rule::info_version_value => self.data.info_version = Some(info_entry_pair.as_str().to_string()),
+                            Rule::info_version_value => self.data.info_version = Some(info_entry_pair.as_str().to_owned()),
                             // Custom
                             Rule::info_custom_entry => {
                                 let mut info_custom_entry_pair = info_entry_pair.into_inner();
                                 if let (Some(info_custom_key), Some(info_custom_value)) = (info_custom_entry_pair.next(), info_custom_entry_pair.next()) {
                                     self.data.info_custom.insert(
-                                        info_custom_key.as_str().to_string(),
-                                        info_custom_value.as_str().to_string()
+                                        info_custom_key.as_str().to_owned(),
+                                        info_custom_value.as_str().to_owned()
                                     );
                                 }
                             }
@@ -104,8 +104,8 @@ impl SsbParser {
                     let mut macros_entry_pairs = section_entry_pair.into_inner();
                     if let (Some(macros_key), Some(macros_value)) = (macros_entry_pairs.next(), macros_entry_pairs.next()) {
                         self.data.macros.insert(
-                            macros_key.as_str().to_string(),
-                            macros_value.as_str().to_string()
+                            macros_key.as_str().to_owned(),
+                            macros_value.as_str().to_owned()
                         );
                     }
                 }
@@ -122,7 +122,7 @@ impl SsbParser {
                                 // Events trigger
                                 trigger: match events_trigger.as_rule() {
                                     // Id
-                                    Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_string()),
+                                    Rule::events_id => EventTrigger::Id(events_trigger.as_str().to_owned()),
                                     // Time
                                     Rule::events_time => {
                                         let mut time = (0, 0);
@@ -143,14 +143,14 @@ impl SsbParser {
                                         }
                                         EventTrigger::Time(time)
                                     },
-                                    _ => EventTrigger::Id("".to_string())
+                                    _ => EventTrigger::Id(String::new())
                                 },
                                 // Events macro
-                                macro_: Some(events_macro.as_str().to_string()).filter(|s| !s.is_empty()),
+                                macro_: Some(events_macro.as_str().to_owned()).filter(|s| !s.is_empty()),
                                 // Events note
-                                note: Some(events_note.as_str().to_string()).filter(|s| !s.is_empty()),
+                                note: Some(events_note.as_str().to_owned()).filter(|s| !s.is_empty()),
                                 // Events data
-                                data: events_data.as_str().to_string()
+                                data: events_data.as_str().to_owned()
                             }
                         );
                     }
@@ -167,10 +167,10 @@ impl SsbParser {
                                     // Add font
                                     self.data.fonts.insert(
                                         FontFace {
-                                            family: resources_font_family.as_str().to_string(),
+                                            family: resources_font_family.as_str().to_owned(),
                                             style: FontStyle::from_str(resources_font_style.as_str()).unwrap_or(FontStyle::Regular)
                                         },
-                                        resources_font_data.as_str().to_string()
+                                        resources_font_data.as_str().to_owned()
                                     );
                                 }
                             }
@@ -181,11 +181,11 @@ impl SsbParser {
                                     = (resources_texture_entry_pairs.next(), resources_texture_entry_pairs.next()) {
                                     // Add texture
                                     self.data.textures.insert(
-                                        resources_texture_id.as_str().to_string(),
+                                        resources_texture_id.as_str().to_owned(),
                                         match resources_texture_data.as_rule() {
-                                            Rule::resources_texture_data_url => TextureData::Url(resources_texture_data.as_str().to_string()),
-                                            Rule::resources_texture_data_raw => TextureData::Raw(resources_texture_data.as_str().to_string()),
-                                            _ => TextureData::Url("".to_string())
+                                            Rule::resources_texture_data_url => TextureData::Url(resources_texture_data.as_str().to_owned()),
+                                            Rule::resources_texture_data_raw => TextureData::Raw(resources_texture_data.as_str().to_owned()),
+                                            _ => TextureData::Url(String::new())
                                         }
                                     );
                                 }
@@ -314,12 +314,12 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
     }
     // Macro already in history (avoid infinite loop!)
     if history.contains(macro_name) {
-        return Err(MacroError::InfiniteLoop(macro_name.to_string()));
+        return Err(MacroError::InfiniteLoop(macro_name.to_owned()));
     } else {
-        history.insert(macro_name.to_string());
+        history.insert(macro_name.to_owned());
     }
     // Process macro value
-    let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_string()))?.clone();
+    let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_owned()))?.clone();
     while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
         // Insert sub-macro
         let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
@@ -328,12 +328,12 @@ fn flatten_macros<'top>(macro_name: &str, history: &mut HashSet<String>, macros:
         }
         flat_macro_value.replace_range(
             found.start()..found.end(),
-            flat_macros.get(sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name.to_string()))?
+            flat_macros.get(sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name.to_owned()))?
         );
     }
     // Register flat macro
     flat_macros.insert(
-        macro_name.to_string(),
+        macro_name.to_owned(),
         flat_macro_value
     );
     // Everything alright

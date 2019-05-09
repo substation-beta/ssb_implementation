@@ -57,21 +57,21 @@ impl<R> From<pest::error::Error<R>> for ParseError
 impl ParseError {
     pub fn new(msg: &str) -> Self {
         Self {
-            msg: msg.to_string(),
+            msg: msg.to_owned(),
             span: None,
             src: None
         }
     }
     pub fn new_with_span(msg: &str, span: ((usize, usize), (usize, usize))) -> Self {
         Self {
-            msg: msg.to_string(),
+            msg: msg.to_owned(),
             span: Some(span),
             src: None
         }
     }
     pub fn new_with_source(msg: &str, span: Option<((usize, usize), (usize, usize))>, src: Box<Error>) -> Self {
         Self {
-            msg: msg.to_string(),
+            msg: msg.to_owned(),
             span: span,
             src: Some(src)
         }

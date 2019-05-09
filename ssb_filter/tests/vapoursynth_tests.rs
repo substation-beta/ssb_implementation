@@ -53,7 +53,7 @@ mod vapoursynth_tests {
             "/../target/",
             env!("PROFILE") // Set by build script
         )).join(
-            platform::LIB_PREFIX.to_string() +
+            platform::LIB_PREFIX.to_owned() +
             &env!("CARGO_PKG_NAME") +
             platform::LIB_EXTENSION
         );

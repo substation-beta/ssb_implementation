@@ -19,7 +19,7 @@ mod font_tests {
         let fonts = system_fonts::query_specific(
             &mut system_fonts::FontPropertyBuilder::new().family(TEST_FONT).build()
         );
-        assert!(fonts.contains(&TEST_FONT.to_string()), "Found fonts: {:?}", fonts);
+        assert!(fonts.contains(&TEST_FONT.to_owned()), "Found fonts: {:?}", fonts);
     }
 
     #[test]
