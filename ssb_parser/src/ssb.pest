@@ -102,6 +102,7 @@ duration = {("-" | "+")? ~ ASCII_DIGIT+}
 color_value = {ASCII_HEX_DIGIT{1,6}}
 alpha_value = {ASCII_HEX_DIGIT{1,2}}
 bool_value = {"y" | "n"}
+float_value = {(ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
 
 
 // Whole event data
@@ -122,11 +123,11 @@ text = {("\\[" | (!"[" ~ ANY))+}
 
 // Tags
 tags = {"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
-tag = _{font_tag | size_tag | bold_tag | italic_tag | underline_tag | strikeout_tag | position_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
+tag = _{font_tag | size_tag | bold_tag | italic_tag | underline_tag | strikeout_tag | position_tag | alignment_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
 font_tag = _{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = {font_name}
 size_tag = _{"size" ~ tag_assign ~ size_tag_value}
-size_tag_value = {(ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
+size_tag_value = {float_value}
 bold_tag = _{"bold" ~ tag_assign ~ bold_tag_value}
 bold_tag_value = {bool_value}
 italic_tag = _{"italic" ~ tag_assign ~ italic_tag_value}
@@ -137,6 +138,10 @@ strikeout_tag = _{"strikeout" ~ tag_assign ~ strikeout_tag_value}
 strikeout_tag_value = {bool_value}
 position_tag = _{"position" ~ tag_assign ~ position_tag_value}
 position_tag_value = {coordinate ~ tag_value_separator ~ coordinate ~ (tag_value_separator ~ coordinate)?}
+alignment_tag = _{"alignment" ~ tag_assign ~ alignment_tag_value}
+alignment_tag_value = _{alignment_tag_percent | alignment_tag_numpad}
+alignment_tag_numpad = {ASCII_NONZERO_DIGIT}
+alignment_tag_percent = {float_value ~ tag_value_separator ~ float_value}
 // TODO: define below
 scale_tag = _{"scale" ~ tag_assign ~ scale_tag_value}
 scale_tag_value = {coordinate ~ (tag_value_separator ~ coordinate){0,2}}

@@ -44,7 +44,7 @@ impl<R> From<pest::error::Error<R>> for ParseError
     fn from(err: pest::error::Error<R>) -> Self {
         Self::new_with_span(
             &match err.variant {
-                pest::error::ErrorVariant::ParsingError{positives, negatives} => format!("Expected {:?}, found {:?}", positives, negatives),
+                pest::error::ErrorVariant::ParsingError{positives, ..} => format!("Expected {:?}", positives),
                 pest::error::ErrorVariant::CustomError{message} => message
             },
             match err.line_col {

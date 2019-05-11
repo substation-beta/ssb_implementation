@@ -236,12 +236,19 @@ impl SsbParser {
                     })?
                 );
             }
+            // Parse script and throw possible error
+            let _pairs = SsbPegParser::parse(Rule::event_data, &event.data).map_err(|mut e| {
+                // Overwrite error line by origin from phase 1
+                use pest::error::LineColLocation;
+                e.line_col = match e.line_col {
+                    LineColLocation::Pos( (_,col) ) => LineColLocation::Pos( (event.script_line, col) ),
+                    LineColLocation::Span( (_,col0), (_,col1) ) => LineColLocation::Span( (event.script_line,col0), (event.script_line,col1) )
+                };
+                e
+            })?;
 
-            // TODO: parse tags & geometries, pack into structure
+            // TODO: pack tags & geometries into structure
 
-            let _pairs = SsbPegParser::parse(Rule::event_data, &event.data).unwrap_or_else(|exception| {
-                panic!("{}", exception);
-            });
             events.push(
                 EventRender {
                     trigger: event.trigger.clone(),
