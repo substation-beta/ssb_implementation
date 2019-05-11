@@ -27,6 +27,7 @@ Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a
 10:0.0-10:50:0.0||Lets scale some text to double its size!|[animate=500,1000,[scale=2]]This text is\ngetting huge
 20:.-21:.|||[font=Rabi-Ribi]${Another}some_circle_ligature
 'show-something'|Default||This will only be shown when the event id is given
+0-1::.||Let's test it!|[font=Arial;size=20.5;bold=y;italic=y;underline=y;strikeout=y;position=100,100,-50]Super styled :)
 
 #Resources
 Font: Rabi-Ribi,bold,UmFiaS1SaWJp

@@ -101,6 +101,7 @@ coordinate = {("-" | "+")? ~ (ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
 duration = {("-" | "+")? ~ ASCII_DIGIT+}
 color_value = {ASCII_HEX_DIGIT{1,6}}
 alpha_value = {ASCII_HEX_DIGIT{1,2}}
+bool_value = {"y" | "n"}
 
 
 // Whole event data
@@ -121,16 +122,22 @@ text = {("\\[" | (!"[" ~ ANY))+}
 
 // Tags
 tags = {"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
-// TODO: define below
-tag = _{font_tag | font_size_tag | bold_tag | position_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
+tag = _{font_tag | size_tag | bold_tag | italic_tag | underline_tag | strikeout_tag | position_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
 font_tag = _{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = {font_name}
-font_size_tag = _{"font-size" ~ tag_assign ~ font_size_tag_value}
-font_size_tag_value = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT{0,2}}
+size_tag = _{"size" ~ tag_assign ~ size_tag_value}
+size_tag_value = {(ASCII_DIGIT* ~ ".")? ~ ASCII_DIGIT+}
 bold_tag = _{"bold" ~ tag_assign ~ bold_tag_value}
-bold_tag_value = {"y" | "n"}
+bold_tag_value = {bool_value}
+italic_tag = _{"italic" ~ tag_assign ~ italic_tag_value}
+italic_tag_value = {bool_value}
+underline_tag = _{"underline" ~ tag_assign ~ underline_tag_value}
+underline_tag_value = {bool_value}
+strikeout_tag = _{"strikeout" ~ tag_assign ~ strikeout_tag_value}
+strikeout_tag_value = {bool_value}
 position_tag = _{"position" ~ tag_assign ~ position_tag_value}
 position_tag_value = {coordinate ~ tag_value_separator ~ coordinate ~ (tag_value_separator ~ coordinate)?}
+// TODO: define below
 scale_tag = _{"scale" ~ tag_assign ~ scale_tag_value}
 scale_tag_value = {coordinate ~ (tag_value_separator ~ coordinate){0,2}}
 rotate_z_tag = _{"rotate-z" ~ tag_assign ~ rotate_z_tag_value}
