@@ -117,8 +117,6 @@ impl SsbParser {
                         // Add event
                         self.data.events.push(
                             Event {
-                                // Script line
-                                script_line: events_trigger.as_span().start_pos().line_col().0,
                                 // Events trigger
                                 trigger: match events_trigger.as_rule() {
                                     // Id
@@ -150,7 +148,8 @@ impl SsbParser {
                                 // Events note
                                 note: Some(events_note.as_str().to_owned()).filter(|s| !s.is_empty()),
                                 // Events data
-                                data: events_data.as_str().to_owned()
+                                data: events_data.as_str().to_owned(),
+                                data_location: events_data.as_span().start_pos().line_col()
                             }
                         );
                     }
@@ -223,7 +222,7 @@ impl SsbParser {
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_ {
                 event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| {
-                    ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.script_line))
+                    ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
                 })?);
             }
             // Insert inline macros
@@ -232,7 +231,7 @@ impl SsbParser {
                 event_data.replace_range(
                     found.start()..found.end(),
                     flat_macros.get(macro_name).ok_or_else(|| {
-                        ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.script_line))
+                        ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
                     })?
                 );
             }
@@ -241,8 +240,8 @@ impl SsbParser {
                 // Overwrite error line by origin from phase 1
                 use pest::error::LineColLocation;
                 e.line_col = match e.line_col {
-                    LineColLocation::Pos( (_,col) ) => LineColLocation::Pos( (event.script_line, col) ),
-                    LineColLocation::Span( (_,col0), (_,col1) ) => LineColLocation::Span( (event.script_line,col0), (event.script_line,col1) )
+                    LineColLocation::Pos( (_,col) ) => LineColLocation::Pos( (event.data_location.0,event.data_location.1+col) ),
+                    LineColLocation::Span( (_,col0), (_,col1) ) => LineColLocation::Span( (event.data_location.0,event.data_location.1+col0), (event.data_location.0,event.data_location.1+col1) )
                 };
                 e
             })?;
