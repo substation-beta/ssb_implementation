@@ -128,14 +128,14 @@ impl SsbParser {
                                         if let (Some(events_start_time), Some(events_end_time)) = (events_time_pairs.next(), events_time_pairs.next()) {
                                             // Start time
                                             for events_start_time_pair in events_start_time.into_inner() {
-                                                if let Ok(unit) = events_start_time_pair.as_str().parse::<u32>() {
-                                                    time.0 += unit * rule_to_ms(events_start_time_pair.as_rule());
+                                                if let Ok(unit_value) = events_start_time_pair.as_str().parse::<u32>() {
+                                                    time.0 += unit_value * rule_to_ms(events_start_time_pair.as_rule());
                                                 }
                                             }
                                             // End time
                                             for events_end_time_pair in events_end_time.into_inner() {
-                                                if let Ok(unit) = events_end_time_pair.as_str().parse::<u32>() {
-                                                    time.1 += unit * rule_to_ms(events_end_time_pair.as_rule());
+                                                if let Ok(unit_value) = events_end_time_pair.as_str().parse::<u32>() {
+                                                    time.1 += unit_value * rule_to_ms(events_end_time_pair.as_rule());
                                                 }
                                             }
                                         }
@@ -239,9 +239,17 @@ impl SsbParser {
             let _pairs = SsbPegParser::parse(Rule::event_data, &event.data).map_err(|mut e| {
                 // Overwrite error line by origin from phase 1
                 use pest::error::LineColLocation;
-                e.line_col = match e.line_col {
-                    LineColLocation::Pos( (_,col) ) => LineColLocation::Pos( (event.data_location.0,event.data_location.1+col) ),
-                    LineColLocation::Span( (_,col0), (_,col1) ) => LineColLocation::Span( (event.data_location.0,event.data_location.1+col0), (event.data_location.0,event.data_location.1+col1) )
+                match &mut e.line_col {
+                    LineColLocation::Pos( pos ) => {
+                        pos.0 = event.data_location.0;
+                        pos.1 += event.data_location.1;
+                    }
+                    LineColLocation::Span( start_pos, end_pos ) => {
+                        start_pos.0 = event.data_location.0;
+                        start_pos.1 += event.data_location.1;
+                        end_pos.0 = event.data_location.0;
+                        end_pos.1 += event.data_location.1;
+                    }
                 };
                 e
             })?;
@@ -305,11 +313,14 @@ impl SsbParser {
 // Helpers
 #[inline]
 fn rule_to_ms(rule: Rule) -> u32 {
+    const SECOND_MS: u32 = 1000;
+    const MINUTE_MS: u32 = SECOND_MS * 60;
+    const HOUR_MS: u32 = MINUTE_MS * 60;
     match rule {
         Rule::time_ms => 1,
-        Rule::time_s => 1000,
-        Rule::time_m => 60 * 1000,
-        Rule::time_h => 60 * 60 * 1000,
+        Rule::time_s => SECOND_MS,
+        Rule::time_m => MINUTE_MS,
+        Rule::time_h => HOUR_MS,
         _ => 0
     }
 }
