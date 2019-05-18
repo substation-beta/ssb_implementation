@@ -183,6 +183,27 @@ pub struct SsbRender {
     pub textures: HashMap<TextureId, TextureDataRender>
 }
 
+// State
+pub enum Mode {
+    Text,
+    Points,
+    Shape
+}
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Text
+    }
+}
+impl Mode {
+    pub fn from_str(str: &str) -> Result<Self,()> {
+        match str {
+            "text" => Ok(Mode::Text),
+            "points" => Ok(Mode::Points),
+            "shape" => Ok(Mode::Shape),
+            _ => Err(())
+        }
+    }
+}
 
 // Tests
 #[cfg(test)]

@@ -235,8 +235,8 @@ impl SsbParser {
                     })?
                 );
             }
-            // Parse script and throw possible error
-            let _pairs = SsbPegParser::parse(Rule::event_data, &event.data).map_err(|mut e| {
+            // Parse data and throw possible error
+            let mut pairs = SsbPegParser::parse(Rule::event_data, &event_data).map_err(|mut e| {
                 // Overwrite error line by origin from phase 1
                 use pest::error::LineColLocation;
                 match &mut e.line_col {
@@ -253,13 +253,49 @@ impl SsbParser {
                 };
                 e
             })?;
+            // Collect event objects from parsing result
+            let mut objects = vec!();
+            if let Some(data_entry_pair) = pairs.next() {   // Unpack single root element
+                if data_entry_pair.as_rule() == Rule::event_data {
+                    let mut mode = Mode::default();
+                    for object_entry_pair in data_entry_pair.into_inner() {
+                        match object_entry_pair.as_rule() {
+                            // Geometries
+                            Rule::text => {
 
-            // TODO: pack tags & geometries into structure
+                                // TODO: check with mode and pack
 
+                                println!("Text: {}", object_entry_pair.as_str());
+
+                            },
+                            Rule::points => {
+
+                                // TODO: check with mode and pack
+
+                                println!("Points: {}", object_entry_pair.as_str());
+
+                            },
+                            Rule::shape => {
+
+                                // TODO: check with mode and pack
+
+                                println!("Shape: {}", object_entry_pair.as_str());
+
+                            },
+                            // Tags
+                            Rule::mode_tag_value => if let Ok(mode_value) = Mode::from_str(object_entry_pair.as_str()) {
+                                mode = mode_value;
+                            },
+                            _ => println!("{:?}: {}", object_entry_pair.as_rule(), object_entry_pair.as_str())
+                        }
+                    }
+                }
+            }
+            // Save event for rendering
             events.push(
                 EventRender {
                     trigger: event.trigger.clone(),
-                    objects: vec!()
+                    objects
                 }
             );
         }

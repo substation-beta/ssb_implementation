@@ -122,7 +122,7 @@ points = {point ~ (" " ~ point)*}
 text = {("\\[" | (!"[" ~ ANY))+}
 
 // Tags
-tags = {"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
+tags = _{"[" ~ tag? ~ (";" ~ tag)* ~ "]"}
 tag = _{font_tag | size_tag | bold_tag | italic_tag | underline_tag | strikeout_tag | position_tag | alignment_tag | scale_tag | rotate_z_tag | color_tag | mode_tag | texture_tag | animate_tag}
 font_tag = _{"font" ~ tag_assign ~ font_tag_value}
 font_tag_value = {font_name}
