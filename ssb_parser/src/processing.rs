@@ -259,7 +259,7 @@ impl SsbParser {
             events.push(
                 EventRender {
                     trigger: event.trigger.clone(),
-                    data: event_data
+                    objects: vec!()
                 }
             );
         }

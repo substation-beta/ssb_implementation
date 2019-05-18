@@ -29,15 +29,17 @@ pub struct Event {
 #[derive(Debug)]
 pub struct EventRender {
     pub trigger: EventTrigger,
-    
-    // TODO: split data into tags & geometries
-
-    pub data: String
+    pub objects: Vec<EventObject>
 }
 #[derive(Debug, PartialEq, Clone)]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))
+}
+#[derive(Debug)]
+pub enum EventObject {
+    Geometry(EventGeometry),
+    Tag(EventTag)
 }
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct FontFace {
@@ -76,6 +78,53 @@ pub enum TextureData {
     Raw(String)
 }
 pub type TextureDataRender = Vec<u8>;
+
+// Object types
+#[derive(Debug)]
+pub enum EventGeometry {
+    Shape(Vec<ShapeSegment>),
+    Points(Vec<Point2D>),
+    Text(String)
+}
+#[derive(Debug)]
+pub enum ShapeSegment {
+    MoveTo(Point2D),
+    LineTo(Point2D),
+    CurveTo(Point2D, Point2D, Point2D),
+    ArcBy(Point2D, f64),
+    Close
+}
+#[derive(Debug)]
+pub struct Point2D {
+    pub x: Coordinate,
+    pub y: Coordinate
+}
+pub type Coordinate = f32;
+#[derive(Debug)]
+pub enum EventTag {
+    Font(String),
+    Size(f32),
+    Bold(bool),
+    Italic(bool),
+    Underline(bool),
+    Strikeout(bool),
+    Position(Point3D),
+    Alignment(Alignment)
+
+    // TODO
+
+}
+#[derive(Debug)]
+pub struct Point3D {
+    pub x: Coordinate,
+    pub y: Coordinate,
+    pub z: Coordinate
+}
+#[derive(Debug)]
+pub enum Alignment {
+    Numpad(u8),
+    Offset(Point2D)
+}
 
 // Raw data
 #[derive(Debug)]
