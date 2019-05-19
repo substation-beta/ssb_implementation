@@ -9,7 +9,8 @@ use lazy_static::lazy_static;
 use regex::*;
 use std::{
     collections::{HashMap, HashSet},
-    path::Path
+    path::Path,
+    convert::TryFrom
 };
 
 
@@ -92,7 +93,7 @@ impl SsbParser {
                                 self.data.target_depth = depth;
                             }
                             // View
-                            Rule::target_view_value => if let Ok(view) = View::from_str(target_entry_pair.as_str()) {
+                            Rule::target_view_value => if let Ok(view) = View::try_from(target_entry_pair.as_str()) {
                                 self.data.target_view = view;
                             }
                             _ => ()
@@ -167,7 +168,7 @@ impl SsbParser {
                                     self.data.fonts.insert(
                                         FontFace {
                                             family: resources_font_family.as_str().to_owned(),
-                                            style: FontStyle::from_str(resources_font_style.as_str()).unwrap_or(FontStyle::Regular)
+                                            style: FontStyle::try_from(resources_font_style.as_str()).unwrap_or(FontStyle::Regular)
                                         },
                                         resources_font_data.as_str().to_owned()
                                     );
@@ -283,7 +284,7 @@ impl SsbParser {
 
                             },
                             // Tags
-                            Rule::mode_tag_value => if let Ok(mode_value) = Mode::from_str(object_entry_pair.as_str()) {
+                            Rule::mode_tag_value => if let Ok(mode_value) = Mode::try_from(object_entry_pair.as_str()) {
                                 mode = mode_value;
                             },
                             _ => println!("{:?}: {}", object_entry_pair.as_rule(), object_entry_pair.as_str())

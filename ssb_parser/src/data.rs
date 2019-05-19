@@ -1,6 +1,7 @@
 // Imports
 use std::collections::HashMap;
 use std::fmt;
+use std::convert::TryFrom;
 
 
 // Sub types
@@ -9,9 +10,10 @@ pub enum View {
     Perspective,
     Orthogonal
 }
-impl View {
-    pub fn from_str(str: &str) -> Result<Self,()> {
-        match str {
+impl TryFrom<&str> for View {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
             "perspective" => Ok(View::Perspective),
             "orthogonal" => Ok(View::Orthogonal),
             _ => Err(())
@@ -58,9 +60,10 @@ pub enum FontStyle {
     Italic,
     BoldItalic
 }
-impl FontStyle {
-    pub fn from_str(str: &str) -> Result<Self,()> {
-        match str {
+impl TryFrom<&str> for FontStyle {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
             "regular" => Ok(FontStyle::Regular),
             "bold" => Ok(FontStyle::Bold),
             "italic" => Ok(FontStyle::Italic),
@@ -184,6 +187,7 @@ pub struct SsbRender {
 }
 
 // State
+#[derive(Debug, PartialEq, Clone)]
 pub enum Mode {
     Text,
     Points,
@@ -194,9 +198,10 @@ impl Default for Mode {
         Mode::Text
     }
 }
-impl Mode {
-    pub fn from_str(str: &str) -> Result<Self,()> {
-        match str {
+impl TryFrom<&str> for Mode {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
             "text" => Ok(Mode::Text),
             "points" => Ok(Mode::Points),
             "shape" => Ok(Mode::Shape),
@@ -210,8 +215,9 @@ impl Mode {
 mod tests {
     #[test]
     fn convert() {
-        use super::{View, FontStyle};
-        assert_eq!(View::from_str("orthogonal").expect("View instance expected!"), View::Orthogonal);
-        assert_eq!(FontStyle::from_str("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
+        use super::{View, FontStyle, Mode, TryFrom};
+        assert_eq!(View::try_from("orthogonal").expect("View instance expected!"), View::Orthogonal);
+        assert_eq!(FontStyle::try_from("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
+        assert_eq!(Mode::try_from("shape").expect("Mode instance expected!"), Mode::Shape);
     }
 }
