@@ -258,16 +258,17 @@ impl SsbParser {
             let mut objects = vec!();
             if let Some(data_entry_pair) = pairs.next() {   // Unpack single root element
                 if data_entry_pair.as_rule() == Rule::event_data {
+                    // Differentiate geometries & tags
                     let mut mode = Mode::default();
                     for object_entry_pair in data_entry_pair.into_inner() {
                         match object_entry_pair.as_rule() {
                             // Geometries
                             Rule::text => {
-
-                                // TODO: check with mode and pack
-
-                                println!("Text: {}", object_entry_pair.as_str());
-
+                                objects.push(
+                                    EventObject::Geometry(EventGeometry::Text(
+                                        object_entry_pair.as_str().to_owned().replace("\\n", "\n")
+                                    ))
+                                );
                             },
                             Rule::points => {
 
