@@ -92,7 +92,7 @@ impl Ssb {
                                 self.info_version = Some(line[INFO_VERSION_KEY.len()..].to_owned());
                             }
                             // Custom
-                            else if let Some(separator_pos) = line.find(KEY_SUFFIX) {
+                            else if let Some(separator_pos) = line.find(KEY_SUFFIX).filter(|pos| *pos > 0) {
                                 self.info_custom.insert(
                                     line[..separator_pos].to_owned(),
                                     line[separator_pos + KEY_SUFFIX.len()..].to_owned()
@@ -141,7 +141,7 @@ impl Ssb {
                         // Macros section
                         Some(Section::Macros) => {
                             // Macro
-                            if let Some(separator_pos) = line.find(KEY_SUFFIX) {
+                            if let Some(separator_pos) = line.find(KEY_SUFFIX).filter(|pos| *pos > 0) {
                                 self.macros.insert(
                                     line[..separator_pos].to_owned(),
                                     line[separator_pos + KEY_SUFFIX.len()..].to_owned()
@@ -154,9 +154,28 @@ impl Ssb {
                         }
                         // Events section
                         Some(Section::Events) => {
+                            let mut event_tokens = line.splitn(4, EVENT_SEPARATOR);
+                            if let (Some(trigger), Some(macro_name), Some(note), Some(data)) = (event_tokens.next(), event_tokens.next(), event_tokens.next(), event_tokens.next()) {
+                                // Save event
+                                self.events.push(
+                                    Event {
+                                        trigger: {
+                                            EventTrigger::Id(String::new())
 
-                            // TODO
+                                            // TODO
 
+                                        },
+                                        macro_name: Some(macro_name.to_owned()).filter(|s| !s.is_empty()),
+                                        note: Some(note.to_owned()).filter(|s| !s.is_empty()),
+                                        data: data.to_owned(),
+                                        data_location: (line_index, trigger.len() + macro_name.len() + note.len() + EVENT_SEPARATOR.len() * 3)
+                                    }
+                                );
+                            }
+                            // Invalid entry
+                            else {
+                                return Err(ParseError::new_with_pos("Invalid events entry!", (line_index, 0)));
+                            }
                         }
                         // Resources section
                         Some(Section::Resources) => {
@@ -318,6 +337,7 @@ const TARGET_VIEW_KEY: &str = "View: ";
 const RESOURCES_FONT_KEY: &str = "Font: ";
 const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
 const VALUE_SEPARATOR: &str = ",";
+const EVENT_SEPARATOR: &str = "|";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }
