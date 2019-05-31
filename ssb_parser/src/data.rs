@@ -61,7 +61,7 @@ impl Ssb {
         let mut section: Option<Section> = None;
         // Iterate through text lines
         for (line_index, line) in reader.lines().enumerate() {
-            // Check for invalid UTF-8 and carriage return (leftover of windows-ending)
+            // Check for valid UTF-8 and remove carriage return (leftover of windows-ending)
             let mut line = line?;
             if line.ends_with("\r") {
                 line.pop();
@@ -75,12 +75,43 @@ impl Ssb {
                     match section {
                         // Info section
                         Some(Section::Info) => {
-
-                            // TODO
-
+                            // Title
+                            if line.starts_with(INFO_TITLE_KEY) {
+                                self.info_title = Some(line[INFO_TITLE_KEY.len()..].to_owned());
+                            }
+                            // Author
+                            else if line.starts_with(INFO_AUTHOR_KEY) {
+                                self.info_author = Some(line[INFO_AUTHOR_KEY.len()..].to_owned());
+                            }
+                            // Description
+                            else if line.starts_with(INFO_DESCRIPTION_KEY) {
+                                self.info_description = Some(line[INFO_DESCRIPTION_KEY.len()..].to_owned());
+                            }
+                            // Version
+                            else if line.starts_with(INFO_VERSION_KEY) {
+                                self.info_version = Some(line[INFO_VERSION_KEY.len()..].to_owned());
+                            }
+                            // Custom
+                            else if let Some(separator_pos) = line.find(KEY_SUFFIX) {
+                                self.info_custom.insert(
+                                    line[..separator_pos].to_owned(),
+                                    line[separator_pos + KEY_SUFFIX.len()..].to_owned()
+                                );
+                            }
+                            // Invalid entry
+                            else {
+                                return Err(ParseError::new_with_pos("Invalid info entry!", (line_index, 0)));
+                            }
                         }
                         // Target section
                         Some(Section::Target) => {
+                            // Width
+
+                            // Height
+
+                            // Depth
+
+                            // View
 
                             // TODO
 
@@ -189,6 +220,11 @@ impl TryFrom<Ssb> for SsbRender {
 
 
 // Helpers
+const INFO_TITLE_KEY: &str = "Title: ";
+const INFO_AUTHOR_KEY: &str = "Author: ";
+const INFO_DESCRIPTION_KEY: &str = "Description: ";
+const INFO_VERSION_KEY: &str = "Version: ";
+const KEY_SUFFIX: &str = ": ";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }

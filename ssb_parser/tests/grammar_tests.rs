@@ -22,7 +22,7 @@ mod grammar_tests {
         ).unwrap_or_else(|exception| {
             panic!("SSB parsing error: {}", exception)
         });
-        //assert_eq!(ssb.info_title.as_ref().expect("Info title should be available!"), "test");
+        assert_eq!(ssb.info_title.as_ref().expect("Info title should be available!"), "test");
         println!("{:?}", ssb);
         // Parse 2nd phase
         let ssb_render = SsbRender::try_from(ssb).unwrap_or_else(|exception| {
