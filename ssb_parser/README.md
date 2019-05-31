@@ -7,6 +7,5 @@
 * Strict syntax checking with error reporting
 * Forbid overwriting / unique entries (=clear script design)
 * UTF-8 & unix line endings only (don't overcomplicate things!)
-* Define & parse by grammar > naive text chunking
 
 [Changes](./CHANGES.md)

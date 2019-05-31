@@ -1,133 +1,17 @@
 // Imports
-use std::collections::HashMap;
-use std::fmt;
-use std::convert::TryFrom;
+use super::{
+    error::*,
+    types::*
+};
+use lazy_static::lazy_static;
+use regex::Regex;
+use std::{
+    collections::{HashMap,HashSet},
+    io::BufRead,
+    path::Path,
+    convert::TryFrom
+};
 
-
-// Sub types
-#[derive(Debug, PartialEq, Clone)]
-pub enum View {
-    Perspective,
-    Orthogonal
-}
-impl TryFrom<&str> for View {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "perspective" => Ok(View::Perspective),
-            "orthogonal" => Ok(View::Orthogonal),
-            _ => Err(())
-        }
-    }
-}
-#[derive(Debug)]
-pub struct Event {
-    pub trigger: EventTrigger,
-    pub macro_: Option<String>,
-    pub note: Option<String>,
-    pub data: String,
-    pub data_location: (usize,usize)
-}
-#[derive(Debug)]
-pub struct EventRender {
-    pub trigger: EventTrigger,
-    pub objects: Vec<EventObject>
-}
-#[derive(Debug, PartialEq, Clone)]
-pub enum EventTrigger {
-    Id(String),
-    Time((u32,u32))
-}
-#[derive(Debug)]
-pub enum EventObject {
-    Geometry(EventGeometry),
-    Tag(EventTag)
-}
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct FontFace {
-    pub family: String,
-    pub style: FontStyle
-}
-impl fmt::Display for FontFace {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{} ({:?})", self.family, self.style)
-    }
-}
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum FontStyle {
-    Regular,
-    Bold,
-    Italic,
-    BoldItalic
-}
-impl TryFrom<&str> for FontStyle {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "regular" => Ok(FontStyle::Regular),
-            "bold" => Ok(FontStyle::Bold),
-            "italic" => Ok(FontStyle::Italic),
-            "bold-italic" => Ok(FontStyle::BoldItalic),
-            _ => Err(())
-        }
-    }
-}
-pub type FontData = String;
-pub type FontDataRender = Vec<u8>;
-pub type TextureId = String;
-#[derive(Debug)]
-pub enum TextureData {
-    Url(String),
-    Raw(String)
-}
-pub type TextureDataRender = Vec<u8>;
-
-// Object types
-#[derive(Debug)]
-pub enum EventGeometry {
-    Shape(Vec<ShapeSegment>),
-    Points(Vec<Point2D>),
-    Text(String)
-}
-#[derive(Debug)]
-pub enum ShapeSegment {
-    MoveTo(Point2D),
-    LineTo(Point2D),
-    CurveTo(Point2D, Point2D, Point2D),
-    ArcBy(Point2D, f64),
-    Close
-}
-#[derive(Debug)]
-pub struct Point2D {
-    pub x: Coordinate,
-    pub y: Coordinate
-}
-pub type Coordinate = f32;
-#[derive(Debug)]
-pub enum EventTag {
-    Font(String),
-    Size(f32),
-    Bold(bool),
-    Italic(bool),
-    Underline(bool),
-    Strikeout(bool),
-    Position(Point3D),
-    Alignment(Alignment)
-
-    // TODO
-
-}
-#[derive(Debug)]
-pub struct Point3D {
-    pub x: Coordinate,
-    pub y: Coordinate,
-    pub z: Coordinate
-}
-#[derive(Debug)]
-pub enum Alignment {
-    Numpad(u8),
-    Offset(Point2D)
-}
 
 // Raw data
 #[derive(Debug)]
@@ -170,8 +54,68 @@ impl Default for Ssb {
         }
     }
 }
+impl Ssb {
+    pub fn parse<R>(&mut self, reader: R, search_path: Option<&Path>) -> Result<&mut Self, ParseError> 
+        where R: BufRead {
+        // Initial state
+        let mut section: Option<Section> = None;
+        // Iterate through text lines
+        for (line_index, line) in reader.lines().enumerate() {
+            // Check for invalid UTF-8 and carriage return (leftover of windows-ending)
+            let mut line = line?;
+            if line.ends_with("\r") {
+                line.pop();
+            }
+            // Ignore empty lines & comments
+            if !(line.is_empty() || line.starts_with("//")) {
+                // Switch or handle section
+                if let Ok(parsed_section) = Section::try_from(line.as_ref()) {
+                    section = Some(parsed_section);
+                } else {
+                    match section {
+                        // Info section
+                        Some(Section::Info) => {
 
-// Processed data
+                            // TODO
+
+                        }
+                        // Target section
+                        Some(Section::Target) => {
+
+                            // TODO
+
+                        }
+                        // Macros section
+                        Some(Section::Macros) => {
+
+                            // TODO
+
+                        }
+                        // Events section
+                        Some(Section::Events) => {
+
+                            // TODO
+
+                        }
+                        // Resources section
+                        Some(Section::Resources) => {
+
+                            // TODO
+
+                        }
+                        // Unset section
+                        None => return Err(ParseError::new_with_pos("Set section first!", (line_index, 0)))
+                    }
+                }
+            }
+        }
+        // Return self for chaining calls
+        Ok(self)
+    }
+}
+
+
+// Processed data (for rendering)
 #[derive(Debug)]
 pub struct SsbRender {
     // Target section
@@ -182,42 +126,140 @@ pub struct SsbRender {
     // Events section
     pub events: Vec<EventRender>,
     // Resources section
-    pub fonts: HashMap<FontFace, FontDataRender>,
-    pub textures: HashMap<TextureId, TextureDataRender>
+    pub fonts: HashMap<FontFace, FontData>,
+    pub textures: HashMap<TextureId, TextureData>
+}
+impl TryFrom<Ssb> for SsbRender {
+    type Error = ParseError;
+
+    fn try_from(data: Ssb) -> Result<Self, Self::Error> {
+        // Flatten macros & detect infinite recursion
+        let mut flat_macros = HashMap::with_capacity(data.macros.len());
+        for macro_name in data.macros.keys() {
+            if let Err(err) = flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros) {
+                return Err(ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)));
+            }
+        }
+        // Evaluate events
+        let mut events = Vec::with_capacity(data.events.len());
+        for event in &data.events {
+            // Insert base macro
+            let mut event_data = event.data.clone();
+            if let Some(macro_name) = &event.macro_name {
+                event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| {
+                    ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
+                })?);
+            }
+            // Insert inline macros
+            while let Some(found) = MACRO_PATTERN.find(&event_data) {
+                let macro_name = &event_data[found.start()+2..found.end()-1];
+                event_data.replace_range(
+                    found.start()..found.end(),
+                    flat_macros.get(macro_name).ok_or_else(|| {
+                        ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
+                    })?
+                );
+            }
+            // Collect event objects by line tokens
+            let objects = vec!();
+            let _mode = Mode::default();
+
+            // TODO
+
+            // Save event for rendering
+            events.push(
+                EventRender {
+                    trigger: event.trigger.clone(),
+                    objects
+                }
+            );
+        }
+        // Return result
+        Ok(SsbRender {
+            target_width: data.target_width,
+            target_height: data.target_height,
+            target_depth: data.target_depth,
+            target_view: data.target_view,
+            events,
+            fonts: data.fonts,
+            textures: data.textures
+        })
+    }
 }
 
-// State
-#[derive(Debug, PartialEq, Clone)]
-pub enum Mode {
-    Text,
-    Points,
-    Shape
+
+// Helpers
+lazy_static! {
+    static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }
-impl Default for Mode {
-    fn default() -> Self {
-        Mode::Text
+
+fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
+    // Macro already flattened?
+    if flat_macros.contains_key(macro_name) {
+        return Ok(());
     }
-}
-impl TryFrom<&str> for Mode {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "text" => Ok(Mode::Text),
-            "points" => Ok(Mode::Points),
-            "shape" => Ok(Mode::Shape),
-            _ => Err(())
+    // Macro already in history (avoid infinite loop!)
+    if history.contains(macro_name) {
+        return Err(MacroError::InfiniteLoop(macro_name.to_owned()));
+    } else {
+        history.insert(macro_name.to_owned());
+    }
+    // Process macro value
+    let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_owned()))?.clone();
+    while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
+        // Insert sub-macro
+        let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
+        if !flat_macros.contains_key(sub_macro_name) {
+            flatten_macro(&sub_macro_name, history, macros, flat_macros)?;
         }
+        flat_macro_value.replace_range(
+            found.start()..found.end(),
+            flat_macros.get(sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name.to_owned()))?
+        );
     }
+    // Register flat macro
+    flat_macros.insert(
+        macro_name.to_owned(),
+        flat_macro_value
+    );
+    // Everything alright
+    Ok(())
 }
+
 
 // Tests
 #[cfg(test)]
 mod tests {
+    use super::{
+        super::error::MacroError,
+        HashMap,
+        HashSet
+    };
+
+
     #[test]
-    fn convert() {
-        use super::{View, FontStyle, Mode, TryFrom};
-        assert_eq!(View::try_from("orthogonal").expect("View instance expected!"), View::Orthogonal);
-        assert_eq!(FontStyle::try_from("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
-        assert_eq!(Mode::try_from("shape").expect("Mode instance expected!"), Mode::Shape);
+    fn flatten_macro_success() {
+        // Test data
+        let mut macros = HashMap::new();
+        macros.insert("a".to_owned(), "Hello ${b} test!".to_owned());
+        macros.insert("b".to_owned(), "fr${c}".to_owned());
+        macros.insert("c".to_owned(), "om".to_owned());
+        let mut flat_macros = HashMap::new();
+        // Test execution
+        super::flatten_macro("a", &mut HashSet::new(), &macros, &mut flat_macros).unwrap();
+        assert_eq!(flat_macros.get("a").unwrap(), "Hello from test!");
+    }
+    #[test]
+    fn flatten_macro_infinite() {
+        // Test data
+        let mut macros = HashMap::new();
+        macros.insert("a".to_owned(), "foo ${b}".to_owned());
+        macros.insert("b".to_owned(), "${a} bar".to_owned());
+        // Test execution
+        assert_eq!(super::flatten_macro("a", &mut HashSet::new(), &macros, &mut HashMap::new()).unwrap_err(), MacroError::InfiniteLoop("a".to_owned()));
+    }
+    #[test]
+    fn flatten_macro_notfound() {
+        assert_eq!(super::flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
     }
 }

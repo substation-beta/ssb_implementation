@@ -11,7 +11,7 @@
 
 /// Error types covering all bad situations in this crate.
 pub mod error;
-/// Data containers for all sort of information of this crate.
+/// Minor types of data in this crate.
+pub mod types;
+/// Data processors and storage of this crate.
 pub mod data;
-/// Processors to generate & handle data of this crate.
-pub mod processing;
