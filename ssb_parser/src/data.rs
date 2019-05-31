@@ -108,30 +108,22 @@ impl Ssb {
                             // Width
                             if line.starts_with(TARGET_WIDTH_KEY) {
                                 self.target_width = Some(
-                                    line[TARGET_WIDTH_KEY.len()..].parse().map_err(|_| {
-                                        ParseError::new_with_pos("Invalid target width value!", (line_index, TARGET_WIDTH_KEY.len()))
-                                    })?
+                                    line[TARGET_WIDTH_KEY.len()..].parse().map_err(|_| ParseError::new_with_pos("Invalid target width value!", (line_index, TARGET_WIDTH_KEY.len())) )?
                                 );
                             }
                             // Height
                             else if line.starts_with(TARGET_HEIGHT_KEY) {
                                 self.target_height = Some(
-                                    line[TARGET_HEIGHT_KEY.len()..].parse().map_err(|_| {
-                                        ParseError::new_with_pos("Invalid target height value!", (line_index, TARGET_HEIGHT_KEY.len()))
-                                    })?
+                                    line[TARGET_HEIGHT_KEY.len()..].parse().map_err(|_| ParseError::new_with_pos("Invalid target height value!", (line_index, TARGET_HEIGHT_KEY.len())) )?
                                 );
                             }
                             // Depth
                             else if line.starts_with(TARGET_DEPTH_KEY) {
-                                self.target_depth = line[TARGET_DEPTH_KEY.len()..].parse().map_err(|_| {
-                                    ParseError::new_with_pos("Invalid target depth value!", (line_index, TARGET_DEPTH_KEY.len()))
-                                })?;
+                                self.target_depth = line[TARGET_DEPTH_KEY.len()..].parse().map_err(|_| ParseError::new_with_pos("Invalid target depth value!", (line_index, TARGET_DEPTH_KEY.len())) )?;
                             }
                             // View
                             else if line.starts_with(TARGET_VIEW_KEY) {
-                                self.target_view = View::try_from(&line[TARGET_VIEW_KEY.len()..]).map_err(|_| {
-                                    ParseError::new_with_pos("Invalid target view value!", (line_index, TARGET_VIEW_KEY.len()))
-                                })?;
+                                self.target_view = View::try_from(&line[TARGET_VIEW_KEY.len()..]).map_err(|_| ParseError::new_with_pos("Invalid target view value!", (line_index, TARGET_VIEW_KEY.len())) )?;
                             }
                             // Invalid entry
                             else {
@@ -160,10 +152,19 @@ impl Ssb {
                                 self.events.push(
                                     Event {
                                         trigger: {
-                                            EventTrigger::Id(String::new())
-
-                                            // TODO
-
+                                            // Tag
+                                            if trigger.starts_with("'") && trigger.ends_with("'") {
+                                                EventTrigger::Id(trigger[1..trigger.len()-1].to_owned())
+                                            // Time
+                                            } else if let Some(seperator_pos) = trigger.find(TRIGGER_SEPARATOR) {
+                                                EventTrigger::Time((
+                                                    parse_timestamp(&trigger[..seperator_pos]).map_err(|_| ParseError::new_with_pos("Start timestamp invalid!", (line_index, 0)) )?,
+                                                    parse_timestamp(&trigger[seperator_pos + TRIGGER_SEPARATOR.len()..]).map_err(|_| ParseError::new_with_pos("End timestamp invalid!", (line_index, seperator_pos + TRIGGER_SEPARATOR.len())) )?
+                                                ))
+                                            // Invalid
+                                            } else {
+                                                return Err(ParseError::new_with_pos("Invalid trigger format!", (line_index, 0)));
+                                            }
                                         },
                                         macro_name: Some(macro_name.to_owned()).filter(|s| !s.is_empty()),
                                         note: Some(note.to_owned()).filter(|s| !s.is_empty()),
@@ -188,13 +189,9 @@ impl Ssb {
                                     self.fonts.insert(
                                         FontFace {
                                             family: family.to_owned(),
-                                            style: FontStyle::try_from(style).map_err(|_| {
-                                                ParseError::new_with_pos("Font style invalid!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + VALUE_SEPARATOR.len()))
-                                            })?
+                                            style: FontStyle::try_from(style).map_err(|_| ParseError::new_with_pos("Font style invalid!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + VALUE_SEPARATOR.len())) )?
                                         },
-                                        base64::decode(data).map_err(|_| {
-                                            ParseError::new_with_pos("Font data not in base64 format!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + style.len() + (VALUE_SEPARATOR.len() << 1)))
-                                        })?
+                                        base64::decode(data).map_err(|_| ParseError::new_with_pos("Font data not in base64 format!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + style.len() + (VALUE_SEPARATOR.len() << 1))) )?
                                     );
                                 } else {
                                     return Err(ParseError::new_with_pos("Font family, style and data expected!", (line_index, RESOURCES_FONT_KEY.len())));
@@ -208,14 +205,10 @@ impl Ssb {
                                     // Save texture
                                     self.textures.insert(
                                         id.to_owned(),
-                                        match TextureDataType::try_from(data_type).map_err(|_| {
-                                            ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + VALUE_SEPARATOR.len()))
-                                        })? {
+                                        match TextureDataType::try_from(data_type).map_err(|_| ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + VALUE_SEPARATOR.len())) )? {
                                             // Raw data
                                             TextureDataType::Raw => {
-                                                base64::decode(data).map_err(|_| {
-                                                    ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1)))
-                                                })?
+                                                base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1))) )?
                                             }
                                             // Data by url
                                             TextureDataType::Url => {
@@ -338,8 +331,30 @@ const RESOURCES_FONT_KEY: &str = "Font: ";
 const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
 const VALUE_SEPARATOR: &str = ",";
 const EVENT_SEPARATOR: &str = "|";
+const TRIGGER_SEPARATOR: &str = "-";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
+    static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<Hours>\\d{0,2}):(?P<HourMinutes>[0-5]?\\d?):)|(?:(?P<Minutes>[0-5]?\\d?):))?(?:(?P<Seconds>[0-5]?\\d?)\\.)?(?P<Milliseconds>\\d{0,3})$").unwrap();
+}
+
+fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
+    // Milliseconds factors
+    const MS_2_MS: u32 = 1;
+    const S_2_MS: u32 = MS_2_MS * 1000;
+    const M_2_MS: u32 = S_2_MS * 60;
+    const H_2_MS: u32 = M_2_MS * 60;
+    // Calculate time in milliseconds
+    let mut ms = 0u32;
+    let captures = TIMESTAMP_PATTERN.captures(timestamp).ok_or_else(|| ())?;
+    for (unit, factor) in &[("Milliseconds", MS_2_MS), ("Seconds", S_2_MS), ("Minutes", M_2_MS), ("HourMinutes", M_2_MS), ("Hours", H_2_MS)] {
+        if let Some(unit_value) = captures.name(unit) {
+            if unit_value.start() != unit_value.end() {
+                ms += unit_value.as_str().parse::<u32>().map_err(|_| ())? * factor;
+            }
+        }
+    }
+    // Return time
+    Ok(ms)
 }
 
 fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
@@ -380,11 +395,20 @@ fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashM
 #[cfg(test)]
 mod tests {
     use super::{
+        parse_timestamp,
+        flatten_macro,
         super::error::MacroError,
         HashMap,
         HashSet
     };
 
+    #[test]
+    fn parse_timestamp_various() {
+        assert_eq!(parse_timestamp(""), Ok(0));
+        assert_eq!(parse_timestamp("1:2.3"), Ok(62_003));
+        assert_eq!(parse_timestamp("59:59.999"), Ok(3_599_999));
+        assert_eq!(parse_timestamp("1::.1"), Ok(3_600_001));
+    }
 
     #[test]
     fn flatten_macro_success() {
@@ -395,7 +419,7 @@ mod tests {
         macros.insert("c".to_owned(), "om".to_owned());
         let mut flat_macros = HashMap::new();
         // Test execution
-        super::flatten_macro("a", &mut HashSet::new(), &macros, &mut flat_macros).unwrap();
+        flatten_macro("a", &mut HashSet::new(), &macros, &mut flat_macros).unwrap();
         assert_eq!(flat_macros.get("a").unwrap(), "Hello from test!");
     }
     #[test]
@@ -405,10 +429,10 @@ mod tests {
         macros.insert("a".to_owned(), "foo ${b}".to_owned());
         macros.insert("b".to_owned(), "${a} bar".to_owned());
         // Test execution
-        assert_eq!(super::flatten_macro("a", &mut HashSet::new(), &macros, &mut HashMap::new()).unwrap_err(), MacroError::InfiniteLoop("a".to_owned()));
+        assert_eq!(flatten_macro("a", &mut HashSet::new(), &macros, &mut HashMap::new()).unwrap_err(), MacroError::InfiniteLoop("a".to_owned()));
     }
     #[test]
     fn flatten_macro_notfound() {
-        assert_eq!(super::flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
+        assert_eq!(flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
     }
 }
