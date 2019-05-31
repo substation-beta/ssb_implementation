@@ -31,11 +31,12 @@ impl ParseError {
             src: None
         }
     }
-    pub fn new_with_source(msg: &str, pos: (usize, usize), src: Box<dyn Error>) -> Self {
+    pub fn new_with_source<E>(msg: &str, pos: (usize, usize), src: E) -> Self
+        where E: Error + 'static {
         Self {
             msg: msg.to_owned(),
             pos: Some(pos),
-            src: Some(src)
+            src: Some(Box::new(src))
         }
     }
 }

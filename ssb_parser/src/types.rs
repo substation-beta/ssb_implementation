@@ -119,6 +119,22 @@ impl TryFrom<&str> for Mode {
     }
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub enum TextureDataType {
+    Raw,
+    Url
+}
+impl TryFrom<&str> for TextureDataType {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "data" => Ok(TextureDataType::Raw),
+            "url" => Ok(TextureDataType::Url),
+            _ => Err(())
+        }
+    }
+}
+
 
 // Object types
 #[derive(Debug)]

@@ -107,35 +107,31 @@ impl Ssb {
                         Some(Section::Target) => {
                             // Width
                             if line.starts_with(TARGET_WIDTH_KEY) {
-                                if let Ok(width) = line[TARGET_WIDTH_KEY.len()..].parse() {
-                                    self.target_width = Some(width);
-                                } else {
-                                    return Err(ParseError::new_with_pos("Invalid target width value!", (line_index, TARGET_WIDTH_KEY.len())));
-                                }
+                                self.target_width = Some(
+                                    line[TARGET_WIDTH_KEY.len()..].parse().map_err(|_| {
+                                        ParseError::new_with_pos("Invalid target width value!", (line_index, TARGET_WIDTH_KEY.len()))
+                                    })?
+                                );
                             }
                             // Height
                             else if line.starts_with(TARGET_HEIGHT_KEY) {
-                                if let Ok(height) = line[TARGET_HEIGHT_KEY.len()..].parse() {
-                                    self.target_height = Some(height);
-                                } else {
-                                    return Err(ParseError::new_with_pos("Invalid target height value!", (line_index, TARGET_HEIGHT_KEY.len())));
-                                }
+                                self.target_height = Some(
+                                    line[TARGET_HEIGHT_KEY.len()..].parse().map_err(|_| {
+                                        ParseError::new_with_pos("Invalid target height value!", (line_index, TARGET_HEIGHT_KEY.len()))
+                                    })?
+                                );
                             }
                             // Depth
                             else if line.starts_with(TARGET_DEPTH_KEY) {
-                                if let Ok(depth) = line[TARGET_DEPTH_KEY.len()..].parse() {
-                                    self.target_depth = depth;
-                                } else {
-                                    return Err(ParseError::new_with_pos("Invalid target depth value!", (line_index, TARGET_DEPTH_KEY.len())));
-                                }
+                                self.target_depth = line[TARGET_DEPTH_KEY.len()..].parse().map_err(|_| {
+                                    ParseError::new_with_pos("Invalid target depth value!", (line_index, TARGET_DEPTH_KEY.len()))
+                                })?;
                             }
                             // View
                             else if line.starts_with(TARGET_VIEW_KEY) {
-                                if let Ok(view) = View::try_from(&line[TARGET_VIEW_KEY.len()..]) {
-                                    self.target_view = view;
-                                } else {
-                                    return Err(ParseError::new_with_pos("Invalid target view value!", (line_index, TARGET_VIEW_KEY.len())));
-                                }
+                                self.target_view = View::try_from(&line[TARGET_VIEW_KEY.len()..]).map_err(|_| {
+                                    ParseError::new_with_pos("Invalid target view value!", (line_index, TARGET_VIEW_KEY.len()))
+                                })?;
                             }
                             // Invalid entry
                             else {
@@ -166,11 +162,58 @@ impl Ssb {
                         Some(Section::Resources) => {
                             // Font
                             if line.starts_with(RESOURCES_FONT_KEY) {
-
+                                // Parse tokens
+                                let mut font_tokens = line[RESOURCES_FONT_KEY.len()..].splitn(3, VALUE_SEPARATOR);
+                                if let (Some(family), Some(style), Some(data)) = (font_tokens.next(), font_tokens.next(), font_tokens.next()) {
+                                    // Save font
+                                    self.fonts.insert(
+                                        FontFace {
+                                            family: family.to_owned(),
+                                            style: FontStyle::try_from(style).map_err(|_| {
+                                                ParseError::new_with_pos("Font style invalid!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + VALUE_SEPARATOR.len()))
+                                            })?
+                                        },
+                                        base64::decode(data).map_err(|_| {
+                                            ParseError::new_with_pos("Font data not in base64 format!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + style.len() + (VALUE_SEPARATOR.len() << 1)))
+                                        })?
+                                    );
+                                } else {
+                                    return Err(ParseError::new_with_pos("Font family, style and data expected!", (line_index, RESOURCES_FONT_KEY.len())));
+                                }
                             }
                             // Texture
                             else if line.starts_with(RESOURCES_TEXTURE_KEY) {
-
+                                // Parse tokens
+                                let mut texture_tokens = line[RESOURCES_TEXTURE_KEY.len()..].splitn(3, VALUE_SEPARATOR);
+                                if let (Some(id), Some(data_type), Some(data)) = (texture_tokens.next(), texture_tokens.next(), texture_tokens.next()) {
+                                    // Save texture
+                                    self.textures.insert(
+                                        id.to_owned(),
+                                        match TextureDataType::try_from(data_type).map_err(|_| {
+                                            ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + VALUE_SEPARATOR.len()))
+                                        })? {
+                                            // Raw data
+                                            TextureDataType::Raw => {
+                                                base64::decode(data).map_err(|_| {
+                                                    ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1)))
+                                                })?
+                                            }
+                                            // Data by url
+                                            TextureDataType::Url => {
+                                                let full_path = search_path.unwrap_or(Path::new(".")).join(data);
+                                                std::fs::read(&full_path).map_err(|err| {
+                                                    ParseError::new_with_source(
+                                                        &format!("Texture data not loadable from file '{}'!", full_path.display()),
+                                                        (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1)),
+                                                        err
+                                                    )
+                                                })?
+                                            }
+                                        }
+                                    );
+                                } else {
+                                    return Err(ParseError::new_with_pos("Texture id, data type and data expected!", (line_index, RESOURCES_TEXTURE_KEY.len())));
+                                }
                             }
                             // Invalid entry
                             else {
@@ -178,7 +221,7 @@ impl Ssb {
                             }
                         }
                         // Unset section
-                        None => return Err(ParseError::new_with_pos("Set section first!", (line_index, 0)))
+                        None => return Err(ParseError::new_with_pos("No section set!", (line_index, 0)))
                     }
                 }
             }
@@ -274,6 +317,7 @@ const TARGET_DEPTH_KEY: &str = "Depth: ";
 const TARGET_VIEW_KEY: &str = "View: ";
 const RESOURCES_FONT_KEY: &str = "Font: ";
 const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
+const VALUE_SEPARATOR: &str = ",";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }
