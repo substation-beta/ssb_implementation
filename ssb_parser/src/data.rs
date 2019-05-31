@@ -106,21 +106,55 @@ impl Ssb {
                         // Target section
                         Some(Section::Target) => {
                             // Width
-
+                            if line.starts_with(TARGET_WIDTH_KEY) {
+                                if let Ok(width) = line[TARGET_WIDTH_KEY.len()..].parse() {
+                                    self.target_width = Some(width);
+                                } else {
+                                    return Err(ParseError::new_with_pos("Invalid target width value!", (line_index, TARGET_WIDTH_KEY.len())));
+                                }
+                            }
                             // Height
-
+                            else if line.starts_with(TARGET_HEIGHT_KEY) {
+                                if let Ok(height) = line[TARGET_HEIGHT_KEY.len()..].parse() {
+                                    self.target_height = Some(height);
+                                } else {
+                                    return Err(ParseError::new_with_pos("Invalid target height value!", (line_index, TARGET_HEIGHT_KEY.len())));
+                                }
+                            }
                             // Depth
-
+                            else if line.starts_with(TARGET_DEPTH_KEY) {
+                                if let Ok(depth) = line[TARGET_DEPTH_KEY.len()..].parse() {
+                                    self.target_depth = depth;
+                                } else {
+                                    return Err(ParseError::new_with_pos("Invalid target depth value!", (line_index, TARGET_DEPTH_KEY.len())));
+                                }
+                            }
                             // View
-
-                            // TODO
-
+                            else if line.starts_with(TARGET_VIEW_KEY) {
+                                if let Ok(view) = View::try_from(&line[TARGET_VIEW_KEY.len()..]) {
+                                    self.target_view = view;
+                                } else {
+                                    return Err(ParseError::new_with_pos("Invalid target view value!", (line_index, TARGET_VIEW_KEY.len())));
+                                }
+                            }
+                            // Invalid entry
+                            else {
+                                return Err(ParseError::new_with_pos("Invalid target entry!", (line_index, 0)));
+                            }
                         }
                         // Macros section
                         Some(Section::Macros) => {
-
-                            // TODO
-
+                            // Macro
+                            if let Some(separator_pos) = line.find(KEY_SUFFIX) {
+                                self.macros.insert(
+                                    line[..separator_pos].to_owned(),
+                                    line[separator_pos + KEY_SUFFIX.len()..].to_owned()
+                                );
+                            }
+                            // Invalid entry
+                            else {
+                                return Err(ParseError::new_with_pos("Invalid macros entry!", (line_index, 0)));
+                            }
                         }
                         // Events section
                         Some(Section::Events) => {
@@ -130,9 +164,18 @@ impl Ssb {
                         }
                         // Resources section
                         Some(Section::Resources) => {
+                            // Font
+                            if line.starts_with(RESOURCES_FONT_KEY) {
 
-                            // TODO
+                            }
+                            // Texture
+                            else if line.starts_with(RESOURCES_TEXTURE_KEY) {
 
+                            }
+                            // Invalid entry
+                            else {
+                                return Err(ParseError::new_with_pos("Invalid resources entry!", (line_index, 0)));
+                            }
                         }
                         // Unset section
                         None => return Err(ParseError::new_with_pos("Set section first!", (line_index, 0)))
@@ -225,6 +268,12 @@ const INFO_AUTHOR_KEY: &str = "Author: ";
 const INFO_DESCRIPTION_KEY: &str = "Description: ";
 const INFO_VERSION_KEY: &str = "Version: ";
 const KEY_SUFFIX: &str = ": ";
+const TARGET_WIDTH_KEY: &str = "Width: ";
+const TARGET_HEIGHT_KEY: &str = "Height: ";
+const TARGET_DEPTH_KEY: &str = "Depth: ";
+const TARGET_VIEW_KEY: &str = "View: ";
+const RESOURCES_FONT_KEY: &str = "Font: ";
+const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
 }
