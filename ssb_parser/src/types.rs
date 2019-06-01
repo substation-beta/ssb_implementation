@@ -3,7 +3,7 @@ use std::fmt;
 use std::convert::TryFrom;
 
 
-// Sub types
+// Data minor types
 #[derive(Debug)]
 pub struct Event {
     pub trigger: EventTrigger,
