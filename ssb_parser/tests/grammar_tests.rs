@@ -29,6 +29,6 @@ mod grammar_tests {
             panic!("SSB render data error: {}", exception)
         });
         assert_eq!(ssb_render.events.get(0).expect("First event missing!").trigger, EventTrigger::Time((2000, 300000)));
-        //println!("{:?}", ssb_render);
+        println!("{:?}", ssb_render);
     }
 }

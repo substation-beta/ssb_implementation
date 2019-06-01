@@ -281,17 +281,31 @@ impl TryFrom<Ssb> for SsbRender {
                 );
             }
             // Collect event objects by line tokens
-            let objects = vec!();
-            let _mode = Mode::default();
-
-            // TODO
-
-            println!("=== {} ===", event_data);
+            let mut objects = vec!();
+            let mode = Mode::default();
             for (is_tag, data) in TagGeometryIterator::new(&event_data) {
-                println!("{}: {}", if is_tag {"Tag"} else {"Geometry"}, data);
+                // Tags
+                if is_tag {
+
+                    // TODO
+
+                // Geometries
+                } else {
+                    match mode {
+                        Mode::Text => objects.push(EventObject::Geometry(EventGeometry::Text(data))),
+                        Mode::Points => {
+
+                            // TODO
+
+                        },
+                        Mode::Shape => {
+
+                            // TODO
+
+                        }
+                    }
+                }
             }
-
-
             // Save event for rendering
             events.push(
                 EventRender {

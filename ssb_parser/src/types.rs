@@ -187,8 +187,14 @@ pub enum EventTag {
 }
 #[derive(Debug)]
 pub enum Alignment {
-    Numpad(u8),
+    Numpad(Numpad),
     Offset(Point2D)
+}
+#[derive(Debug)]
+pub enum Numpad {
+    BottomLeft = 1, BottomCenter = 2, BottomRight = 3,
+    MiddleLeft = 4, MiddleCenter = 5, MiddleRight = 6,
+    TopLeft = 7, TopCenter = 8, TopRight = 9
 }
 
 
