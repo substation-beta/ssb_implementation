@@ -153,7 +153,7 @@ impl Ssb {
                                     Event {
                                         trigger: {
                                             // Tag
-                                            if trigger.starts_with("'") && trigger.ends_with("'") {
+                                            if trigger.starts_with("'") && trigger.len() >= 2 && trigger.ends_with("'") {
                                                 EventTrigger::Id(trigger[1..trigger.len()-1].to_owned())
                                             // Time
                                             } else if let Some(seperator_pos) = trigger.find(TRIGGER_SEPARATOR) {
