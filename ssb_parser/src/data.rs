@@ -63,9 +63,7 @@ impl Ssb {
         for (line_index, line) in reader.lines().enumerate() {
             // Check for valid UTF-8 and remove carriage return (leftover of windows-ending)
             let mut line = line?;
-            if line.ends_with("\r") {
-                line.pop();
-            }
+            if line.ends_with("\r") {line.pop();}
             // Ignore empty lines & comments
             if !(line.is_empty() || line.starts_with("//")) {
                 // Switch or handle section
@@ -264,9 +262,7 @@ impl TryFrom<Ssb> for SsbRender {
         // Flatten macros & detect infinite recursion
         let mut flat_macros = HashMap::with_capacity(data.macros.len());
         for macro_name in data.macros.keys() {
-            flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros).map_err(|err| {
-                ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err))
-            })?;
+            flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros).map_err(|err| ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)) )?;
         }
         // Evaluate events
         let mut events = Vec::with_capacity(data.events.len());
@@ -274,18 +270,14 @@ impl TryFrom<Ssb> for SsbRender {
             // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_name {
-                event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| {
-                    ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
-                })?);
+                event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?);
             }
             // Insert inline macros
             while let Some(found) = MACRO_PATTERN.find(&event_data) {
                 let macro_name = &event_data[found.start()+2..found.end()-1];
                 event_data.replace_range(
                     found.start()..found.end(),
-                    flat_macros.get(macro_name).ok_or_else(|| {
-                        ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0))
-                    })?
+                    flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?
                 );
             }
             // Collect event objects by line tokens
@@ -357,7 +349,7 @@ fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
     let captures = TIMESTAMP_PATTERN.captures(timestamp).ok_or_else(|| ())?;
     for (unit, factor) in &[("MS", MS_2_MS), ("S", S_2_MS), ("M", M_2_MS), ("HM", M_2_MS), ("H", H_2_MS)] {
         if let Some(unit_value) = captures.name(unit) {
-            if unit_value.start() != unit_value.end() {
+            if unit_value.start() != unit_value.end() { // Not empty
                 ms += unit_value.as_str().parse::<u32>().map_err(|_| ())? * factor;
             }
         }
@@ -427,12 +419,10 @@ impl Iterator for TagGeometryIterator {
             is_tag = true;
             // Till tag end (considers nested tags)
             let mut tag_open_count = 0usize;
-            if let Some(end_pos) = text.char_indices().skip(1).find(|c| {
-                match c.1 {
-                    TAG_START_CHAR => {tag_open_count+=1; false},
-                    TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
-                    _ => false
-                }
+            if let Some(end_pos) = text.char_indices().skip(1).find(|c| match c.1 {
+                TAG_START_CHAR => {tag_open_count+=1; false},
+                TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
+                _ => false
             }).map(|c| c.0) {
                 self.pos += end_pos + TAG_END.len();
                 text_chunk = &text[TAG_START.len()..end_pos];

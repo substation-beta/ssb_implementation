@@ -42,20 +42,14 @@ impl ParseError {
 }
 impl Display for ParseError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        if let Some(pos) = self.pos {
-            write!(f, "{} <{}:{}>", self.msg, pos.0, pos.1)
-        } else {
-            write!(f, "{}", self.msg)
-        }
+        self.pos
+            .map(|pos| write!(f, "{} <{}:{}>", self.msg, pos.0, pos.1))
+            .unwrap_or_else(|| write!(f, "{}", self.msg))
     }
 }
 impl Error for ParseError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        if let Some(src) = &self.src {
-            Some(src.as_ref())
-        } else {
-            None
-        }
+        self.src.as_ref().map(|src| src.as_ref())
     }
 }
 impl From<std::io::Error> for ParseError {
