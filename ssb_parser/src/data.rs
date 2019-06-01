@@ -292,12 +292,13 @@ impl TryFrom<Ssb> for SsbRender {
             let objects = vec!();
             let _mode = Mode::default();
 
+            // TODO
+
             println!("=== {} ===", event_data);
             for (is_tag, data) in TagGeometryIterator::new(&event_data) {
                 println!("{}: {}", if is_tag {"Tag"} else {"Geometry"}, data);
             }
 
-            // TODO
 
             // Save event for rendering
             events.push(
@@ -337,10 +338,12 @@ const VALUE_SEPARATOR: &str = ",";
 const EVENT_SEPARATOR: &str = "|";
 const TRIGGER_SEPARATOR: &str = "-";
 const TAG_START: &str = "[";
+const TAG_START_CHAR: char = '[';
 const TAG_END: &str = "]";
+const TAG_END_CHAR: char = ']';
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
-    static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<Hours>\\d{0,2}):(?P<HourMinutes>[0-5]?\\d?):)|(?:(?P<Minutes>[0-5]?\\d?):))?(?:(?P<Seconds>[0-5]?\\d?)\\.)?(?P<Milliseconds>\\d{0,3})$").unwrap();
+    static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<H>\\d{0,2}):(?P<HM>[0-5]?\\d?):)|(?:(?P<M>[0-5]?\\d?):))?(?:(?P<S>[0-5]?\\d?)\\.)?(?P<MS>\\d{0,3})$").unwrap();
 }
 
 fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
@@ -352,7 +355,7 @@ fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
     // Calculate time in milliseconds
     let mut ms = 0u32;
     let captures = TIMESTAMP_PATTERN.captures(timestamp).ok_or_else(|| ())?;
-    for (unit, factor) in &[("Milliseconds", MS_2_MS), ("Seconds", S_2_MS), ("Minutes", M_2_MS), ("HourMinutes", M_2_MS), ("Hours", H_2_MS)] {
+    for (unit, factor) in &[("MS", MS_2_MS), ("S", S_2_MS), ("M", M_2_MS), ("HM", M_2_MS), ("H", H_2_MS)] {
         if let Some(unit_value) = captures.name(unit) {
             if unit_value.start() != unit_value.end() {
                 ms += unit_value.as_str().parse::<u32>().map_err(|_| ())? * factor;
@@ -422,8 +425,15 @@ impl Iterator for TagGeometryIterator {
         let text_chunk;
         if text.starts_with(TAG_START) {
             is_tag = true;
-            // Till tag end
-            if let Some(end_pos) = text.find(TAG_END) {
+            // Till tag end (considers nested tags)
+            let mut tag_open_count = 0usize;
+            if let Some(end_pos) = text.char_indices().skip(1).find(|c| {
+                match c.1 {
+                    TAG_START_CHAR => {tag_open_count+=1; false},
+                    TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
+                    _ => false
+                }
+            }).map(|c| c.0) {
                 self.pos += end_pos + TAG_END.len();
                 text_chunk = &text[TAG_START.len()..end_pos];
             // Till end
@@ -443,7 +453,7 @@ impl Iterator for TagGeometryIterator {
                 text_chunk = text;
             }
         }
-        // Return tags or geometry with unescaped characters
+        // Return tag or geometry with unescaped characters
         Some((is_tag, text_chunk.replace("\x02", TAG_START).replace("\x03", TAG_END)))
     }
 }
@@ -497,10 +507,10 @@ mod tests {
 
     #[test]
     fn tag_geometry_iter() {
-        let mut iter = TagGeometryIterator::new("[tag1][tag2]geometry1\\[geometry1_continue[tag3]geometry2\\n[tag4");
+        let mut iter = TagGeometryIterator::new("[tag1][tag2=[inner_tag]]geometry1\\[geometry1_continue\\\\[tag3]geometry2\\n[tag4");
         assert_eq!(iter.next(), Some((true, "tag1".to_owned())));
-        assert_eq!(iter.next(), Some((true, "tag2".to_owned())));
-        assert_eq!(iter.next(), Some((false, "geometry1[geometry1_continue".to_owned())));
+        assert_eq!(iter.next(), Some((true, "tag2=[inner_tag]".to_owned())));
+        assert_eq!(iter.next(), Some((false, "geometry1[geometry1_continue\\".to_owned())));
         assert_eq!(iter.next(), Some((true, "tag3".to_owned())));
         assert_eq!(iter.next(), Some((false, "geometry2\n".to_owned())));
         assert_eq!(iter.next(), Some((true, "tag4".to_owned())));
