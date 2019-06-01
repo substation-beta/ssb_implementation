@@ -260,18 +260,17 @@ pub struct SsbRender {
 }
 impl TryFrom<Ssb> for SsbRender {
     type Error = ParseError;
-
     fn try_from(data: Ssb) -> Result<Self, Self::Error> {
         // Flatten macros & detect infinite recursion
         let mut flat_macros = HashMap::with_capacity(data.macros.len());
         for macro_name in data.macros.keys() {
-            if let Err(err) = flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros) {
-                return Err(ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)));
-            }
+            flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros).map_err(|err| {
+                ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err))
+            })?;
         }
         // Evaluate events
         let mut events = Vec::with_capacity(data.events.len());
-        for event in &data.events {
+        for event in data.events {
             // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_name {
@@ -292,6 +291,11 @@ impl TryFrom<Ssb> for SsbRender {
             // Collect event objects by line tokens
             let objects = vec!();
             let _mode = Mode::default();
+
+            println!("=== {} ===", event_data);
+            for (is_tag, data) in TagGeometryIterator::new(&event_data) {
+                println!("{}: {}", if is_tag {"Tag"} else {"Geometry"}, data);
+            }
 
             // TODO
 
@@ -332,6 +336,8 @@ const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
 const VALUE_SEPARATOR: &str = ",";
 const EVENT_SEPARATOR: &str = "|";
 const TRIGGER_SEPARATOR: &str = "-";
+const TAG_START: &str = "[";
+const TAG_END: &str = "]";
 lazy_static! {
     static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
     static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<Hours>\\d{0,2}):(?P<HourMinutes>[0-5]?\\d?):)|(?:(?P<Minutes>[0-5]?\\d?):))?(?:(?P<Seconds>[0-5]?\\d?)\\.)?(?P<Milliseconds>\\d{0,3})$").unwrap();
@@ -390,6 +396,58 @@ fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashM
     Ok(())
 }
 
+struct TagGeometryIterator {
+    text: String,
+    pos: usize
+}
+impl TagGeometryIterator {
+    pub fn new(source: &str) -> Self {
+        Self {
+            text: source.replace("\\\\", "\x1B").replace(&("\\".to_owned() + TAG_START), "\x02").replace(&("\\".to_owned() + TAG_END), "\x03").replace("\\n", "\n").replace("\x1B", "\\"),
+            pos: 0
+        }
+    }
+}
+impl Iterator for TagGeometryIterator {
+    type Item = (bool, String);
+    fn next(&mut self) -> Option<Self::Item> {
+        // Remaining of source
+        let text = &self.text[self.pos..];
+        // End of source reached?
+        if text.is_empty() {
+            return None;
+        }
+        // Match tag or geometry
+        let is_tag;
+        let text_chunk;
+        if text.starts_with(TAG_START) {
+            is_tag = true;
+            // Till tag end
+            if let Some(end_pos) = text.find(TAG_END) {
+                self.pos += end_pos + TAG_END.len();
+                text_chunk = &text[TAG_START.len()..end_pos];
+            // Till end
+            } else {
+                self.pos += text.len();
+                text_chunk = &text[TAG_START.len()..];
+            }
+        } else {
+            is_tag = false;
+            // Till tag start
+            if let Some(start_pos) = text.find(TAG_START) {
+                self.pos += start_pos;
+                text_chunk = &text[..start_pos];
+            // Till end
+            } else {
+                self.pos += text.len();
+                text_chunk = text;
+            }
+        }
+        // Return tags or geometry with unescaped characters
+        Some((is_tag, text_chunk.replace("\x02", TAG_START).replace("\x03", TAG_END)))
+    }
+}
+
 
 // Tests
 #[cfg(test)]
@@ -397,6 +455,7 @@ mod tests {
     use super::{
         parse_timestamp,
         flatten_macro,
+        TagGeometryIterator,
         super::error::MacroError,
         HashMap,
         HashSet
@@ -434,5 +493,17 @@ mod tests {
     #[test]
     fn flatten_macro_notfound() {
         assert_eq!(flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
+    }
+
+    #[test]
+    fn tag_geometry_iter() {
+        let mut iter = TagGeometryIterator::new("[tag1][tag2]geometry1\\[geometry1_continue[tag3]geometry2\\n[tag4");
+        assert_eq!(iter.next(), Some((true, "tag1".to_owned())));
+        assert_eq!(iter.next(), Some((true, "tag2".to_owned())));
+        assert_eq!(iter.next(), Some((false, "geometry1[geometry1_continue".to_owned())));
+        assert_eq!(iter.next(), Some((true, "tag3".to_owned())));
+        assert_eq!(iter.next(), Some((false, "geometry2\n".to_owned())));
+        assert_eq!(iter.next(), Some((true, "tag4".to_owned())));
+        assert_eq!(iter.next(), None);
     }
 }

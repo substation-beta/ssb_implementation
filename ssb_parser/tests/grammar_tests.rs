@@ -1,7 +1,7 @@
 mod grammar_tests {
     // Imports
     use ssb_parser::{
-        //types::EventTrigger,
+        types::EventTrigger,
         data::{Ssb, SsbRender}
     };
     use std::{
@@ -23,12 +23,12 @@ mod grammar_tests {
             panic!("SSB parsing error: {}", exception)
         });
         assert_eq!(ssb.info_title.as_ref().expect("Info title should be available!"), "test");
-        println!("{:?}", ssb);
+        //println!("{:?}", ssb);
         // Parse 2nd phase
         let ssb_render = SsbRender::try_from(ssb).unwrap_or_else(|exception| {
             panic!("SSB render data error: {}", exception)
         });
-        //assert_eq!(ssb_render.events.get(0).expect("First event missing!").trigger, EventTrigger::Time((2000, 300000)));
-        println!("{:?}", ssb_render);
+        assert_eq!(ssb_render.events.get(0).expect("First event missing!").trigger, EventTrigger::Time((2000, 300000)));
+        //println!("{:?}", ssb_render);
     }
 }
