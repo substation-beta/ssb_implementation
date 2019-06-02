@@ -42,9 +42,9 @@ impl ParseError {
 }
 impl Display for ParseError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        self.pos
-            .map(|pos| write!(f, "{} <{}:{}>", self.msg, pos.0, pos.1))
-            .unwrap_or_else(|| write!(f, "{}", self.msg))
+        self.pos.map(|pos| write!(f, "{} <{}:{}>", self.msg, pos.0, pos.1))
+                .unwrap_or_else(|| write!(f, "{}", self.msg))
+                .and_then(|_| write!(f, "{}", self.source().map_or(String::new(), |src| format!("\n{}", src))))
     }
 }
 impl Error for ParseError {
@@ -54,7 +54,7 @@ impl Error for ParseError {
 }
 impl From<std::io::Error> for ParseError {
     fn from(err: std::io::Error) -> Self {
-        Self::new(err.description())
+        Self::new(&err.to_string())
     }
 }
 
@@ -64,4 +64,26 @@ impl From<std::io::Error> for ParseError {
 pub enum MacroError {
     NotFound(String),
     InfiniteLoop(String)
+}
+
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::ParseError;
+
+    #[test]
+    fn parse_error() {
+        assert_eq!(ParseError::new("simple").to_string(), "simple");
+    }
+
+    #[test]
+    fn parse_error_with_pos() {
+        assert_eq!(ParseError::new_with_pos("error somewhere", (1,2)).to_string(), "error somewhere <1:2>");
+    }
+
+    #[test]
+    fn parse_error_with_source() {
+        assert_eq!(ParseError::new_with_source("test", (42, 26), ParseError::new("source")).to_string(), "test <42:26>\nsource");
+    }
 }
