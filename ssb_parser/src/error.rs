@@ -49,7 +49,7 @@ impl Display for ParseError {
 }
 impl Error for ParseError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.src.as_ref().map(|src| src.as_ref())
+        self.src.as_ref().map(AsRef::as_ref)
     }
 }
 impl From<std::io::Error> for ParseError {

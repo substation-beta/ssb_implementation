@@ -62,7 +62,7 @@ impl Ssb {
         for (line_index, line) in reader.lines().enumerate() {
             // Check for valid UTF-8 and remove carriage return (leftover of windows-ending)
             let mut line = line?;
-            if line.ends_with("\r") {line.pop();}
+            if line.ends_with('\r') {line.pop();}
             // Ignore empty lines & comments
             if !(line.is_empty() || line.starts_with("//")) {
                 // Switch or handle section
@@ -150,7 +150,7 @@ impl Ssb {
                                     Event {
                                         trigger: {
                                             // Tag
-                                            if trigger.starts_with("'") && trigger.len() >= 2 && trigger.ends_with("'") {
+                                            if trigger.starts_with('\'') && trigger.len() >= 2 && trigger.ends_with('\'') {
                                                 EventTrigger::Id(trigger[1..trigger.len()-1].to_owned())
                                             // Time
                                             } else if let Some(seperator_pos) = trigger.find(TRIGGER_SEPARATOR) {
@@ -209,7 +209,7 @@ impl Ssb {
                                             }
                                             // Data by url
                                             TextureDataType::Url => {
-                                                let full_path = search_path.unwrap_or(Path::new(".")).join(data);
+                                                let full_path = search_path.unwrap_or_else(|| Path::new(".")).join(data);
                                                 std::fs::read(&full_path).map_err(|err| {
                                                     ParseError::new_with_source(
                                                         &format!("Texture data not loadable from file '{}'!", full_path.display()),
@@ -296,7 +296,7 @@ impl TryFrom<Ssb> for SsbRender {
 
                             // TODO
 
-                        },
+                        }
                         Mode::Shape => {
 
                             // TODO

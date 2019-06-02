@@ -67,7 +67,7 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
         history.insert(macro_name.to_owned());
     }
     // Process macro value
-    let mut flat_macro_value = macros.get(macro_name).ok_or(MacroError::NotFound(macro_name.to_owned()))?.clone();
+    let mut flat_macro_value = macros.get(macro_name).ok_or_else(|| MacroError::NotFound(macro_name.to_owned()))?.clone();
     while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
         // Insert sub-macro
         let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
@@ -76,7 +76,7 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
         }
         flat_macro_value.replace_range(
             found.start()..found.end(),
-            flat_macros.get(sub_macro_name).ok_or(MacroError::NotFound(sub_macro_name.to_owned()))?
+            flat_macros.get(sub_macro_name).ok_or_else(|| MacroError::NotFound(sub_macro_name.to_owned()))?
         );
     }
     // Register flat macro
