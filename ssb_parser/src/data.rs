@@ -282,7 +282,7 @@ impl TryFrom<Ssb> for SsbRender {
             // Collect event objects by line tokens
             let mut objects = vec!();
             let mode = Mode::default();
-            for (is_tag, data) in TagGeometryIterator::new(&event_data) {
+            for (is_tag, data) in EscapedText::new(&event_data).iter() {
                 // Tags
                 if is_tag {
 
@@ -291,7 +291,7 @@ impl TryFrom<Ssb> for SsbRender {
                 // Geometries
                 } else {
                     match mode {
-                        Mode::Text => objects.push(EventObject::Geometry(EventGeometry::Text(data))),
+                        Mode::Text => objects.push(EventObject::Geometry(EventGeometry::Text(data.to_owned()))),
                         Mode::Points => {
 
                             // TODO

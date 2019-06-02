@@ -88,60 +88,72 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
     Ok(())
 }
 
-pub struct TagGeometryIterator {
+pub struct EscapedText {
     text: String,
-    pos: usize
+    tag_starts_ends: Vec<(usize,char)>
 }
-impl TagGeometryIterator {
+impl EscapedText {
     pub fn new(source: &str) -> Self {
+        let text = source.replace("\\\\", "\x1B").replace(&("\\".to_owned() + TAG_START), "\x02").replace(&("\\".to_owned() + TAG_END), "\x03").replace("\\n", "\n").replace("\x1B", "\\");
         Self {
-            text: source.replace("\\\\", "\x1B").replace(&("\\".to_owned() + TAG_START), "\x02").replace(&("\\".to_owned() + TAG_END), "\x03").replace("\\n", "\n").replace("\x1B", "\\"),
+            text: text.replace("\x02", TAG_START).replace("\x03", TAG_END),
+            tag_starts_ends: text.char_indices().filter(|c| c.1 == TAG_START_CHAR || c.1 == TAG_END_CHAR).collect()
+        }
+    }
+    pub fn iter(&self) -> TagGeometryIterator {
+        TagGeometryIterator {
+            source: self,
             pos: 0
         }
     }
 }
-impl Iterator for TagGeometryIterator {
-    type Item = (bool, String);
+pub struct TagGeometryIterator<'src> {
+    source: &'src EscapedText,
+    pos: usize
+}
+impl<'src> Iterator for TagGeometryIterator<'src> {
+    type Item = (bool, &'src str);
     fn next(&mut self) -> Option<Self::Item> {
-        // Remaining of source
-        let text = &self.text[self.pos..];
         // End of source reached?
-        if text.is_empty() {
+        if self.pos == self.source.text.len() {
             return None;
         }
+        // Find next tag start
+        let tag_start = self.source.tag_starts_ends.iter().find(|c| c.0 >= self.pos && c.1 == TAG_START_CHAR).map(|c| c.0);
         // Match tag or geometry
         let is_tag;
         let text_chunk;
-        if text.starts_with(TAG_START) {
+        if tag_start.filter(|pos| *pos == self.pos).is_some() {
             is_tag = true;
             // Till tag end (considers nested tags)
             let mut tag_open_count = 0usize;
-            if let Some(end_pos) = text.char_indices().skip(1).find(|c| match c.1 {
+            if let Some(end_pos) = self.source.tag_starts_ends.iter().find(|c| match c.1 {
+                _ if c.0 < self.pos + TAG_START.len() => false,
                 TAG_START_CHAR => {tag_open_count+=1; false},
                 TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
                 _ => false
             }).map(|c| c.0) {
-                self.pos += end_pos + TAG_END.len();
-                text_chunk = &text[TAG_START.len()..end_pos];
+                text_chunk = &self.source.text[self.pos + TAG_START.len()..end_pos];
+                self.pos = end_pos + TAG_END.len();
             // Till end
             } else {
-                self.pos += text.len();
-                text_chunk = &text[TAG_START.len()..];
+                text_chunk = &self.source.text[self.pos + TAG_START.len()..];
+                self.pos = self.source.text.len();
             }
         } else {
             is_tag = false;
             // Till tag start
-            if let Some(start_pos) = text.find(TAG_START) {
-                self.pos += start_pos;
-                text_chunk = &text[..start_pos];
+            if let Some(tag_start) = tag_start {
+                text_chunk = &self.source.text[self.pos..tag_start];
+                self.pos = tag_start;
             // Till end
             } else {
-                self.pos += text.len();
-                text_chunk = text;
+                text_chunk = &self.source.text[self.pos..];
+                self.pos = self.source.text.len();
             }
         }
-        // Return tag or geometry with unescaped characters
-        Some((is_tag, text_chunk.replace("\x02", TAG_START).replace("\x03", TAG_END)))
+        // Return tag or geometry
+        Some((is_tag, text_chunk))
     }
 }
 
@@ -152,7 +164,7 @@ mod tests {
     use super::{
         parse_timestamp,
         flatten_macro,
-        TagGeometryIterator,
+        EscapedText,
         super::error::MacroError,
         HashMap,
         HashSet
@@ -194,13 +206,14 @@ mod tests {
 
     #[test]
     fn tag_geometry_iter() {
-        let mut iter = TagGeometryIterator::new("[tag1][tag2=[inner_tag]]geometry1\\[geometry1_continue\\\\[tag3]geometry2\\n[tag4");
-        assert_eq!(iter.next(), Some((true, "tag1".to_owned())));
-        assert_eq!(iter.next(), Some((true, "tag2=[inner_tag]".to_owned())));
-        assert_eq!(iter.next(), Some((false, "geometry1[geometry1_continue\\".to_owned())));
-        assert_eq!(iter.next(), Some((true, "tag3".to_owned())));
-        assert_eq!(iter.next(), Some((false, "geometry2\n".to_owned())));
-        assert_eq!(iter.next(), Some((true, "tag4".to_owned())));
+        let text = EscapedText::new("[tag1][tag2=[inner_tag]]geometry1\\[geometry1_continue\\\\[tag3]geometry2\\n[tag4");
+        let mut iter = text.iter();
+        assert_eq!(iter.next(), Some((true, "tag1")));
+        assert_eq!(iter.next(), Some((true, "tag2=[inner_tag]")));
+        assert_eq!(iter.next(), Some((false, "geometry1[geometry1_continue\\")));
+        assert_eq!(iter.next(), Some((true, "tag3")));
+        assert_eq!(iter.next(), Some((false, "geometry2\n")));
+        assert_eq!(iter.next(), Some((true, "tag4")));
         assert_eq!(iter.next(), None);
     }
 }
