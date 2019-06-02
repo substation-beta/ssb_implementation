@@ -3,7 +3,7 @@ use super::{
     error::*
 };
 use lazy_static::lazy_static;
-use regex::Regex;
+use regex::{Regex,escape};
 use std::{
     collections::{HashMap,HashSet}
 };
@@ -21,6 +21,8 @@ pub const TARGET_DEPTH_KEY: &str = "Depth: ";
 pub const TARGET_VIEW_KEY: &str = "View: ";
 pub const RESOURCES_FONT_KEY: &str = "Font: ";
 pub const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
+pub const MACRO_INLINE_START: &str = "${";
+pub const MACRO_INLINE_END: &str = "}";
 pub const VALUE_SEPARATOR: &str = ",";
 pub const EVENT_SEPARATOR: &str = "|";
 pub const TRIGGER_SEPARATOR: &str = "-";
@@ -29,7 +31,7 @@ pub const TAG_START_CHAR: char = '[';
 pub const TAG_END: &str = "]";
 pub const TAG_END_CHAR: char = ']';
 lazy_static! {
-    pub static ref MACRO_PATTERN: Regex = Regex::new("\\$\\{([a-zA-Z0-9_-]+)\\}").unwrap();
+    pub static ref MACRO_PATTERN: Regex = Regex::new(&(escape(MACRO_INLINE_START) + "([a-zA-Z0-9_-]+)" + &escape(MACRO_INLINE_END))).unwrap();
     static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<H>\\d{0,2}):(?P<HM>[0-5]?\\d?):)|(?:(?P<M>[0-5]?\\d?):))?(?:(?P<S>[0-5]?\\d?)\\.)?(?P<MS>\\d{0,3})$").unwrap();
 }
 
@@ -70,7 +72,7 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
     let mut flat_macro_value = macros.get(macro_name).ok_or_else(|| MacroError::NotFound(macro_name.to_owned()))?.clone();
     while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
         // Insert sub-macro
-        let sub_macro_name = &flat_macro_value[found.start()+2..found.end()-1];
+        let sub_macro_name = &flat_macro_value[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
         if !flat_macros.contains_key(sub_macro_name) {
             flatten_macro(&sub_macro_name, history, macros, flat_macros)?;
         }
