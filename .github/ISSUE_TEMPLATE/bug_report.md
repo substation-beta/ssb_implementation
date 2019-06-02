@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows 10 Pro]
- - Machine: [e.g. vm, container, <hardware>]
+ - Machine: [e.g. vm, container, &lt;hardware&gt;]
  - Version [e.g. 0.1.0]
 
 **Additional context**
