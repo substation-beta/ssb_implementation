@@ -269,7 +269,7 @@ impl TryFrom<Ssb> for SsbRender {
             // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_name {
-                event_data.insert_str(0, flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?);
+                event_data.insert_str(0, flat_macros.get(macro_name.as_str()).ok_or_else(|| ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?);
             }
             // Insert inline macros
             while let Some(found) = MACRO_PATTERN.find(&event_data) {

@@ -57,24 +57,27 @@ pub fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
     Ok(ms)
 }
 
-pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &HashMap<String, String>, flat_macros: &mut HashMap<String, String>) -> Result<(), MacroError> {
+pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macros: &'a HashMap<String, String>, flat_macros: &mut HashMap<&'a str, String>) -> Result<(), MacroError> {
     // Macro already flattened?
     if flat_macros.contains_key(macro_name) {
         return Ok(());
     }
+    // Macro exists?
+    let (macro_name, mut flat_macro_value) = get_key_value(macros, macro_name)
+        .map(|key_value| (key_value.0.as_str(), key_value.1.to_owned()))
+        .ok_or_else(|| MacroError::NotFound(macro_name.to_owned()))?;
     // Macro already in history (avoid infinite loop!)
     if history.contains(macro_name) {
         return Err(MacroError::InfiniteLoop(macro_name.to_owned()));
     } else {
-        history.insert(macro_name.to_owned());
+        history.insert(macro_name);
     }
     // Process macro value
-    let mut flat_macro_value = macros.get(macro_name).ok_or_else(|| MacroError::NotFound(macro_name.to_owned()))?.clone();
     while let Some(found) = MACRO_PATTERN.find(&flat_macro_value) {
         // Insert sub-macro
         let sub_macro_name = &flat_macro_value[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
         if !flat_macros.contains_key(sub_macro_name) {
-            flatten_macro(&sub_macro_name, history, macros, flat_macros)?;
+            flatten_macro(sub_macro_name, history, macros, flat_macros)?;
         }
         let sub_macro_location = found.start()..found.end();
         let sub_macro_value = flat_macros.get(sub_macro_name).ok_or_else(|| MacroError::NotFound(sub_macro_name.to_owned()))?;
@@ -82,11 +85,18 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
     }
     // Register flat macro
     flat_macros.insert(
-        macro_name.to_owned(),
+        macro_name,
         flat_macro_value
     );
     // Everything alright
     Ok(())
+}
+// On stable: <https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_key_value>
+fn get_key_value<'a,K,V,Q: ?Sized>(map: &'a HashMap<K,V>, k: &Q) -> Option<(&'a K, &'a V)>
+    where K: std::borrow::Borrow<Q> + std::hash::Hash + std::cmp::Eq,
+        Q: std::hash::Hash + Eq {
+    let key = map.keys().find(|key| key.borrow() == k)?;
+    Some((key, map.get(key.borrow())?))
 }
 
 pub struct EscapedText {
