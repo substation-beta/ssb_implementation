@@ -274,10 +274,9 @@ impl TryFrom<Ssb> for SsbRender {
             // Insert inline macros
             while let Some(found) = MACRO_PATTERN.find(&event_data) {
                 let macro_name = &event_data[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
-                event_data.replace_range(
-                    found.start()..found.end(),
-                    flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?
-                );
+                let macro_location = found.start()..found.end();
+                let macro_value = flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?;
+                event_data.replace_range(macro_location, macro_value);
             }
             // Collect event objects by line tokens
             let mut objects = vec!();

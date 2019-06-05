@@ -76,10 +76,9 @@ pub fn flatten_macro(macro_name: &str, history: &mut HashSet<String>, macros: &H
         if !flat_macros.contains_key(sub_macro_name) {
             flatten_macro(&sub_macro_name, history, macros, flat_macros)?;
         }
-        flat_macro_value.replace_range(
-            found.start()..found.end(),
-            flat_macros.get(sub_macro_name).ok_or_else(|| MacroError::NotFound(sub_macro_name.to_owned()))?
-        );
+        let sub_macro_location = found.start()..found.end();
+        let sub_macro_value = flat_macros.get(sub_macro_name).ok_or_else(|| MacroError::NotFound(sub_macro_name.to_owned()))?;
+        flat_macro_value.replace_range(sub_macro_location, sub_macro_value);
     }
     // Register flat macro
     flat_macros.insert(
