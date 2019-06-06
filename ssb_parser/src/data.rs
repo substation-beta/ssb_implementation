@@ -286,10 +286,41 @@ impl TryFrom<Ssb> for SsbRender {
                 if is_tag {
                     for (tag_name, tag_value) in TagsIterator::new(data) {
                         match tag_name {
-                            "mode" => mode = tag_value.and_then(|value| Mode::try_from(value).ok() ).ok_or_else(|| ParseError::new_with_pos(&format!("Invalid mode '{}'!", tag_value.unwrap_or("")), event.data_location) )?,
-                            "font" => objects.push(EventObject::Tag(EventTag::Font(tag_value.map(ToOwned::to_owned).ok_or_else(|| ParseError::new_with_pos(&format!("Invalid font '{}'!", tag_value.unwrap_or("")), event.data_location) )?))),
+                            "mode" => mode = tag_value
+                                .and_then(|value| Mode::try_from(value).ok() )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid mode '{}'!", tag_value.unwrap_or("")), event.data_location) )?,
+                            "font" => objects.push(EventObject::Tag(EventTag::Font(
+                                tag_value
+                                .map(ToOwned::to_owned)
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid font '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "size" => objects.push(EventObject::Tag(EventTag::Size(
+                                tag_value
+                                .and_then(|value| value.parse::<f32>().ok() )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid size '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "bold" => objects.push(EventObject::Tag(EventTag::Bold(
+                                tag_value
+                                .map(|value| value == "y")
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid bold '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "italic" => objects.push(EventObject::Tag(EventTag::Italic(
+                                tag_value
+                                .map(|value| value == "y")
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid italic '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "underline" => objects.push(EventObject::Tag(EventTag::Underline(
+                                tag_value
+                                .map(|value| value == "y")
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid underline '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "strikeout" => objects.push(EventObject::Tag(EventTag::Strikeout(
+                                tag_value
+                                .map(|value| value == "y")
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
 
-                            _ if !tag_name.is_empty() => (), // TODO: all tags
+                            _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all tags
 
                             _ => return Err(ParseError::new_with_pos(&format!("Invalid tag '{}'!", tag_name), event.data_location))
                         }
