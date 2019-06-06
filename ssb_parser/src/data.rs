@@ -166,7 +166,7 @@ impl Ssb {
                                         macro_name: Some(macro_name.to_owned()).filter(|s| !s.is_empty()),
                                         note: Some(note.to_owned()).filter(|s| !s.is_empty()),
                                         data: data.to_owned(),
-                                        data_location: (line_index, trigger.len() + macro_name.len() + note.len() + 1 /* EVENT_SEPARATOR */ * 3)
+                                        data_location: (line_index, trigger.len() + macro_name.len() + note.len() + 3 /* 3x EVENT_SEPARATOR */)
                                     }
                                 );
                             }
@@ -269,26 +269,30 @@ impl TryFrom<Ssb> for SsbRender {
             // Insert base macro
             let mut event_data = event.data.clone();
             if let Some(macro_name) = &event.macro_name {
-                event_data.insert_str(0, flat_macros.get(macro_name.as_str()).ok_or_else(|| ParseError::new(&format!("Base macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?);
+                event_data.insert_str(0, flat_macros.get(macro_name.as_str()).ok_or_else(|| ParseError::new_with_pos(&format!("Base macro '{}' not found to insert!", macro_name), (event.data_location.0, 0)) )?);
             }
             // Insert inline macros
             while let Some(found) = MACRO_PATTERN.find(&event_data) {
                 let macro_name = &event_data[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
                 let macro_location = found.start()..found.end();
-                let macro_value = flat_macros.get(macro_name).ok_or_else(|| ParseError::new(&format!("Inline macro '{}' not found to insert in event at line {}", macro_name, event.data_location.0)) )?;
+                let macro_value = flat_macros.get(macro_name).ok_or_else(|| ParseError::new_with_pos(&format!("Inline macro '{}' not found to insert!", macro_name), event.data_location) )?;
                 event_data.replace_range(macro_location, macro_value);
             }
             // Collect event objects by line tokens
             let mut objects = vec!();
-            let mode = Mode::default();
+            let mut mode = Mode::default();
             for (is_tag, data) in EscapedText::new(&event_data).iter() {
                 // Tags
                 if is_tag {
                     for (tag_name, tag_value) in TagsIterator::new(data) {
+                        match tag_name {
+                            "mode" => mode = tag_value.and_then(|value| Mode::try_from(value).ok() ).ok_or_else(|| ParseError::new_with_pos(&format!("Invalid mode '{}'!", tag_value.unwrap_or("")), event.data_location) )?,
+                            "font" => objects.push(EventObject::Tag(EventTag::Font(tag_value.map(ToOwned::to_owned).ok_or_else(|| ParseError::new_with_pos(&format!("Invalid font '{}'!", tag_value.unwrap_or("")), event.data_location) )?))),
 
-                        println!("{}={:?}", tag_name, tag_value);
-                        // TODO
+                            _ if !tag_name.is_empty() => (), // TODO: all tags
 
+                            _ => return Err(ParseError::new_with_pos(&format!("Invalid tag '{}'!", tag_name), event.data_location))
+                        }
                     }
                 // Geometries
                 } else {
