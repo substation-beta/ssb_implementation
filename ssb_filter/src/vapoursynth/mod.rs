@@ -66,15 +66,15 @@ impl<'core> Filter<'core> for Render<'core> {
                     // 8-bit
                     1 => for pixel in frame.plane_row_mut::<u8>(plane, row) {
                         *pixel = 255 - *pixel;
-                    },
+                    }
                     // 16-bit
                     2 => for pixel in frame.plane_row_mut::<u16>(plane, row) {
                         *pixel = ((1u64 << bits_per_sample) - 1) as u16 - *pixel;
-                    },
+                    }
                     // 32-bit (that's a lot)
                     4 => for pixel in frame.plane_row_mut::<u32>(plane, row) {
                         *pixel = ((1u64 << bits_per_sample) - 1) as u32 - *pixel;
-                    },
+                    }
                     _ => unreachable!(),
                 }
             }

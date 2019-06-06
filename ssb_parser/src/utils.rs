@@ -142,7 +142,7 @@ impl<'src> Iterator for TagGeometryIterator<'src> {
             let mut tag_open_count = 0usize;
             if let Some(end_pos) = self.source.tag_starts_ends.iter().find(|c| match c.1 {
                 _ if c.0 < self.pos + TAG_START.len() => false,
-                TAG_START_CHAR => {tag_open_count+=1; false},
+                TAG_START_CHAR => {tag_open_count+=1; false}
                 TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
                 _ => false
             }).map(|c| c.0) {
@@ -192,7 +192,7 @@ impl<'src> Iterator for TagsIterator<'src> {
         // Find next tag separator (considers nested tags)
         let mut tag_open_count = 0usize;
         let tag_sep = self.text.char_indices().skip(self.pos).find(|c| match c.1 {
-            TAG_START_CHAR => {tag_open_count+=1; false},
+            TAG_START_CHAR => {tag_open_count+=1; false}
             TAG_END_CHAR => {if tag_open_count > 0 {tag_open_count-=1} false}
             TAG_SEPARATOR if tag_open_count == 0 => true,
             _ => false

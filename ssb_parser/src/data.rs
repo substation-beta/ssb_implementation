@@ -319,7 +319,23 @@ impl TryFrom<Ssb> for SsbRender {
                                 .map(|value| value == "y")
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
-
+                            "position" => objects.push(EventObject::Tag(EventTag::Position(
+                                tag_value
+                                .and_then(|value| {
+                                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
+                                    if let (Some(token1), Some(token2)) = (tokens.next(), tokens.next()) {
+                                        Some(Point3D {
+                                            x: token1.parse::<Coordinate>().ok()?,
+                                            y: token2.parse::<Coordinate>().ok()?,
+                                            z: tokens.next().or(Some("0")).and_then(|value| value.parse::<Coordinate>().ok())?
+                                        })
+                                    } else {
+                                        None
+                                    }
+                                } )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid position '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all tags
 
                             _ => return Err(ParseError::new_with_pos(&format!("Invalid tag '{}'!", tag_name), event.data_location))
