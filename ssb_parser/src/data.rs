@@ -156,7 +156,7 @@ impl Ssb {
                                             } else if let Some(seperator_pos) = trigger.find(TRIGGER_SEPARATOR) {
                                                 EventTrigger::Time((
                                                     parse_timestamp(&trigger[..seperator_pos]).map_err(|_| ParseError::new_with_pos("Start timestamp invalid!", (line_index, 0)) )?,
-                                                    parse_timestamp(&trigger[seperator_pos + TRIGGER_SEPARATOR.len()..]).map_err(|_| ParseError::new_with_pos("End timestamp invalid!", (line_index, seperator_pos + TRIGGER_SEPARATOR.len())) )?
+                                                    parse_timestamp(&trigger[seperator_pos + 1 /* TRIGGER_SEPARATOR */..]).map_err(|_| ParseError::new_with_pos("End timestamp invalid!", (line_index, seperator_pos + 1 /* TRIGGER_SEPARATOR */) ))?
                                                 ))
                                             // Invalid
                                             } else {
@@ -166,7 +166,7 @@ impl Ssb {
                                         macro_name: Some(macro_name.to_owned()).filter(|s| !s.is_empty()),
                                         note: Some(note.to_owned()).filter(|s| !s.is_empty()),
                                         data: data.to_owned(),
-                                        data_location: (line_index, trigger.len() + macro_name.len() + note.len() + EVENT_SEPARATOR.len() * 3)
+                                        data_location: (line_index, trigger.len() + macro_name.len() + note.len() + 1 /* EVENT_SEPARATOR */ * 3)
                                     }
                                 );
                             }
@@ -186,9 +186,9 @@ impl Ssb {
                                     self.fonts.insert(
                                         FontFace {
                                             family: family.to_owned(),
-                                            style: FontStyle::try_from(style).map_err(|_| ParseError::new_with_pos("Font style invalid!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + VALUE_SEPARATOR.len())) )?
+                                            style: FontStyle::try_from(style).map_err(|_| ParseError::new_with_pos("Font style invalid!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + 1 /* VALUE_SEPARATOR */) ))?
                                         },
-                                        base64::decode(data).map_err(|_| ParseError::new_with_pos("Font data not in base64 format!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + style.len() + (VALUE_SEPARATOR.len() << 1))) )?
+                                        base64::decode(data).map_err(|_| ParseError::new_with_pos("Font data not in base64 format!", (line_index, RESOURCES_FONT_KEY.len() + family.len() + style.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?
                                     );
                                 } else {
                                     return Err(ParseError::new_with_pos("Font family, style and data expected!", (line_index, RESOURCES_FONT_KEY.len())));
@@ -202,10 +202,10 @@ impl Ssb {
                                     // Save texture
                                     self.textures.insert(
                                         id.to_owned(),
-                                        match TextureDataType::try_from(data_type).map_err(|_| ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + VALUE_SEPARATOR.len())) )? {
+                                        match TextureDataType::try_from(data_type).map_err(|_| ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + 1 /* VALUE_SEPARATOR */)) )? {
                                             // Raw data
                                             TextureDataType::Raw => {
-                                                base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1))) )?
+                                                base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?
                                             }
                                             // Data by url
                                             TextureDataType::Url => {
@@ -213,7 +213,7 @@ impl Ssb {
                                                 std::fs::read(&full_path).map_err(|err| {
                                                     ParseError::new_with_source(
                                                         &format!("Texture data not loadable from file '{}'!", full_path.display()),
-                                                        (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (VALUE_SEPARATOR.len() << 1)),
+                                                        (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1)),
                                                         err
                                                     )
                                                 })?
@@ -284,9 +284,12 @@ impl TryFrom<Ssb> for SsbRender {
             for (is_tag, data) in EscapedText::new(&event_data).iter() {
                 // Tags
                 if is_tag {
+                    for (tag_name, tag_value) in TagsIterator::new(data) {
 
-                    // TODO
+                        println!("{}={:?}", tag_name, tag_value);
+                        // TODO
 
+                    }
                 // Geometries
                 } else {
                     match mode {
