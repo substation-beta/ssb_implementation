@@ -301,22 +301,22 @@ impl TryFrom<Ssb> for SsbRender {
                             ))),
                             "bold" => objects.push(EventObject::Tag(EventTag::Bold(
                                 tag_value
-                                .map(|value| value == "y")
+                                .and_then(|value| bool_from_str(value).ok())
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid bold '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             "italic" => objects.push(EventObject::Tag(EventTag::Italic(
                                 tag_value
-                                .map(|value| value == "y")
+                                .and_then(|value| bool_from_str(value).ok())
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid italic '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             "underline" => objects.push(EventObject::Tag(EventTag::Underline(
                                 tag_value
-                                .map(|value| value == "y")
+                                .and_then(|value| bool_from_str(value).ok())
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid underline '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             "strikeout" => objects.push(EventObject::Tag(EventTag::Strikeout(
                                 tag_value
-                                .map(|value| value == "y")
+                                .and_then(|value| bool_from_str(value).ok())
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             "position" => objects.push(EventObject::Tag(EventTag::Position(

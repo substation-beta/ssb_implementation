@@ -215,6 +215,14 @@ impl<'src> Iterator for TagsIterator<'src> {
     }
 }
 
+pub fn bool_from_str(text: &str) -> Result<bool,()> {
+    match text {
+        "y" => Ok(true),
+        "n" => Ok(false),
+        _ => Err(())
+    }
+}
+
 
 // Tests
 #[cfg(test)]
