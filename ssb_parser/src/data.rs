@@ -279,7 +279,7 @@ impl TryFrom<Ssb> for SsbRender {
                 event_data.replace_range(macro_location, macro_value);
             }
             // Collect event objects by line tokens
-            let mut objects = vec!();
+            let mut objects = vec![];
             let mut mode = Mode::default();
             for (is_tag, data) in EscapedText::new(&event_data).iter() {
                 // Tags
@@ -297,7 +297,7 @@ impl TryFrom<Ssb> for SsbRender {
                             ))),
                             "size" => objects.push(EventObject::Tag(EventTag::Size(
                                 tag_value
-                                .and_then(|value| value.parse::<f32>().ok() )
+                                .and_then(|value| value.parse().ok() )
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid size '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             "bold" => objects.push(EventObject::Tag(EventTag::Bold(
@@ -326,9 +326,9 @@ impl TryFrom<Ssb> for SsbRender {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     if let (Some(token1), Some(token2)) = (tokens.next(), tokens.next()) {
                                         Some(Point3D {
-                                            x: token1.parse::<Coordinate>().ok()?,
-                                            y: token2.parse::<Coordinate>().ok()?,
-                                            z: tokens.next().or(Some("0")).and_then(|value| value.parse::<Coordinate>().ok())?
+                                            x: token1.parse().ok()?,
+                                            y: token2.parse().ok()?,
+                                            z: tokens.next().or(Some("0")).and_then(|value| value.parse().ok())?
                                         })
                                     } else {
                                         None
@@ -342,8 +342,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                                             Alignment::Offset(Point2D {
-                                                x: value[..sep].parse::<Coordinate>().ok()?,
-                                                y: value[sep + 1 /* VALUE_SEPARATOR */..].parse::<Coordinate>().ok()?,
+                                                x: value[..sep].parse().ok()?,
+                                                y: value[sep + 1 /* VALUE_SEPARATOR */..].parse().ok()?,
                                             })
                                         } else {
                                             Alignment::Numpad(Numpad::try_from(value.parse::<u8>().ok()?).ok()?)
@@ -363,9 +363,23 @@ impl TryFrom<Ssb> for SsbRender {
                     match mode {
                         Mode::Text => objects.push(EventObject::Geometry(EventGeometry::Text(data.to_owned()))),
                         Mode::Points => {
-
-                            // TODO
-
+                            // Find points
+                            let tokens = data.split_ascii_whitespace().collect::<Vec<&str>>();
+                            let mut points = Vec::with_capacity(tokens.len() >> 1);
+                            let mut tokens = tokens.iter();
+                            // Collect points
+                            loop {
+                                match (tokens.next(), tokens.next()) {
+                                    (Some(x), Some(y)) => points.push(Point2D {
+                                        x: x.parse().map_err(|_| ParseError::new_with_pos("X coordinate of point invalid!", event.data_location) )?,
+                                        y: y.parse().map_err(|_| ParseError::new_with_pos("Y coordinate of point invalid!", event.data_location) )?
+                                    }),
+                                    (Some(leftover), None) => return Err(ParseError::new_with_pos(&format!("Points incomplete (leftover: '{}')!", leftover), event.data_location)),
+                                    _ => break
+                                }
+                            }
+                            // Save points
+                            objects.push(EventObject::Geometry(EventGeometry::Points(points)));
                         }
                         Mode::Shape => {
 
