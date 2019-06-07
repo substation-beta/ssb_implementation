@@ -190,11 +190,28 @@ pub enum Alignment {
     Numpad(Numpad),
     Offset(Point2D)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Numpad {
-    BottomLeft = 1, BottomCenter = 2, BottomRight = 3,
-    MiddleLeft = 4, MiddleCenter = 5, MiddleRight = 6,
-    TopLeft = 7, TopCenter = 8, TopRight = 9
+    TopLeft, TopCenter, TopRight,
+    MiddleLeft, MiddleCenter, MiddleRight,
+    BottomLeft, BottomCenter, BottomRight
+}
+impl TryFrom<u8> for Numpad {
+    type Error = ();
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(Numpad::BottomLeft),
+            2 => Ok(Numpad::BottomCenter),
+            3 => Ok(Numpad::BottomRight),
+            4 => Ok(Numpad::MiddleLeft),
+            5 => Ok(Numpad::MiddleCenter),
+            6 => Ok(Numpad::MiddleRight),
+            7 => Ok(Numpad::TopLeft),
+            8 => Ok(Numpad::TopCenter),
+            9 => Ok(Numpad::TopRight),
+            _ => Err(())
+        }
+    }
 }
 
 
@@ -203,10 +220,12 @@ pub enum Numpad {
 mod tests {
     #[test]
     fn convert() {
-        use super::{View, FontStyle, Section, Mode, TryFrom};
+        use super::{View, FontStyle, Section, Mode, TextureDataType, Numpad, TryFrom};
         assert_eq!(View::try_from("orthogonal").expect("View instance expected!"), View::Orthogonal);
         assert_eq!(FontStyle::try_from("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
         assert_eq!(Section::try_from("#Events").expect("Section instance expected!"), Section::Events);
         assert_eq!(Mode::try_from("shape").expect("Mode instance expected!"), Mode::Shape);
+        assert_eq!(TextureDataType::try_from("data").expect("Texture data type expected!"), TextureDataType::Raw);
+        assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
     }
 }

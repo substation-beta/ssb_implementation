@@ -286,7 +286,8 @@ impl TryFrom<Ssb> for SsbRender {
                 if is_tag {
                     for (tag_name, tag_value) in TagsIterator::new(data) {
                         match tag_name {
-                            "mode" => mode = tag_value
+                            "mode" => mode =
+                                tag_value
                                 .and_then(|value| Mode::try_from(value).ok() )
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid mode '{}'!", tag_value.unwrap_or("")), event.data_location) )?,
                             "font" => objects.push(EventObject::Tag(EventTag::Font(
@@ -335,8 +336,24 @@ impl TryFrom<Ssb> for SsbRender {
                                 } )
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid position '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
+                            "alignment" => objects.push(EventObject::Tag(EventTag::Alignment(
+                                tag_value
+                                .and_then(|value| {
+                                    Some(
+                                        if let Some(sep) = value.find(VALUE_SEPARATOR) {
+                                            Alignment::Offset(Point2D {
+                                                x: value[..sep].parse::<Coordinate>().ok()?,
+                                                y: value[sep + 1 /* VALUE_SEPARATOR */..].parse::<Coordinate>().ok()?,
+                                            })
+                                        } else {
+                                            Alignment::Numpad(Numpad::try_from(value.parse::<u8>().ok()?).ok()?)
+                                        }
+                                    )
+                                } )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
                             
-                            _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all tags
+                            _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
 
                             _ => return Err(ParseError::new_with_pos(&format!("Invalid tag '{}'!", tag_name), event.data_location))
                         }
