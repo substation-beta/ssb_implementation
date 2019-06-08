@@ -120,15 +120,15 @@ impl TryFrom<&str> for Mode {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum SegmentType {
+pub enum ShapeSegmentType {
     Move,
     Line,
     Curve,
     Arc
 }
-impl Default for SegmentType {
+impl Default for ShapeSegmentType {
     fn default() -> Self {
-        SegmentType::Move
+        ShapeSegmentType::Move
     }
 }
 

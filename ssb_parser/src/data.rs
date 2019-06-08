@@ -353,7 +353,9 @@ impl TryFrom<Ssb> for SsbRender {
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
                             
+
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
+
 
                             _ => return Err(ParseError::new_with_pos(&format!("Invalid tag '{}'!", tag_name), event.data_location))
                         }
@@ -371,8 +373,8 @@ impl TryFrom<Ssb> for SsbRender {
                             loop {
                                 match (tokens.next(), tokens.next()) {
                                     (Some(x), Some(y)) => points.push(Point2D {
-                                        x: x.parse().map_err(|_| ParseError::new_with_pos("X coordinate of point invalid!", event.data_location) )?,
-                                        y: y.parse().map_err(|_| ParseError::new_with_pos("Y coordinate of point invalid!", event.data_location) )?
+                                        x: x.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of point '{}'!", x), event.data_location) )?,
+                                        y: y.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid Y coordinate of point '{}'!", y), event.data_location) )?
                                     }),
                                     (Some(leftover), None) => return Err(ParseError::new_with_pos(&format!("Points incomplete (leftover: '{}')!", leftover), event.data_location)),
                                     _ => break
@@ -387,38 +389,38 @@ impl TryFrom<Ssb> for SsbRender {
                             let mut segments = Vec::with_capacity(tokens.len() >> 2 /* Vague estimation, shrinking later */);   
                             let mut tokens = tokens.iter();
                             // Collect segments
-                            let mut segment_type = SegmentType::default();
+                            let mut segment_type = ShapeSegmentType::default();
                             while let Some(token) = tokens.next() {
                                 match token {
-                                    &"m" => segment_type = SegmentType::Move,
-                                    &"l" => segment_type = SegmentType::Line,
-                                    &"b" => segment_type = SegmentType::Curve,
-                                    &"a" => segment_type = SegmentType::Arc,
-                                    &"c" => {segments.push(ShapeSegment::Close); segment_type = SegmentType::Move;}
+                                    &"m" => segment_type = ShapeSegmentType::Move,
+                                    &"l" => segment_type = ShapeSegmentType::Line,
+                                    &"b" => segment_type = ShapeSegmentType::Curve,
+                                    &"a" => segment_type = ShapeSegmentType::Arc,
+                                    &"c" => {segments.push(ShapeSegment::Close); segment_type = ShapeSegmentType::Move;}
                                     _ => match segment_type {
-                                        SegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
-                                            x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of move invalid!", event.data_location) )?,
-                                            y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of move invalid!", event.data_location) )?
+                                        ShapeSegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
+                                            x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of move '{}'!", token), event.data_location) )?,
+                                            y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of move '{}'!", token), event.data_location) )?
                                         })),
-                                        SegmentType::Line => segments.push(ShapeSegment::LineTo(Point2D {
-                                            x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of line invalid!", event.data_location) )?,
-                                            y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of line invalid!", event.data_location) )?
+                                        ShapeSegmentType::Line => segments.push(ShapeSegment::LineTo(Point2D {
+                                            x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of line '{}'!", token), event.data_location) )?,
+                                            y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of line '{}'!", token), event.data_location) )?
                                         })),
-                                        SegmentType::Curve => segments.push(ShapeSegment::CurveTo(
+                                        ShapeSegmentType::Curve => segments.push(ShapeSegment::CurveTo(
                                             Point2D {
-                                                x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
-                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                                x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of curve first point '{}'!", token), event.data_location) )?,
+                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve first point '{}'!", token), event.data_location) )?
                                             },
                                             Point2D {
-                                                x: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
-                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                                x: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve second point '{}'!", token), event.data_location) )?,
+                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve second point '{}'!", token), event.data_location) )?
                                             },
                                             Point2D {
-                                                x: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
-                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                                x: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve third point '{}'!", token), event.data_location) )?,
+                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve third point '{}'!", token), event.data_location) )?
                                             }
                                         )),
-                                        SegmentType::Arc => segments.push(ShapeSegment::ArcBy(
+                                        ShapeSegmentType::Arc => segments.push(ShapeSegment::ArcBy(
                                             Point2D {
                                                 x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of arc invalid!", event.data_location) )?,
                                                 y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of arc invalid!", event.data_location) )?
