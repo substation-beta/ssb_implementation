@@ -33,7 +33,7 @@ doctest = false
 # Depend on parser module
 # RESERVATION: ssb_parser = {path = "../ssb_parser", version = "0.0.0"}
 # Render targets
-image = "~0.21.1"   # https://crates.io/crates/image
+image = "~0.21.2"   # https://crates.io/crates/image
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
 rusttype = "~0.7.6"  # https://crates.io/crates/rusttype

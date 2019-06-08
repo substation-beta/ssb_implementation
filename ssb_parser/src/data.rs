@@ -352,6 +352,43 @@ impl TryFrom<Ssb> for SsbRender {
                                 } )
                                 .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", tag_value.unwrap_or("")), event.data_location) )?
                             ))),
+                            "margin" => objects.push(EventObject::Tag(EventTag::Margin(
+                                tag_value
+                                .and_then(|value| {
+                                    let mut tokens = value.splitn(4, VALUE_SEPARATOR);
+                                    if let (Some(top), Some(right), Some(bottom), Some(left)) = (tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
+                                        Some(Margin::All(
+                                            top.parse().ok()?,
+                                            right.parse().ok()?,
+                                            bottom.parse().ok()?,
+                                            left.parse().ok()?
+                                        ))
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "margin-top" => objects.push(EventObject::Tag(EventTag::Margin(
+                                tag_value
+                                .and_then(|value| Some(Margin::Top(value.parse().ok()?)) )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin top '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "margin-right" => objects.push(EventObject::Tag(EventTag::Margin(
+                                tag_value
+                                .and_then(|value| Some(Margin::Right(value.parse().ok()?)) )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin right '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "margin-bottom" => objects.push(EventObject::Tag(EventTag::Margin(
+                                tag_value
+                                .and_then(|value| Some(Margin::Bottom(value.parse().ok()?)) )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin bottom '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
+                            "margin-left" => objects.push(EventObject::Tag(EventTag::Margin(
+                                tag_value
+                                .and_then(|value| Some(Margin::Left(value.parse().ok()?)) )
+                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin left '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                            ))),
                             
 
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags

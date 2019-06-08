@@ -193,7 +193,8 @@ pub enum EventTag {
     Underline(bool),
     Strikeout(bool),
     Position(Point3D),
-    Alignment(Alignment)
+    Alignment(Alignment),
+    Margin(Margin)
 
     // TODO
 
@@ -225,6 +226,14 @@ impl TryFrom<u8> for Numpad {
             _ => Err(())
         }
     }
+}
+#[derive(Debug)]
+pub enum Margin {
+    All(Coordinate, Coordinate, Coordinate, Coordinate),
+    Top(Coordinate),
+    Right(Coordinate),
+    Bottom(Coordinate),
+    Left(Coordinate)
 }
 
 
