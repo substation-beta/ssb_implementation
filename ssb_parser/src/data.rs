@@ -382,9 +382,55 @@ impl TryFrom<Ssb> for SsbRender {
                             objects.push(EventObject::Geometry(EventGeometry::Points(points)));
                         }
                         Mode::Shape => {
-
-                            // TODO
-
+                            // Find segments
+                            let tokens = data.split_ascii_whitespace().collect::<Vec<&str>>();
+                            let mut segments = Vec::with_capacity(tokens.len() >> 2 /* Vague estimation, shrinking later */);   
+                            let mut tokens = tokens.iter();
+                            // Collect segments
+                            let mut segment_type = SegmentType::default();
+                            while let Some(token) = tokens.next() {
+                                match token {
+                                    &"m" => segment_type = SegmentType::Move,
+                                    &"l" => segment_type = SegmentType::Line,
+                                    &"b" => segment_type = SegmentType::Curve,
+                                    &"a" => segment_type = SegmentType::Arc,
+                                    &"c" => {segments.push(ShapeSegment::Close); segment_type = SegmentType::Move;}
+                                    _ => match segment_type {
+                                        SegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
+                                            x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of move invalid!", event.data_location) )?,
+                                            y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of move invalid!", event.data_location) )?
+                                        })),
+                                        SegmentType::Line => segments.push(ShapeSegment::LineTo(Point2D {
+                                            x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of line invalid!", event.data_location) )?,
+                                            y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of line invalid!", event.data_location) )?
+                                        })),
+                                        SegmentType::Curve => segments.push(ShapeSegment::CurveTo(
+                                            Point2D {
+                                                x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
+                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                            },
+                                            Point2D {
+                                                x: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
+                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                            },
+                                            Point2D {
+                                                x: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("X coordinate of curve invalid!", event.data_location) )?,
+                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of curve invalid!", event.data_location) )?
+                                            }
+                                        )),
+                                        SegmentType::Arc => segments.push(ShapeSegment::ArcBy(
+                                            Point2D {
+                                                x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of arc invalid!", event.data_location) )?,
+                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of arc invalid!", event.data_location) )?
+                                            },
+                                            tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Degree of arc invalid!", event.data_location) )?
+                                        )),
+                                    }
+                                }
+                            }
+                            // Save segments
+                            segments.shrink_to_fit();
+                            objects.push(EventObject::Geometry(EventGeometry::Shape(segments)));
                         }
                     }
                 }

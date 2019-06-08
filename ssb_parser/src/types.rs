@@ -120,6 +120,19 @@ impl TryFrom<&str> for Mode {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub enum SegmentType {
+    Move,
+    Line,
+    Curve,
+    Arc
+}
+impl Default for SegmentType {
+    fn default() -> Self {
+        SegmentType::Move
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum TextureDataType {
     Raw,
     Url
