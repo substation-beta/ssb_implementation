@@ -287,42 +287,34 @@ impl TryFrom<Ssb> for SsbRender {
                     for (tag_name, tag_value) in TagsIterator::new(data) {
                         match tag_name {
                             "mode" => mode =
-                                tag_value
-                                .and_then(|value| Mode::try_from(value).ok() )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid mode '{}'!", tag_value.unwrap_or("")), event.data_location) )?,
+                                map_or_err_str(tag_value, |value| Mode::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid mode '{}'!", value), event.data_location) )?,
                             "font" => objects.push(EventObject::Tag(EventTag::Font(
-                                tag_value
-                                .map(ToOwned::to_owned)
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid font '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_else_err_str(tag_value, |value| Some(value.to_owned()) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid font '{}'!", value), event.data_location) )?
                             ))),
                             "size" => objects.push(EventObject::Tag(EventTag::Size(
-                                tag_value
-                                .and_then(|value| value.parse().ok() )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid size '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_or_err_str(tag_value, |value| value.parse() )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid size '{}'!", value), event.data_location) )?
                             ))),
                             "bold" => objects.push(EventObject::Tag(EventTag::Bold(
-                                tag_value
-                                .and_then(|value| bool_from_str(value).ok())
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid bold '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid bold '{}'!", value), event.data_location) )?
                             ))),
                             "italic" => objects.push(EventObject::Tag(EventTag::Italic(
-                                tag_value
-                                .and_then(|value| bool_from_str(value).ok())
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid italic '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid italic '{}'!", value), event.data_location) )?
                             ))),
                             "underline" => objects.push(EventObject::Tag(EventTag::Underline(
-                                tag_value
-                                .and_then(|value| bool_from_str(value).ok())
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid underline '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid underline '{}'!", value), event.data_location) )?
                             ))),
                             "strikeout" => objects.push(EventObject::Tag(EventTag::Strikeout(
-                                tag_value
-                                .and_then(|value| bool_from_str(value).ok())
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", value), event.data_location) )?
                             ))),
                             "position" => objects.push(EventObject::Tag(EventTag::Position(
-                                tag_value
-                                .and_then(|value| {
+                                map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     if let (Some(token1), Some(token2)) = (tokens.next(), tokens.next()) {
                                         Some(Point3D {
@@ -334,11 +326,10 @@ impl TryFrom<Ssb> for SsbRender {
                                         None
                                     }
                                 } )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid position '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid position '{}'!", value), event.data_location) )?
                             ))),
                             "alignment" => objects.push(EventObject::Tag(EventTag::Alignment(
-                                tag_value
-                                .and_then(|value| {
+                                map_else_err_str(tag_value, |value| {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                                             Alignment::Offset(Point2D {
@@ -350,11 +341,10 @@ impl TryFrom<Ssb> for SsbRender {
                                         }
                                     )
                                 } )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", value), event.data_location) )?
                             ))),
                             "margin" => objects.push(EventObject::Tag(EventTag::Margin(
-                                tag_value
-                                .and_then(|value| {
+                                map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(4, VALUE_SEPARATOR);
                                     if let (Some(top), Some(right), Some(bottom), Some(left)) = (tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
                                         Some(Margin::All(
@@ -366,28 +356,24 @@ impl TryFrom<Ssb> for SsbRender {
                                     } else {
                                         None
                                     }
-                                })
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin '{}'!", value), event.data_location) )?
                             ))),
                             "margin-top" => objects.push(EventObject::Tag(EventTag::Margin(
-                                tag_value
-                                .and_then(|value| Some(Margin::Top(value.parse().ok()?)) )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin top '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_else_err_str(tag_value, |value| Some(Margin::Top(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin top '{}'!", value), event.data_location) )?
                             ))),
                             "margin-right" => objects.push(EventObject::Tag(EventTag::Margin(
-                                tag_value
-                                .and_then(|value| Some(Margin::Right(value.parse().ok()?)) )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin right '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_else_err_str(tag_value, |value| Some(Margin::Right(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin right '{}'!", value), event.data_location) )?
                             ))),
                             "margin-bottom" => objects.push(EventObject::Tag(EventTag::Margin(
-                                tag_value
-                                .and_then(|value| Some(Margin::Bottom(value.parse().ok()?)) )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin bottom '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_else_err_str(tag_value, |value| Some(Margin::Bottom(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin bottom '{}'!", value), event.data_location) )?
                             ))),
                             "margin-left" => objects.push(EventObject::Tag(EventTag::Margin(
-                                tag_value
-                                .and_then(|value| Some(Margin::Left(value.parse().ok()?)) )
-                                .ok_or_else(|| ParseError::new_with_pos(&format!("Invalid margin left '{}'!", tag_value.unwrap_or("")), event.data_location) )?
+                                map_else_err_str(tag_value, |value| Some(Margin::Left(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin left '{}'!", value), event.data_location) )?
                             ))),
                             
 
@@ -437,32 +423,32 @@ impl TryFrom<Ssb> for SsbRender {
                                     _ => match segment_type {
                                         ShapeSegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
                                             x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of move '{}'!", token), event.data_location) )?,
-                                            y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of move '{}'!", token), event.data_location) )?
+                                            y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of move '{}'!", token), event.data_location) )?
                                         })),
                                         ShapeSegmentType::Line => segments.push(ShapeSegment::LineTo(Point2D {
                                             x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of line '{}'!", token), event.data_location) )?,
-                                            y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of line '{}'!", token), event.data_location) )?
+                                            y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of line '{}'!", token), event.data_location) )?
                                         })),
                                         ShapeSegmentType::Curve => segments.push(ShapeSegment::CurveTo(
                                             Point2D {
                                                 x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of curve first point '{}'!", token), event.data_location) )?,
-                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve first point '{}'!", token), event.data_location) )?
+                                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve first point '{}'!", token), event.data_location) )?
                                             },
                                             Point2D {
-                                                x: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve second point '{}'!", token), event.data_location) )?,
-                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve second point '{}'!", token), event.data_location) )?
+                                                x: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve second point '{}'!", token), event.data_location) )?,
+                                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve second point '{}'!", token), event.data_location) )?
                                             },
                                             Point2D {
-                                                x: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve third point '{}'!", token), event.data_location) )?,
-                                                y: tokens.next().map_or(Err(""), |token| token.parse().map_err(|_| *token )).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve third point '{}'!", token), event.data_location) )?
+                                                x: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid X coordinate of curve third point '{}'!", token), event.data_location) )?,
+                                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of curve third point '{}'!", token), event.data_location) )?
                                             }
                                         )),
                                         ShapeSegmentType::Arc => segments.push(ShapeSegment::ArcBy(
                                             Point2D {
-                                                x: token.parse().map_err(|_| ParseError::new_with_pos("X coordinate of arc invalid!", event.data_location) )?,
-                                                y: tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Y coordinate of arc invalid!", event.data_location) )?
+                                                x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of arc '{}'!", token), event.data_location) )?,
+                                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid Y coordinate of arc '{}'!", token), event.data_location) )?
                                             },
-                                            tokens.next().and_then(|value| value.parse().ok()).ok_or_else(|| ParseError::new_with_pos("Degree of arc invalid!", event.data_location) )?
+                                            map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new_with_pos(&format!("Invalid degree of arc '{}'!", token), event.data_location) )?
                                         )),
                                     }
                                 }
