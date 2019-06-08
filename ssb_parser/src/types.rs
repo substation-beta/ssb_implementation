@@ -194,7 +194,9 @@ pub enum EventTag {
     Strikeout(bool),
     Position(Point3D),
     Alignment(Alignment),
-    Margin(Margin)
+    Margin(Margin),
+    WrapStyle(WrapStyle),
+    Direction(Direction)
 
     // TODO
 
@@ -235,6 +237,42 @@ pub enum Margin {
     Bottom(Coordinate),
     Left(Coordinate)
 }
+#[derive(Debug, PartialEq)]
+pub enum WrapStyle {
+    Space,
+    Character,
+    NoWrap
+}
+impl TryFrom<&str> for WrapStyle {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "space" => Ok(WrapStyle::Space),
+            "character" => Ok(WrapStyle::Character),
+            "nowrap" => Ok(WrapStyle::NoWrap),
+            _ => Err(())
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+pub enum Direction {
+    LeftToRight,
+    RightToLeft,
+    TopToBottom,
+    BottomToTop
+}
+impl TryFrom<&str> for Direction {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "ltr" => Ok(Direction::LeftToRight),
+            "rtl" => Ok(Direction::RightToLeft),
+            "ttb" => Ok(Direction::TopToBottom),
+            "btt" => Ok(Direction::BottomToTop),
+            _ => Err(())
+        }
+    }
+}
 
 
 // Tests
@@ -242,12 +280,14 @@ pub enum Margin {
 mod tests {
     #[test]
     fn convert() {
-        use super::{View, FontStyle, Section, Mode, TextureDataType, Numpad, TryFrom};
+        use super::{View, FontStyle, Section, Mode, TextureDataType, Numpad, WrapStyle, Direction, TryFrom};
         assert_eq!(View::try_from("orthogonal").expect("View instance expected!"), View::Orthogonal);
         assert_eq!(FontStyle::try_from("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
         assert_eq!(Section::try_from("#Events").expect("Section instance expected!"), Section::Events);
         assert_eq!(Mode::try_from("shape").expect("Mode instance expected!"), Mode::Shape);
         assert_eq!(TextureDataType::try_from("data").expect("Texture data type expected!"), TextureDataType::Raw);
         assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
+        assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
+        assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
     }
 }

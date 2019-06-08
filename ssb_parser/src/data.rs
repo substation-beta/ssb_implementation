@@ -375,6 +375,14 @@ impl TryFrom<Ssb> for SsbRender {
                                 map_else_err_str(tag_value, |value| Some(Margin::Left(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin left '{}'!", value), event.data_location) )?
                             ))),
+                            "wrap-style" => objects.push(EventObject::Tag(EventTag::WrapStyle(
+                                map_or_err_str(tag_value, |value| WrapStyle::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid wrap style '{}'!", value), event.data_location) )?
+                            ))),
+                            "direction" => objects.push(EventObject::Tag(EventTag::Direction(
+                                map_or_err_str(tag_value, |value| Direction::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid direction '{}'!", value), event.data_location) )?
+                            ))),
                             
 
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
