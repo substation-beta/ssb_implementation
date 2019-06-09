@@ -420,6 +420,121 @@ impl TryFrom<Ssb> for SsbRender {
                                 map_else_err_str(tag_value, |value| Some(Space::Vertical(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid space vertical '{}'!", value), event.data_location) )?
                             ))),
+                            "rotate" => objects.push(EventObject::Tag(EventTag::Rotate(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
+                                    if let (Some(x), Some(y), Some(z)) = (tokens.next(), tokens.next(), tokens.next()) {
+                                        Some(Rotate::All(
+                                            x.parse().ok()?,
+                                            y.parse().ok()?,
+                                            z.parse().ok()?
+                                        ))
+                                    } else {
+                                        None
+                                    }
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate '{}'!", value), event.data_location) )?
+                            ))),
+                            "rotate-x" => objects.push(EventObject::Tag(EventTag::Rotate(
+                                map_else_err_str(tag_value, |value| Some(Rotate::X(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate x '{}'!", value), event.data_location) )?
+                            ))),
+                            "rotate-y" => objects.push(EventObject::Tag(EventTag::Rotate(
+                                map_else_err_str(tag_value, |value| Some(Rotate::Y(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate y '{}'!", value), event.data_location) )?
+                            ))),
+                            "rotate-z" => objects.push(EventObject::Tag(EventTag::Rotate(
+                                map_else_err_str(tag_value, |value| Some(Rotate::Z(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate z '{}'!", value), event.data_location) )?
+                            ))),
+                            "scale" => objects.push(EventObject::Tag(EventTag::Scale(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
+                                    if let (Some(x), Some(y), Some(z)) = (tokens.next(), tokens.next(), tokens.next()) {
+                                        Some(Scale::All(
+                                            x.parse().ok()?,
+                                            y.parse().ok()?,
+                                            z.parse().ok()?
+                                        ))
+                                    } else {
+                                        None
+                                    }
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale '{}'!", value), event.data_location) )?
+                            ))),
+                            "scale-x" => objects.push(EventObject::Tag(EventTag::Scale(
+                                map_else_err_str(tag_value, |value| Some(Scale::X(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale x '{}'!", value), event.data_location) )?
+                            ))),
+                            "scale-y" => objects.push(EventObject::Tag(EventTag::Scale(
+                                map_else_err_str(tag_value, |value| Some(Scale::Y(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale y '{}'!", value), event.data_location) )?
+                            ))),
+                            "scale-z" => objects.push(EventObject::Tag(EventTag::Scale(
+                                map_else_err_str(tag_value, |value| Some(Scale::Z(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale z '{}'!", value), event.data_location) )?
+                            ))),
+                            "translate" => objects.push(EventObject::Tag(EventTag::Translate(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
+                                    if let (Some(x), Some(y), Some(z)) = (tokens.next(), tokens.next(), tokens.next()) {
+                                        Some(Translate::All(
+                                            x.parse().ok()?,
+                                            y.parse().ok()?,
+                                            z.parse().ok()?
+                                        ))
+                                    } else {
+                                        None
+                                    }
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate '{}'!", value), event.data_location) )?
+                            ))),
+                            "translate-x" => objects.push(EventObject::Tag(EventTag::Translate(
+                                map_else_err_str(tag_value, |value| Some(Translate::X(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate x '{}'!", value), event.data_location) )?
+                            ))),
+                            "translate-y" => objects.push(EventObject::Tag(EventTag::Translate(
+                                map_else_err_str(tag_value, |value| Some(Translate::Y(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate y '{}'!", value), event.data_location) )?
+                            ))),
+                            "translate-z" => objects.push(EventObject::Tag(EventTag::Translate(
+                                map_else_err_str(tag_value, |value| Some(Translate::Z(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate z '{}'!", value), event.data_location) )?
+                            ))),
+                            "shear" => objects.push(EventObject::Tag(EventTag::Shear(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
+                                    if let (Some(x), Some(y)) = (tokens.next(), tokens.next()) {
+                                        Some(Shear::All(
+                                            x.parse().ok()?,
+                                            y.parse().ok()?
+                                        ))
+                                    } else {
+                                        None
+                                    }
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear '{}'!", value), event.data_location) )?
+                            ))),
+                            "shear-x" => objects.push(EventObject::Tag(EventTag::Shear(
+                                map_else_err_str(tag_value, |value| Some(Shear::X(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear x '{}'!", value), event.data_location) )?
+                            ))),
+                            "shear-y" => objects.push(EventObject::Tag(EventTag::Shear(
+                                map_else_err_str(tag_value, |value| Some(Shear::Y(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear y '{}'!", value), event.data_location) )?
+                            ))),
+                            "matrix" => objects.push(EventObject::Tag(EventTag::Matrix(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(16, VALUE_SEPARATOR).filter_map(|value| value.parse().ok() );
+                                    Some([
+                                        tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
+                                        tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
+                                        tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
+                                        tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?
+                                    ])
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid matrix '{}'!", value), event.data_location) )?
+                            ))),
                             
 
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
@@ -459,12 +574,12 @@ impl TryFrom<Ssb> for SsbRender {
                             // Collect segments
                             let mut segment_type = ShapeSegmentType::default();
                             while let Some(token) = tokens.next() {
-                                match token {
-                                    &"m" => segment_type = ShapeSegmentType::Move,
-                                    &"l" => segment_type = ShapeSegmentType::Line,
-                                    &"b" => segment_type = ShapeSegmentType::Curve,
-                                    &"a" => segment_type = ShapeSegmentType::Arc,
-                                    &"c" => {segments.push(ShapeSegment::Close); segment_type = ShapeSegmentType::Move;}
+                                match *token {
+                                    "m" => segment_type = ShapeSegmentType::Move,
+                                    "l" => segment_type = ShapeSegmentType::Line,
+                                    "b" => segment_type = ShapeSegmentType::Curve,
+                                    "a" => segment_type = ShapeSegmentType::Arc,
+                                    "c" => {segments.push(ShapeSegment::Close); segment_type = ShapeSegmentType::Move;}
                                     _ => match segment_type {
                                         ShapeSegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
                                             x: token.parse().map_err(|_| ParseError::new_with_pos(&format!("Invalid X coordinate of move '{}'!", token), event.data_location) )?,

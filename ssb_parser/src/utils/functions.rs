@@ -77,12 +77,12 @@ pub fn bool_from_str(text: &str) -> Result<bool,()> {
     }
 }
 
-pub fn map_or_err_str<'a,T,F,U,E>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
+pub fn map_or_err_str<T,F,U,E>(option: Option<& T>, op: F) -> Result<U,&str>
     where T: AsRef<str> + ?Sized,
         F: FnOnce(&str) -> Result<U,E> {
     option.map_or(Err(""), |value| op(value.as_ref()).map_err(|_| value.as_ref() ))
 }
-pub fn map_else_err_str<'a,T,F,U>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
+pub fn map_else_err_str<T,F,U>(option: Option<&T>, op: F) -> Result<U,&str>
     where T: AsRef<str> + ?Sized,
         F: FnOnce(&str) -> Option<U> {
     option.map_or(Err(""), |value| op(value.as_ref()).ok_or_else(|| value.as_ref() ))
