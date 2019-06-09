@@ -27,6 +27,14 @@ pub fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
     Ok(ms)
 }
 
+pub fn bool_from_str(text: &str) -> Result<bool,()> {
+    match text {
+        "y" => Ok(true),
+        "n" => Ok(false),
+        _ => Err(())
+    }
+}
+
 pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macros: &'a HashMap<String, String>, flat_macros: &mut HashMap<&'a str, String>) -> Result<(), MacroError> {
     // Macro already flattened?
     if flat_macros.contains_key(macro_name) {
@@ -67,14 +75,6 @@ fn get_key_value<'a,K,V,Q: ?Sized>(map: &'a HashMap<K,V>, k: &Q) -> Option<(&'a 
         Q: std::hash::Hash + Eq {
     let key = map.keys().find(|key| key.borrow() == k)?;
     Some((key, map.get(key.borrow())?))
-}
-
-pub fn bool_from_str(text: &str) -> Result<bool,()> {
-    match text {
-        "y" => Ok(true),
-        "n" => Ok(false),
-        _ => Err(())
-    }
 }
 
 pub fn map_or_err_str<T,F,U,E>(option: Option<& T>, op: F) -> Result<U,&str>
@@ -210,7 +210,10 @@ impl<'src> Iterator for TagsIterator<'src> {
 mod tests {
     use super::{
         parse_timestamp,
+        bool_from_str,
         flatten_macro,
+        map_or_err_str,
+        map_else_err_str,
         EscapedText,
         TagsIterator,
         MacroError,
@@ -224,6 +227,13 @@ mod tests {
         assert_eq!(parse_timestamp("1:2.3"), Ok(62_003));
         assert_eq!(parse_timestamp("59:59.999"), Ok(3_599_999));
         assert_eq!(parse_timestamp("1::.1"), Ok(3_600_001));
+    }
+
+    #[test]
+    fn parse_bool() {
+        assert_eq!(bool_from_str("y"), Ok(true));
+        assert_eq!(bool_from_str("n"), Ok(false));
+        assert_eq!(bool_from_str("no"), Err(()));
     }
 
     #[test]
@@ -250,6 +260,12 @@ mod tests {
     #[test]
     fn flatten_macro_notfound() {
         assert_eq!(flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
+    }
+
+    #[test]
+    fn map_err_str() {
+        assert_eq!(map_or_err_str(Some("123"), |value| value.parse()), Ok(123));
+        assert_eq!(map_else_err_str(Some("987a"), |value| value.parse::<i32>().ok()), Err("987a"));
     }
 
     #[test]
