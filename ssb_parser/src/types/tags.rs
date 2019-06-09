@@ -22,7 +22,10 @@ pub enum EventTag {
     Scale(Scale),
     Translate(Translate),
     Shear(Shear),
-    Matrix([Degree;16])
+    Matrix([Degree;16]),
+    Border(Border),
+    Join(Join),
+    Cap(Cap)
 
     // TODO
 
@@ -132,6 +135,46 @@ pub enum Shear {
     X(Degree),
     Y(Degree)
 }
+#[derive(Debug)]
+pub enum Border {
+    All(Coordinate, Coordinate),
+    Horizontal(Coordinate),
+    Vertical(Coordinate)
+}
+#[derive(Debug, PartialEq)]
+pub enum Join {
+    Round,
+    Bevel,
+    Miter
+}
+impl TryFrom<&str> for Join {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "round" => Ok(Join::Round),
+            "bevel" => Ok(Join::Bevel),
+            "miter" => Ok(Join::Miter),
+            _ => Err(())
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+pub enum Cap {
+    Round,
+    Butt,
+    Square
+}
+impl TryFrom<&str> for Cap {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "round" => Ok(Cap::Round),
+            "butt" => Ok(Cap::Butt),
+            "square" => Ok(Cap::Square),
+            _ => Err(())
+        }
+    }
+}
 
 
 // Tests
@@ -139,9 +182,11 @@ pub enum Shear {
 mod tests {
     #[test]
     fn convert() {
-        use super::{Numpad, WrapStyle, Direction, TryFrom};
+        use super::{Numpad, WrapStyle, Direction, Join, Cap, TryFrom};
         assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
         assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
         assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
+        assert_eq!(Join::try_from("bevel").expect("Join expected!"), Join::Bevel);
+        assert_eq!(Cap::try_from("butt").expect("Cap expected!"), Cap::Butt);
     }
 }

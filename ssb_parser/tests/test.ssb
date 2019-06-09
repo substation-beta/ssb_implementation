@@ -27,7 +27,7 @@ Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a
 10:0.0-10:50:0.0||Lets scale some text to double its size!|[animate=500,1000,[scale=2]]This text is\ngetting huge
 20:.-21:.|||[mode=points;font=Rabi-Ribi]0 0 100 0 66.6 50${Mine}33.3 50
 'show-something'|Default||This will only be shown when the event id is given
-0-1::.||Let's test it!|[font=Arial;size=20.5;bold=y;italic=n;underline=y;strikeout=n;position=-20,1.5;position=100,100,-50;alignment=5;alignment=1,2.7;margin=1,2,3,4;margin-top=-1.23;wrap-style=nowrap;direction=rtl;space=9.8,7.6;space-h=4;rotate=5,9,1;rotate-y=90;scale=0.75,1.25,1;scale-z=2;translate=100,200,0;translate-z=50;shear=1,-1;shear-y=0.33;matrix=0.5,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]Super styled :)
+0-1::.||Let's test it!|[font=Arial;size=20.5;bold=y;italic=n;underline=y;strikeout=n;position=-20,1.5;position=100,100,-50;alignment=5;alignment=1,2.7;margin=1,2,3,4;margin-top=-1.23;wrap-style=nowrap;direction=rtl;space=9.8,7.6;space-h=4;rotate=5,9,1;rotate-y=90;scale=0.75,1.25,1;scale-z=2;translate=100,200,0;translate-z=50;shear=1,-1;shear-y=0.33;matrix=0.5,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;border=42;border-v=-17.83;join=round;cap=square]Super styled :)
 
 #Resources
 Font: Rabi-Ribi,bold,UmFiaS1SaWJp
