@@ -1,5 +1,5 @@
 // Imports
-use super::ssb::Point2D;
+use super::ssb::{Point2D,Degree};
 
 
 // Enums
@@ -14,6 +14,6 @@ pub enum ShapeSegment {
     MoveTo(Point2D),
     LineTo(Point2D),
     CurveTo(Point2D, Point2D, Point2D),
-    ArcBy(Point2D, f64),
+    ArcBy(Point2D, Degree),
     Close
 }

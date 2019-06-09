@@ -1,6 +1,6 @@
 // Imports
 use std::convert::TryFrom;
-use super::ssb::{Coordinate,Point2D,Point3D};
+use super::ssb::{Coordinate,Degree,Point2D,Point3D};
 
 
 // Enums
@@ -16,7 +16,13 @@ pub enum EventTag {
     Alignment(Alignment),
     Margin(Margin),
     WrapStyle(WrapStyle),
-    Direction(Direction)
+    Direction(Direction),
+    Space(Space),
+    Rotate(Rotate),
+    Scale(Scale),
+    Translate(Translate),
+    Shear(Shear),
+    Matrix([Degree;16])
 
     // TODO
 
@@ -92,6 +98,39 @@ impl TryFrom<&str> for Direction {
             _ => Err(())
         }
     }
+}
+#[derive(Debug)]
+pub enum Space {
+    All(Coordinate, Coordinate),
+    Horizontal(Coordinate),
+    Vertical(Coordinate)
+}
+#[derive(Debug)]
+pub enum Rotate {
+    All(Degree, Degree, Degree),
+    X(Degree),
+    Y(Degree),
+    Z(Degree)
+}
+#[derive(Debug)]
+pub enum Scale {
+    All(Degree, Degree, Degree),
+    X(Degree),
+    Y(Degree),
+    Z(Degree)
+}
+#[derive(Debug)]
+pub enum Translate {
+    All(Coordinate, Coordinate, Coordinate),
+    X(Coordinate),
+    Y(Coordinate),
+    Z(Coordinate)
+}
+#[derive(Debug)]
+pub enum Shear {
+    All(Degree, Degree),
+    X(Degree),
+    Y(Degree)
 }
 
 

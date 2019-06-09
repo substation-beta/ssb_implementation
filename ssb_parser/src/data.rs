@@ -5,7 +5,7 @@ use super::{
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
         geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction}
+        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear}
     },
     utils::{
         constants::*,
@@ -395,6 +395,30 @@ impl TryFrom<Ssb> for SsbRender {
                             "direction" => objects.push(EventObject::Tag(EventTag::Direction(
                                 map_or_err_str(tag_value, |value| Direction::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid direction '{}'!", value), event.data_location) )?
+                            ))),
+                            "space" => objects.push(EventObject::Tag(EventTag::Space(
+                                map_else_err_str(tag_value, |value| {
+                                    Some(
+                                        if let Some(sep) = value.find(VALUE_SEPARATOR) {
+                                            Space::All(
+                                                value[..sep].parse().ok()?,
+                                                value[sep + 1 /* VALUE_SEPARATOR */..].parse().ok()?
+                                            )
+                                        } else {
+                                            let space = value.parse().ok()?;
+                                            Space::All(space, space)
+                                        }
+                                    )
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid space '{}'!", value), event.data_location) )?
+                            ))),
+                            "space-h" => objects.push(EventObject::Tag(EventTag::Space(
+                                map_else_err_str(tag_value, |value| Some(Space::Horizontal(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid space horizontal '{}'!", value), event.data_location) )?
+                            ))),
+                            "space-v" => objects.push(EventObject::Tag(EventTag::Space(
+                                map_else_err_str(tag_value, |value| Some(Space::Vertical(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid space vertical '{}'!", value), event.data_location) )?
                             ))),
                             
 
