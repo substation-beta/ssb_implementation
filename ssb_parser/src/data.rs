@@ -5,7 +5,7 @@ use super::{
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
         geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap}
+        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping}
     },
     utils::{
         constants::*,
@@ -554,6 +554,23 @@ impl TryFrom<Ssb> for SsbRender {
                             "cap" => objects.push(EventObject::Tag(EventTag::Cap(
                                 map_or_err_str(tag_value, |value| Cap::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid cap '{}'!", value), event.data_location) )?
+                            ))),
+                            "texture" => objects.push(EventObject::Tag(EventTag::Texture(
+                                map_else_err_str(tag_value, |value| Some(value.to_owned()) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture '{}'!", value), event.data_location) )?
+                            ))),
+                            "texfill" => objects.push(EventObject::Tag(EventTag::TexFill(
+                                map_else_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
+                                    Some(TexFill {
+                                        x0: tokens.next()?.parse().ok()?,
+                                        y0: tokens.next()?.parse().ok()?,
+                                        x1: tokens.next()?.parse().ok()?,
+                                        y1: tokens.next()?.parse().ok()?,
+                                        wrap: TextureWrapping::try_from(tokens.next()?).ok()?
+                                    })
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture filling '{}'!", value), event.data_location) )?
                             ))),
                             
 

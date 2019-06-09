@@ -25,7 +25,9 @@ pub enum EventTag {
     Matrix([Degree;16]),
     Border(Border),
     Join(Join),
-    Cap(Cap)
+    Cap(Cap),
+    Texture(String),
+    TexFill(TexFill)
 
     // TODO
 
@@ -175,6 +177,33 @@ impl TryFrom<&str> for Cap {
         }
     }
 }
+#[derive(Debug)]
+pub struct TexFill {
+    pub x0: Degree,
+    pub y0: Degree,
+    pub x1: Degree,
+    pub y1: Degree,
+    pub wrap: TextureWrapping
+}
+#[derive(Debug, PartialEq)]
+pub enum TextureWrapping {
+    Pad,
+    Clamp,
+    Repeat,
+    Mirror
+}
+impl TryFrom<&str> for TextureWrapping {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "pad" => Ok(TextureWrapping::Pad),
+            "clamp" => Ok(TextureWrapping::Clamp),
+            "repeat" => Ok(TextureWrapping::Repeat),
+            "mirror" => Ok(TextureWrapping::Mirror),
+            _ => Err(())
+        }
+    }
+}
 
 
 // Tests
@@ -182,11 +211,12 @@ impl TryFrom<&str> for Cap {
 mod tests {
     #[test]
     fn convert() {
-        use super::{Numpad, WrapStyle, Direction, Join, Cap, TryFrom};
+        use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, TryFrom};
         assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
         assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
         assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
         assert_eq!(Join::try_from("bevel").expect("Join expected!"), Join::Bevel);
         assert_eq!(Cap::try_from("butt").expect("Cap expected!"), Cap::Butt);
+        assert_eq!(TextureWrapping::try_from("mirror").expect("TextureWrapping expected!"), TextureWrapping::Mirror);
     }
 }
