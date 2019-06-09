@@ -15,8 +15,7 @@ mod grammar_tests {
     #[test]
     fn test_ssb() {
         // Parse 1st phase
-        let mut ssb = Ssb::default();
-        ssb.parse(
+        let ssb = Ssb::default().parse_owned(
             Cursor::new(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))),
             Some(Path::new(env!("CARGO_MANIFEST_DIR")))
         ).unwrap_or_else(|exception| {

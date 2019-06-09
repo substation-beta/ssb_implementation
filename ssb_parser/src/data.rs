@@ -62,6 +62,11 @@ impl Default for Ssb {
     }
 }
 impl Ssb {
+    pub fn parse_owned<R>(mut self, reader: R, search_path: Option<&Path>) -> Result<Self, ParseError>
+        where R: BufRead {
+        self.parse(reader, search_path)?;
+        Ok(self)
+    }
     pub fn parse<R>(&mut self, reader: R, search_path: Option<&Path>) -> Result<&mut Self, ParseError> 
         where R: BufRead {
         // Initial state

@@ -12,9 +12,9 @@
 //! let ssb_reader1 = Cursor::new("...");
 //! let ssb_reader2 = BufReader::new(File::open("/foo/bar.ssb").unwrap());
 //! // Parsing
-//! let mut ssb = Ssb::default();
-//! ssb.parse(ssb_reader1, None).unwrap()
-//!     .parse(ssb_reader2, Some(Path::new("/foo/"))).unwrap();
+//! let ssb = Ssb::default()
+//!     .parse_owned(ssb_reader1, None).unwrap()
+//!     .parse_owned(ssb_reader2, Some(Path::new("/foo/"))).unwrap();
 //! let ssb_render = SsbRender::try_from(ssb).unwrap();
 //! // Print
 //! println!("{:#?}", ssb_render);
