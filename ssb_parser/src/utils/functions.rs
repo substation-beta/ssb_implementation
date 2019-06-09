@@ -1,44 +1,12 @@
 // Imports
 use super::{
-    error::*
+    constants::*,
+    super::types::error::MacroError
 };
-use lazy_static::lazy_static;
-use regex::{Regex,escape};
-use std::{
-    collections::{HashMap,HashSet}
-};
+use std::collections::{HashMap,HashSet};
 
 
-// Constants
-pub const INFO_TITLE_KEY: &str = "Title: ";
-pub const INFO_AUTHOR_KEY: &str = "Author: ";
-pub const INFO_DESCRIPTION_KEY: &str = "Description: ";
-pub const INFO_VERSION_KEY: &str = "Version: ";
-pub const KEY_SUFFIX: &str = ": ";
-pub const TARGET_WIDTH_KEY: &str = "Width: ";
-pub const TARGET_HEIGHT_KEY: &str = "Height: ";
-pub const TARGET_DEPTH_KEY: &str = "Depth: ";
-pub const TARGET_VIEW_KEY: &str = "View: ";
-pub const RESOURCES_FONT_KEY: &str = "Font: ";
-pub const RESOURCES_TEXTURE_KEY: &str = "Texture: ";
-pub const MACRO_INLINE_START: &str = "${";
-pub const MACRO_INLINE_END: &str = "}";
-pub const VALUE_SEPARATOR: char = ',';
-pub const EVENT_SEPARATOR: char = '|';
-pub const TRIGGER_SEPARATOR: char = '-';
-pub const TAG_START: &str = "[";
-pub const TAG_START_CHAR: char = '[';
-pub const TAG_END: &str = "]";
-pub const TAG_END_CHAR: char = ']';
-pub const TAG_SEPARATOR: char = ';';
-pub const TAG_ASSIGN: char = '=';
-lazy_static! {
-    pub static ref MACRO_PATTERN: Regex = Regex::new(&(escape(MACRO_INLINE_START) + "([a-zA-Z0-9_-]+)" + &escape(MACRO_INLINE_END))).unwrap();
-    static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<H>\\d{0,2}):(?P<HM>[0-5]?\\d?):)|(?:(?P<M>[0-5]?\\d?):))?(?:(?P<S>[0-5]?\\d?)\\.)?(?P<MS>\\d{0,3})$").unwrap();
-}
-
-
-// Utilities
+// Functions
 pub fn parse_timestamp(timestamp: &str) -> Result<u32,()> {
     // Milliseconds factors
     const MS_2_MS: u32 = 1;
@@ -101,6 +69,27 @@ fn get_key_value<'a,K,V,Q: ?Sized>(map: &'a HashMap<K,V>, k: &Q) -> Option<(&'a 
     Some((key, map.get(key.borrow())?))
 }
 
+pub fn bool_from_str(text: &str) -> Result<bool,()> {
+    match text {
+        "y" => Ok(true),
+        "n" => Ok(false),
+        _ => Err(())
+    }
+}
+
+pub fn map_or_err_str<'a,T,F,U,E>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
+    where T: AsRef<str> + ?Sized,
+        F: FnOnce(&str) -> Result<U,E> {
+    option.map_or(Err(""), |value| op(value.as_ref()).map_err(|_| value.as_ref() ))
+}
+pub fn map_else_err_str<'a,T,F,U>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
+    where T: AsRef<str> + ?Sized,
+        F: FnOnce(&str) -> Option<U> {
+    option.map_or(Err(""), |value| op(value.as_ref()).ok_or_else(|| value.as_ref() ))
+}
+
+
+// Structures
 pub struct EscapedText {
     text: String,
     tag_starts_ends: Vec<(usize,char)>
@@ -215,25 +204,6 @@ impl<'src> Iterator for TagsIterator<'src> {
     }
 }
 
-pub fn bool_from_str(text: &str) -> Result<bool,()> {
-    match text {
-        "y" => Ok(true),
-        "n" => Ok(false),
-        _ => Err(())
-    }
-}
-
-pub fn map_or_err_str<'a,T,F,U,E>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
-    where T: AsRef<str> + ?Sized,
-        F: FnOnce(&str) -> Result<U,E> {
-    option.map_or(Err(""), |value| op(value.as_ref()).map_err(|_| value.as_ref() ))
-}
-pub fn map_else_err_str<'a,T,F,U>(option: Option<&'a T>, op: F) -> Result<U,&'a str>
-    where T: AsRef<str> + ?Sized,
-        F: FnOnce(&str) -> Option<U> {
-    option.map_or(Err(""), |value| op(value.as_ref()).ok_or_else(|| value.as_ref() ))
-}
-
 
 // Tests
 #[cfg(test)]
@@ -243,7 +213,7 @@ mod tests {
         flatten_macro,
         EscapedText,
         TagsIterator,
-        super::error::MacroError,
+        MacroError,
         HashMap,
         HashSet
     };

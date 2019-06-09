@@ -1,7 +1,7 @@
 mod grammar_tests {
     // Imports
     use ssb_parser::{
-        types::EventTrigger,
+        types::ssb::EventTrigger,
         data::{Ssb, SsbRender}
     };
     use std::{
