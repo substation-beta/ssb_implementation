@@ -27,7 +27,11 @@ pub enum EventTag {
     Join(Join),
     Cap(Cap),
     Texture(String),
-    TexFill(TexFill)
+    TexFill(TexFill),
+    Color(Color),
+    BorderColor(Color),
+    Alpha(Alpha),
+    BorderAlpha(Alpha)
 
     // TODO
 
@@ -203,6 +207,22 @@ impl TryFrom<&str> for TextureWrapping {
             _ => Err(())
         }
     }
+}
+#[derive(Debug)]
+pub enum Color {
+    Mono([u8;3]),
+    Linear([[u8;3];2]),
+    LinearWithStop([[u8;3];3]),
+    Corners([[u8;3];4]),
+    CornersWithStop([[u8;3];5])
+}
+#[derive(Debug)]
+pub enum Alpha {
+    Mono(u8),
+    Linear([u8;2]),
+    LinearWithStop([u8;3]),
+    Corners([u8;4]),
+    CornersWithStop([u8;5])
 }
 
 

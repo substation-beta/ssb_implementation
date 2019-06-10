@@ -5,11 +5,11 @@ use super::{
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
         geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping}
+        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha}
     },
     utils::{
         constants::*,
-        functions::{parse_timestamp,flatten_macro,EscapedText,TagsIterator,bool_from_str,map_or_err_str,map_else_err_str}
+        functions::{parse_timestamp,flatten_macro,EscapedText,TagsIterator,bool_from_str,alpha_from_str,rgb_from_str,map_or_err_str,map_else_err_str}
     }
 };
 use std::{
@@ -571,6 +571,162 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture filling '{}'!", value), event.data_location) )?
+                            ))),
+                            "color" => objects.push(EventObject::Tag(EventTag::Color(
+                                map_or_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
+                                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
+                                        (Some(color1), Some(color2), Some(color3), Some(color4), Some(color5)) =>
+                                            Color::CornersWithStop([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?,
+                                                rgb_from_str(color4)?,
+                                                rgb_from_str(color5)?
+                                            ]),
+                                        (Some(color1), Some(color2), Some(color3), Some(color4), None) =>
+                                            Color::Corners([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?,
+                                                rgb_from_str(color4)?
+                                            ]),
+                                        (Some(color1), Some(color2), Some(color3), None, None) =>
+                                            Color::LinearWithStop([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?
+                                            ]),
+                                        (Some(color1), Some(color2), None, None, None) =>
+                                            Color::Linear([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?
+                                            ]),
+                                        (Some(color1), None, None, None, None) =>
+                                            Color::Mono(
+                                                rgb_from_str(color1)?
+                                            ),
+                                        _ => return Err(())
+                                    })
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
+                            ))),
+                            "bordercolor" => objects.push(EventObject::Tag(EventTag::BorderColor(
+                                map_or_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
+                                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
+                                        (Some(color1), Some(color2), Some(color3), Some(color4), Some(color5)) =>
+                                            Color::CornersWithStop([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?,
+                                                rgb_from_str(color4)?,
+                                                rgb_from_str(color5)?
+                                            ]),
+                                        (Some(color1), Some(color2), Some(color3), Some(color4), None) =>
+                                            Color::Corners([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?,
+                                                rgb_from_str(color4)?
+                                            ]),
+                                        (Some(color1), Some(color2), Some(color3), None, None) =>
+                                            Color::LinearWithStop([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?,
+                                                rgb_from_str(color3)?
+                                            ]),
+                                        (Some(color1), Some(color2), None, None, None) =>
+                                            Color::Linear([
+                                                rgb_from_str(color1)?,
+                                                rgb_from_str(color2)?
+                                            ]),
+                                        (Some(color1), None, None, None, None) =>
+                                            Color::Mono(
+                                                rgb_from_str(color1)?
+                                            ),
+                                        _ => return Err(())
+                                    })
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
+                            ))),
+                            "alpha" => objects.push(EventObject::Tag(EventTag::Alpha(
+                                map_or_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
+                                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), Some(alpha5)) =>
+                                            Alpha::CornersWithStop([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?,
+                                                alpha_from_str(alpha4)?,
+                                                alpha_from_str(alpha5)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), None) =>
+                                            Alpha::Corners([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?,
+                                                alpha_from_str(alpha4)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), None, None) =>
+                                            Alpha::LinearWithStop([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), None, None, None) =>
+                                            Alpha::Linear([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?
+                                            ]),
+                                        (Some(alpha1), None, None, None, None) =>
+                                            Alpha::Mono(
+                                                alpha_from_str(alpha1)?
+                                            ),
+                                        _ => return Err(())
+                                    })
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
+                            ))),
+                            "borderalpha" => objects.push(EventObject::Tag(EventTag::BorderAlpha(
+                                map_or_err_str(tag_value, |value| {
+                                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
+                                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), Some(alpha5)) =>
+                                            Alpha::CornersWithStop([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?,
+                                                alpha_from_str(alpha4)?,
+                                                alpha_from_str(alpha5)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), None) =>
+                                            Alpha::Corners([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?,
+                                                alpha_from_str(alpha4)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), Some(alpha3), None, None) =>
+                                            Alpha::LinearWithStop([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?,
+                                                alpha_from_str(alpha3)?
+                                            ]),
+                                        (Some(alpha1), Some(alpha2), None, None, None) =>
+                                            Alpha::Linear([
+                                                alpha_from_str(alpha1)?,
+                                                alpha_from_str(alpha2)?
+                                            ]),
+                                        (Some(alpha1), None, None, None, None) =>
+                                            Alpha::Mono(
+                                                alpha_from_str(alpha1)?
+                                            ),
+                                        _ => return Err(())
+                                    })
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
                             ))),
                             
 
