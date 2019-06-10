@@ -21,7 +21,7 @@ use std::{
 
 
 // Raw data
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Ssb {
     // Info section
     pub info_title: Option<String>,
@@ -255,7 +255,7 @@ impl Ssb {
 
 
 // Processed data (for rendering)
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct SsbRender {
     // Target section
     pub target_width: Option<u16>,

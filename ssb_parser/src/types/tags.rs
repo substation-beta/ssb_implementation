@@ -4,7 +4,7 @@ use super::ssb::{Coordinate,Degree,Point2D,Point3D};
 
 
 // Enums
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum EventTag {
     Font(String),
     Size(f32),
@@ -36,7 +36,7 @@ pub enum EventTag {
     // TODO
 
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Alignment {
     Numpad(Numpad),
     Offset(Point2D)
@@ -64,7 +64,7 @@ impl TryFrom<u8> for Numpad {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Margin {
     All(Coordinate, Coordinate, Coordinate, Coordinate),
     Top(Coordinate),
@@ -108,40 +108,40 @@ impl TryFrom<&str> for Direction {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Space {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Rotate {
     All(Degree, Degree, Degree),
     X(Degree),
     Y(Degree),
     Z(Degree)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Scale {
     All(Degree, Degree, Degree),
     X(Degree),
     Y(Degree),
     Z(Degree)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Translate {
     All(Coordinate, Coordinate, Coordinate),
     X(Coordinate),
     Y(Coordinate),
     Z(Coordinate)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Shear {
     All(Degree, Degree),
     X(Degree),
     Y(Degree)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Border {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
@@ -181,7 +181,7 @@ impl TryFrom<&str> for Cap {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct TexFill {
     pub x0: Degree,
     pub y0: Degree,
@@ -208,7 +208,7 @@ impl TryFrom<&str> for TextureWrapping {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Color {
     Mono([u8;3]),
     Linear([[u8;3];2]),
@@ -216,7 +216,7 @@ pub enum Color {
     Corners([[u8;3];4]),
     CornersWithStop([[u8;3];5])
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Alpha {
     Mono(u8),
     Linear([u8;2]),

@@ -8,7 +8,7 @@ use super::{
 
 
 // Data minor types
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Event {
     pub trigger: EventTrigger,
     pub macro_name: Option<String>,
@@ -16,7 +16,7 @@ pub struct Event {
     pub data: String,
     pub data_location: (usize,usize)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct EventRender {
     pub trigger: EventTrigger,
     pub objects: Vec<EventObject>
@@ -79,17 +79,17 @@ pub type TextureData = Vec<u8>;
 
 
 // Object types
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum EventObject {
     Geometry(EventGeometry),
     Tag(EventTag)
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Point2D {
     pub x: Coordinate,
     pub y: Coordinate
 }
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Point3D {
     pub x: Coordinate,
     pub y: Coordinate,
