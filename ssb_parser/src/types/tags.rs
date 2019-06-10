@@ -31,7 +31,10 @@ pub enum EventTag {
     Color(Color),
     BorderColor(Color),
     Alpha(Alpha),
-    BorderAlpha(Alpha)
+    BorderAlpha(Alpha),
+    Blur(Blur),
+    Target(Target),
+    Blend(Blend)
 
     // TODO
 
@@ -224,6 +227,50 @@ pub enum Alpha {
     Corners([u8;4]),
     CornersWithStop([u8;5])
 }
+#[derive(Debug, PartialEq)]
+pub enum Blur {
+    All(Coordinate, Coordinate),
+    Horizontal(Coordinate),
+    Vertical(Coordinate)
+}
+#[derive(Debug, PartialEq)]
+pub enum Target {
+    Frame,
+    Mask
+}
+impl TryFrom<&str> for Target {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "frame" => Ok(Target::Frame),
+            "mask" => Ok(Target::Mask),
+            _ => Err(())
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+pub enum Blend {
+    Add,
+    Subtract,
+    Multiply,
+    Invert,
+    Difference,
+    Screen
+}
+impl TryFrom<&str> for Blend {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "add" => Ok(Blend::Add),
+            "subtract" => Ok(Blend::Subtract),
+            "multiply" => Ok(Blend::Multiply),
+            "invert" => Ok(Blend::Invert),
+            "difference" => Ok(Blend::Difference),
+            "screen" => Ok(Blend::Screen),
+            _ => Err(())
+        }
+    }
+}
 
 
 // Tests
@@ -231,12 +278,14 @@ pub enum Alpha {
 mod tests {
     #[test]
     fn convert() {
-        use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, TryFrom};
+        use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, Target, Blend, TryFrom};
         assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
         assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
         assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
         assert_eq!(Join::try_from("bevel").expect("Join expected!"), Join::Bevel);
         assert_eq!(Cap::try_from("butt").expect("Cap expected!"), Cap::Butt);
         assert_eq!(TextureWrapping::try_from("mirror").expect("TextureWrapping expected!"), TextureWrapping::Mirror);
+        assert_eq!(Target::try_from("mask").expect("Target expected!"), Target::Mask);
+        assert_eq!(Blend::try_from("invert").expect("Blend expected!"), Blend::Invert);
     }
 }

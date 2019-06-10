@@ -437,6 +437,26 @@ Texture: Fancy,data,RmFuY3k=
                                     13
                                 ]))
                             ),
+                            EventObject::Tag(
+                                EventTag::Blur(Blur::All(
+                                    1.2, 1.5
+                                ))
+                            ),
+                            EventObject::Tag(
+                                EventTag::Blur(Blur::Vertical(
+                                    5.0
+                                ))
+                            ),
+                            EventObject::Tag(
+                                EventTag::Target(
+                                    Target::Frame
+                                )
+                            ),
+                            EventObject::Tag(
+                                EventTag::Blend(
+                                    Blend::Screen
+                                )
+                            ),
                             EventObject::Geometry(
                                 EventGeometry::Text(
                                     "Super styled :)".to_owned()

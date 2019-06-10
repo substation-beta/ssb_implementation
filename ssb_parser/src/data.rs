@@ -5,7 +5,7 @@ use super::{
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
         geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha}
+        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Target,Blend}
     },
     utils::{
         constants::*,
@@ -727,6 +727,38 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
+                            ))),
+                            "blur" => objects.push(EventObject::Tag(EventTag::Blur(
+                                map_else_err_str(tag_value, |value| {
+                                    Some(
+                                        if let Some(sep) = value.find(VALUE_SEPARATOR) {
+                                            Blur::All(
+                                                value[..sep].parse().ok()?,
+                                                value[sep + 1 /* VALUE_SEPARATOR */..].parse().ok()?
+                                            )
+                                        } else {
+                                            let blur = value.parse().ok()?;
+                                            Blur::All(blur, blur)
+                                        }
+                                    )
+                                } )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur '{}'!", value), event.data_location) )?
+                            ))),
+                            "blur-h" => objects.push(EventObject::Tag(EventTag::Blur(
+                                map_else_err_str(tag_value, |value| Some(Blur::Horizontal(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur horizontal '{}'!", value), event.data_location) )?
+                            ))),
+                            "blur-v" => objects.push(EventObject::Tag(EventTag::Blur(
+                                map_else_err_str(tag_value, |value| Some(Blur::Vertical(value.parse().ok()?)) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur vertical '{}'!", value), event.data_location) )?
+                            ))),
+                            "target" => objects.push(EventObject::Tag(EventTag::Target(
+                                map_or_err_str(tag_value, |value| Target::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid target '{}'!", value), event.data_location) )?
+                            ))),
+                            "blend" => objects.push(EventObject::Tag(EventTag::Blend(
+                                map_or_err_str(tag_value, |value| Blend::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid blend '{}'!", value), event.data_location) )?
                             ))),
                             
 
