@@ -448,14 +448,22 @@ Texture: Fancy,data,RmFuY3k=
                                 ))
                             ),
                             EventObject::Tag(
+                                EventTag::Blend(
+                                    Blend::Screen
+                                )
+                            ),
+                            EventObject::Tag(
                                 EventTag::Target(
                                     Target::Frame
                                 )
                             ),
                             EventObject::Tag(
-                                EventTag::Blend(
-                                    Blend::Screen
+                                EventTag::MaskMode(
+                                    MaskMode::Normal
                                 )
+                            ),
+                            EventObject::Tag(
+                                EventTag::MaskClear
                             ),
                             EventObject::Geometry(
                                 EventGeometry::Text(

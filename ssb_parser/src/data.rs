@@ -5,7 +5,7 @@ use super::{
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
         geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Target,Blend}
+        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode}
     },
     utils::{
         constants::*,
@@ -752,14 +752,22 @@ impl TryFrom<Ssb> for SsbRender {
                                 map_else_err_str(tag_value, |value| Some(Blur::Vertical(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur vertical '{}'!", value), event.data_location) )?
                             ))),
-                            "target" => objects.push(EventObject::Tag(EventTag::Target(
-                                map_or_err_str(tag_value, |value| Target::try_from(value) )
-                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid target '{}'!", value), event.data_location) )?
-                            ))),
                             "blend" => objects.push(EventObject::Tag(EventTag::Blend(
                                 map_or_err_str(tag_value, |value| Blend::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blend '{}'!", value), event.data_location) )?
                             ))),
+                            "target" => objects.push(EventObject::Tag(EventTag::Target(
+                                map_or_err_str(tag_value, |value| Target::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid target '{}'!", value), event.data_location) )?
+                            ))),
+                            "mask-mode" => objects.push(EventObject::Tag(EventTag::MaskMode(
+                                map_or_err_str(tag_value, |value| MaskMode::try_from(value) )
+                                .map_err(|value| ParseError::new_with_pos(&format!("Invalid mask mode '{}'!", value), event.data_location) )?
+                            ))),
+                            "mask-clear" => objects.push(EventObject::Tag(
+                                if tag_value.is_none() {EventTag::MaskClear}
+                                else {return Err(ParseError::new_with_pos("Mask clear has no value!", event.data_location))}
+                            )),
                             
 
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags

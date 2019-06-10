@@ -33,8 +33,10 @@ pub enum EventTag {
     Alpha(Alpha),
     BorderAlpha(Alpha),
     Blur(Blur),
+    Blend(Blend),
     Target(Target),
-    Blend(Blend)
+    MaskMode(MaskMode),
+    MaskClear
 
     // TODO
 
@@ -234,21 +236,6 @@ pub enum Blur {
     Vertical(Coordinate)
 }
 #[derive(Debug, PartialEq)]
-pub enum Target {
-    Frame,
-    Mask
-}
-impl TryFrom<&str> for Target {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "frame" => Ok(Target::Frame),
-            "mask" => Ok(Target::Mask),
-            _ => Err(())
-        }
-    }
-}
-#[derive(Debug, PartialEq)]
 pub enum Blend {
     Add,
     Subtract,
@@ -271,6 +258,36 @@ impl TryFrom<&str> for Blend {
         }
     }
 }
+#[derive(Debug, PartialEq)]
+pub enum Target {
+    Frame,
+    Mask
+}
+impl TryFrom<&str> for Target {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "frame" => Ok(Target::Frame),
+            "mask" => Ok(Target::Mask),
+            _ => Err(())
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+pub enum MaskMode {
+    Normal,
+    Invert
+}
+impl TryFrom<&str> for MaskMode {
+    type Error = ();
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "normal" => Ok(MaskMode::Normal),
+            "invert" => Ok(MaskMode::Invert),
+            _ => Err(())
+        }
+    }
+}
 
 
 // Tests
@@ -278,14 +295,15 @@ impl TryFrom<&str> for Blend {
 mod tests {
     #[test]
     fn convert() {
-        use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, Target, Blend, TryFrom};
+        use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, Blend, Target, MaskMode, TryFrom};
         assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
         assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
         assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
         assert_eq!(Join::try_from("bevel").expect("Join expected!"), Join::Bevel);
         assert_eq!(Cap::try_from("butt").expect("Cap expected!"), Cap::Butt);
         assert_eq!(TextureWrapping::try_from("mirror").expect("TextureWrapping expected!"), TextureWrapping::Mirror);
-        assert_eq!(Target::try_from("mask").expect("Target expected!"), Target::Mask);
         assert_eq!(Blend::try_from("invert").expect("Blend expected!"), Blend::Invert);
+        assert_eq!(Target::try_from("mask").expect("Target expected!"), Target::Mask);
+        assert_eq!(MaskMode::try_from("invert").expect("MaskMode expected!"), MaskMode::Invert);
     }
 }
