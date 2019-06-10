@@ -35,6 +35,19 @@ pub fn bool_from_str(text: &str) -> Result<bool,()> {
     }
 }
 
+pub fn alpha_from_str(text: &str) -> Result<u8,()> {
+    match text.len() {
+        1...2 => u8::from_str_radix(text, 16).map_err(|_| () ),
+        _ => Err(())
+    }
+}
+pub fn rgb_from_str(text: &str) -> Result<[u8;3],()> {
+    match text.len() {
+        1...6 => u32::from_str_radix(text, 16).map(|value| {let bytes = value.to_le_bytes(); [bytes[2], bytes[1], bytes[0]]} ).map_err(|_| () ),
+        _ => Err(()),
+    }
+}
+
 pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macros: &'a HashMap<String, String>, flat_macros: &mut HashMap<&'a str, String>) -> Result<(), MacroError> {
     // Macro already flattened?
     if flat_macros.contains_key(macro_name) {
@@ -211,6 +224,8 @@ mod tests {
     use super::{
         parse_timestamp,
         bool_from_str,
+        alpha_from_str,
+        rgb_from_str,
         flatten_macro,
         map_or_err_str,
         map_else_err_str,
@@ -234,6 +249,19 @@ mod tests {
         assert_eq!(bool_from_str("y"), Ok(true));
         assert_eq!(bool_from_str("n"), Ok(false));
         assert_eq!(bool_from_str("no"), Err(()));
+    }
+
+    #[test]
+    fn parse_rgb_alpha() {
+        assert_eq!(alpha_from_str(""), Err(()));
+        assert_eq!(alpha_from_str("A"), Ok(10));
+        assert_eq!(alpha_from_str("C1"), Ok(193));
+        assert_eq!(alpha_from_str("1FF"), Err(()));
+        assert_eq!(rgb_from_str(""), Err(()));
+        assert_eq!(rgb_from_str("1FF"), Ok([0, 1, 255]));
+        assert_eq!(rgb_from_str("808080"), Ok([128, 128, 128]));
+        assert_eq!(rgb_from_str("FFFF01"), Ok([255, 255, 1]));
+        assert_eq!(rgb_from_str("1FFFFFF"), Err(()));
     }
 
     #[test]
