@@ -22,7 +22,7 @@ pub enum EventTag {
     Scale(Scale),
     Translate(Translate),
     Shear(Shear),
-    Matrix([Degree;16]),
+    Matrix(Box<[Degree;16]>),
     Border(Border),
     Join(Join),
     Cap(Cap),

@@ -511,12 +511,12 @@ impl TryFrom<Ssb> for SsbRender {
                             "matrix" => objects.push(EventObject::Tag(EventTag::Matrix(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(16, VALUE_SEPARATOR).filter_map(|value| value.parse().ok() );
-                                    Some([
+                                    Some(Box::new([
                                         tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
                                         tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
                                         tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
                                         tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?
-                                    ])
+                                    ]))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid matrix '{}'!", value), event.data_location) )?
                             ))),

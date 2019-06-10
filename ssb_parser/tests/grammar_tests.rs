@@ -367,12 +367,12 @@ Texture: Fancy,data,RmFuY3k=
                                 ))
                             ),
                             EventObject::Tag(
-                                EventTag::Matrix([
+                                EventTag::Matrix(Box::new([
                                     0.5, 0.0, 0.0, 0.0,
                                     0.0, 1.0, 0.0, 0.0,
                                     0.0, 0.0, 1.0, 0.0,
                                     0.0, 0.0, 0.0, 1.0
-                                ])
+                                ]))
                             ),
                             EventObject::Tag(
                                 EventTag::Border(Border::All(
