@@ -19,23 +19,25 @@ mod grammar_tests {
     #[test]
     fn test_ssb_simple() {
         // Parse
-        let ssb = Ssb::default().parse_owned(Cursor::new("\n\
-            #Info\n\
-            Author: Youka\n\
-            \n\
-            #Target\n\
-            Width: 123\n\
-            \n\
-            #Macros\n\
-            foo: bar\n\
-            \n\
-            #Events\n\
-            0-1::.|foo|I'm a note!|[color=123abc]Hello world!\n\
-            \n\
-            #Resources\n\
-            Font: bar,bold,dXNhZ2k=\n\
-            Texture: Fancy,data,RmFuY3k=\n\
-        "), None).unwrap();
+        let ssb = Ssb::default().parse_owned(Cursor::new(
+"
+#Info
+Author: Youka
+
+#Target
+Width: 123
+
+#Macros
+foo: bar
+
+#Events
+0-1::.|foo|I'm a note!|[color=123abc]Hello world!
+
+#Resources
+Font: bar,bold,dXNhZ2k=
+Texture: Fancy,data,RmFuY3k=
+"
+        ), None).unwrap();
         // Asserts
         assert_eq!(ssb.info_title, None);
         assert_eq!(ssb.info_author, Some("Youka".to_owned()));
@@ -53,18 +55,20 @@ mod grammar_tests {
     }
 
     #[test]
-    fn test_ssb() {
+    fn test_ssb_complex() {
         // Parse 1st phase
         let mut ssb = Ssb::default();
         ssb.parse(
-            BufReader::new(File::open(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb")).expect("Test SSB file must exist!")),
+            BufReader::new(
+                File::open(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))
+                .expect("Test SSB file must exist!")
+            ),
             Some(Path::new(env!("CARGO_MANIFEST_DIR")))
         ).unwrap_or_else(|exception| panic!("SSB parsing error: {}", exception) );
         //println!("{:#?}", ssb);
         // Parse 2nd phase
-        let ssb_render = SsbRender::try_from(ssb).unwrap_or_else(|exception| panic!("SSB render data error: {}", exception) );
         assert_eq!(
-            ssb_render,
+            SsbRender::try_from(ssb).unwrap_or_else(|exception| panic!("SSB render data error: {}", exception) ),
             SsbRender {
                 target_width: Some(1280),
                 target_height: Some(720),
@@ -93,9 +97,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Color(Color::Mono([
-                                    255,
-                                    0,
-                                    0
+                                    255, 0, 0
                                 ]))
                             ),
                             EventObject::Geometry(
@@ -115,9 +117,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Color(Color::Mono([
-                                    255,
-                                    0,
-                                    0
+                                    255, 0, 0
                                 ]))
                             ),
                             EventObject::Tag(
@@ -210,9 +210,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Color(Color::Mono([
-                                    255,
-                                    0,
-                                    0
+                                    255, 0, 0
                                 ]))
                             ),
                             EventObject::Geometry(
@@ -300,10 +298,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Margin(Margin::All(
-                                    1.0,
-                                    2.0,
-                                    3.0,
-                                    4.0
+                                    1.0, 2.0, 3.0, 4.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -323,8 +318,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Space(Space::All(
-                                    9.8,
-                                    7.6
+                                    9.8, 7.6
                                 ))
                             ),
                             EventObject::Tag(
@@ -334,9 +328,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Rotate(Rotate::All(
-                                    5.0,
-                                    9.0,
-                                    1.0
+                                    5.0, 9.0, 1.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -346,9 +338,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Scale(Scale::All(
-                                    0.75,
-                                    1.25,
-                                    1.0
+                                    0.75, 1.25, 1.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -358,9 +348,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Translate(Translate::All(
-                                    100.0,
-                                    200.0,
-                                    0.0
+                                    100.0, 200.0, 0.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -370,8 +358,7 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Shear(Shear::All(
-                                    1.0,
-                                    -1.0
+                                    1.0, -1.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -381,28 +368,15 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Matrix([
-                                    0.5,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    1.0
+                                    0.5, 0.0, 0.0, 0.0,
+                                    0.0, 1.0, 0.0, 0.0,
+                                    0.0, 0.0, 1.0, 0.0,
+                                    0.0, 0.0, 0.0, 1.0
                                 ])
                             ),
                             EventObject::Tag(
                                 EventTag::Border(Border::All(
-                                    42.0,
-                                    42.0
+                                    42.0, 42.0
                                 ))
                             ),
                             EventObject::Tag(
@@ -436,50 +410,18 @@ mod grammar_tests {
                             ),
                             EventObject::Tag(
                                 EventTag::Color(Color::CornersWithStop([
-                                    [
-                                        0,
-                                        0,
-                                        0
-                                    ],
-                                    [
-                                        255,
-                                        255,
-                                        255
-                                    ],
-                                    [
-                                        255,
-                                        0,
-                                        0
-                                    ],
-                                    [
-                                        0,
-                                        255,
-                                        0
-                                    ],
-                                    [
-                                        0,
-                                        0,
-                                        255
-                                    ]
+                                    [0, 0, 0],
+                                    [255, 255,  255],
+                                    [255, 0, 0],
+                                    [0, 255, 0],
+                                    [0, 0, 255]
                                 ]))
                             ),
                             EventObject::Tag(
                                 EventTag::BorderColor(Color::LinearWithStop([
-                                    [
-                                        255,
-                                        255,
-                                        0
-                                    ],
-                                    [
-                                        0,
-                                        255,
-                                        255
-                                    ],
-                                    [
-                                        255,
-                                        0,
-                                        255
-                                    ]
+                                    [255, 255, 0],
+                                    [0, 255, 255],
+                                    [255, 0, 255]
                                 ]))
                             ),
                             EventObject::Tag(
