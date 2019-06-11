@@ -562,13 +562,13 @@ impl TryFrom<Ssb> for SsbRender {
                             "texfill" => objects.push(EventObject::Tag(EventTag::TexFill(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
-                                    Some(TexFill {
+                                    Some(Box::new(TexFill {
                                         x0: tokens.next()?.parse().ok()?,
                                         y0: tokens.next()?.parse().ok()?,
                                         x1: tokens.next()?.parse().ok()?,
                                         y1: tokens.next()?.parse().ok()?,
                                         wrap: TextureWrapping::try_from(tokens.next()?).ok()?
-                                    })
+                                    }))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture filling '{}'!", value), event.data_location) )?
                             ))),

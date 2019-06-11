@@ -27,7 +27,7 @@ pub enum EventTag {
     Join(Join),
     Cap(Cap),
     Texture(String),
-    TexFill(TexFill),
+    TexFill(Box<TexFill>),
     Color(Color),
     BorderColor(Color),
     Alpha(Alpha),
