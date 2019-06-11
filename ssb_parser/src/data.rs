@@ -3,9 +3,8 @@ use super::{
     types::{
         error::ParseError,
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
-        ssb::{View,Event,EventRender,EventTrigger,EventObject,Point2D,Point3D,FontFace,FontStyle,FontData,TextureId,TextureData},
-        geometries::{EventGeometry,ShapeSegment},
-        tags::{EventTag,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode}
+        ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData},
+        objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode}
     },
     utils::{
         constants::*,
@@ -299,31 +298,31 @@ impl TryFrom<Ssb> for SsbRender {
                 if is_tag {
                     for (tag_name, tag_value) in TagsIterator::new(data) {
                         match tag_name {
-                            "font" => objects.push(EventObject::Tag(EventTag::Font(
+                            "font" => objects.push(EventObject::TagFont(
                                 map_else_err_str(tag_value, |value| Some(value.to_owned()) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid font '{}'!", value), event.data_location) )?
-                            ))),
-                            "size" => objects.push(EventObject::Tag(EventTag::Size(
+                            )),
+                            "size" => objects.push(EventObject::TagSize(
                                 map_or_err_str(tag_value, |value| value.parse() )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid size '{}'!", value), event.data_location) )?
-                            ))),
-                            "bold" => objects.push(EventObject::Tag(EventTag::Bold(
+                            )),
+                            "bold" => objects.push(EventObject::TagBold(
                                 map_or_err_str(tag_value, |value| bool_from_str(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid bold '{}'!", value), event.data_location) )?
-                            ))),
-                            "italic" => objects.push(EventObject::Tag(EventTag::Italic(
+                            )),
+                            "italic" => objects.push(EventObject::TagItalic(
                                 map_or_err_str(tag_value, |value| bool_from_str(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid italic '{}'!", value), event.data_location) )?
-                            ))),
-                            "underline" => objects.push(EventObject::Tag(EventTag::Underline(
+                            )),
+                            "underline" => objects.push(EventObject::TagUnderline(
                                 map_or_err_str(tag_value, |value| bool_from_str(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid underline '{}'!", value), event.data_location) )?
-                            ))),
-                            "strikeout" => objects.push(EventObject::Tag(EventTag::Strikeout(
+                            )),
+                            "strikeout" => objects.push(EventObject::TagStrikeout(
                                 map_or_err_str(tag_value, |value| bool_from_str(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid strikeout '{}'!", value), event.data_location) )?
-                            ))),
-                            "position" => objects.push(EventObject::Tag(EventTag::Position(
+                            )),
+                            "position" => objects.push(EventObject::TagPosition(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     Some(Point3D {
@@ -333,8 +332,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid position '{}'!", value), event.data_location) )?
-                            ))),
-                            "alignment" => objects.push(EventObject::Tag(EventTag::Alignment(
+                            )),
+                            "alignment" => objects.push(EventObject::TagAlignment(
                                 map_else_err_str(tag_value, |value| {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
@@ -348,8 +347,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     )
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid alignment '{}'!", value), event.data_location) )?
-                            ))),
-                            "margin" => objects.push(EventObject::Tag(EventTag::Margin(
+                            )),
+                            "margin" => objects.push(EventObject::TagMargin(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(4, VALUE_SEPARATOR);
                                     Some(
@@ -372,32 +371,32 @@ impl TryFrom<Ssb> for SsbRender {
                                     )
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin '{}'!", value), event.data_location) )?
-                            ))),
-                            "margin-top" => objects.push(EventObject::Tag(EventTag::Margin(
+                            )),
+                            "margin-top" => objects.push(EventObject::TagMargin(
                                 map_else_err_str(tag_value, |value| Some(Margin::Top(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin top '{}'!", value), event.data_location) )?
-                            ))),
-                            "margin-right" => objects.push(EventObject::Tag(EventTag::Margin(
+                            )),
+                            "margin-right" => objects.push(EventObject::TagMargin(
                                 map_else_err_str(tag_value, |value| Some(Margin::Right(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin right '{}'!", value), event.data_location) )?
-                            ))),
-                            "margin-bottom" => objects.push(EventObject::Tag(EventTag::Margin(
+                            )),
+                            "margin-bottom" => objects.push(EventObject::TagMargin(
                                 map_else_err_str(tag_value, |value| Some(Margin::Bottom(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin bottom '{}'!", value), event.data_location) )?
-                            ))),
-                            "margin-left" => objects.push(EventObject::Tag(EventTag::Margin(
+                            )),
+                            "margin-left" => objects.push(EventObject::TagMargin(
                                 map_else_err_str(tag_value, |value| Some(Margin::Left(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid margin left '{}'!", value), event.data_location) )?
-                            ))),
-                            "wrap-style" => objects.push(EventObject::Tag(EventTag::WrapStyle(
+                            )),
+                            "wrap-style" => objects.push(EventObject::TagWrapStyle(
                                 map_or_err_str(tag_value, |value| WrapStyle::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid wrap style '{}'!", value), event.data_location) )?
-                            ))),
-                            "direction" => objects.push(EventObject::Tag(EventTag::Direction(
+                            )),
+                            "direction" => objects.push(EventObject::TagDirection(
                                 map_or_err_str(tag_value, |value| Direction::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid direction '{}'!", value), event.data_location) )?
-                            ))),
-                            "space" => objects.push(EventObject::Tag(EventTag::Space(
+                            )),
+                            "space" => objects.push(EventObject::TagSpace(
                                 map_else_err_str(tag_value, |value| {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
@@ -412,16 +411,16 @@ impl TryFrom<Ssb> for SsbRender {
                                     )
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid space '{}'!", value), event.data_location) )?
-                            ))),
-                            "space-h" => objects.push(EventObject::Tag(EventTag::Space(
+                            )),
+                            "space-h" => objects.push(EventObject::TagSpace(
                                 map_else_err_str(tag_value, |value| Some(Space::Horizontal(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid space horizontal '{}'!", value), event.data_location) )?
-                            ))),
-                            "space-v" => objects.push(EventObject::Tag(EventTag::Space(
+                            )),
+                            "space-v" => objects.push(EventObject::TagSpace(
                                 map_else_err_str(tag_value, |value| Some(Space::Vertical(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid space vertical '{}'!", value), event.data_location) )?
-                            ))),
-                            "rotate" => objects.push(EventObject::Tag(EventTag::Rotate(
+                            )),
+                            "rotate" => objects.push(EventObject::TagRotate(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     Some(Rotate::All(
@@ -431,20 +430,20 @@ impl TryFrom<Ssb> for SsbRender {
                                     ))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate '{}'!", value), event.data_location) )?
-                            ))),
-                            "rotate-x" => objects.push(EventObject::Tag(EventTag::Rotate(
+                            )),
+                            "rotate-x" => objects.push(EventObject::TagRotate(
                                 map_else_err_str(tag_value, |value| Some(Rotate::X(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate x '{}'!", value), event.data_location) )?
-                            ))),
-                            "rotate-y" => objects.push(EventObject::Tag(EventTag::Rotate(
+                            )),
+                            "rotate-y" => objects.push(EventObject::TagRotate(
                                 map_else_err_str(tag_value, |value| Some(Rotate::Y(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate y '{}'!", value), event.data_location) )?
-                            ))),
-                            "rotate-z" => objects.push(EventObject::Tag(EventTag::Rotate(
+                            )),
+                            "rotate-z" => objects.push(EventObject::TagRotate(
                                 map_else_err_str(tag_value, |value| Some(Rotate::Z(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid rotate z '{}'!", value), event.data_location) )?
-                            ))),
-                            "scale" => objects.push(EventObject::Tag(EventTag::Scale(
+                            )),
+                            "scale" => objects.push(EventObject::TagScale(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     Some(Scale::All(
@@ -454,20 +453,20 @@ impl TryFrom<Ssb> for SsbRender {
                                     ))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale '{}'!", value), event.data_location) )?
-                            ))),
-                            "scale-x" => objects.push(EventObject::Tag(EventTag::Scale(
+                            )),
+                            "scale-x" => objects.push(EventObject::TagScale(
                                 map_else_err_str(tag_value, |value| Some(Scale::X(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale x '{}'!", value), event.data_location) )?
-                            ))),
-                            "scale-y" => objects.push(EventObject::Tag(EventTag::Scale(
+                            )),
+                            "scale-y" => objects.push(EventObject::TagScale(
                                 map_else_err_str(tag_value, |value| Some(Scale::Y(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale y '{}'!", value), event.data_location) )?
-                            ))),
-                            "scale-z" => objects.push(EventObject::Tag(EventTag::Scale(
+                            )),
+                            "scale-z" => objects.push(EventObject::TagScale(
                                 map_else_err_str(tag_value, |value| Some(Scale::Z(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid scale z '{}'!", value), event.data_location) )?
-                            ))),
-                            "translate" => objects.push(EventObject::Tag(EventTag::Translate(
+                            )),
+                            "translate" => objects.push(EventObject::TagTranslate(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                                     Some(Translate::All(
@@ -477,20 +476,20 @@ impl TryFrom<Ssb> for SsbRender {
                                     ))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate '{}'!", value), event.data_location) )?
-                            ))),
-                            "translate-x" => objects.push(EventObject::Tag(EventTag::Translate(
+                            )),
+                            "translate-x" => objects.push(EventObject::TagTranslate(
                                 map_else_err_str(tag_value, |value| Some(Translate::X(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate x '{}'!", value), event.data_location) )?
-                            ))),
-                            "translate-y" => objects.push(EventObject::Tag(EventTag::Translate(
+                            )),
+                            "translate-y" => objects.push(EventObject::TagTranslate(
                                 map_else_err_str(tag_value, |value| Some(Translate::Y(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate y '{}'!", value), event.data_location) )?
-                            ))),
-                            "translate-z" => objects.push(EventObject::Tag(EventTag::Translate(
+                            )),
+                            "translate-z" => objects.push(EventObject::TagTranslate(
                                 map_else_err_str(tag_value, |value| Some(Translate::Z(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid translate z '{}'!", value), event.data_location) )?
-                            ))),
-                            "shear" => objects.push(EventObject::Tag(EventTag::Shear(
+                            )),
+                            "shear" => objects.push(EventObject::TagShear(
                                 map_else_err_str(tag_value, |value| {
                                     let sep = value.find(VALUE_SEPARATOR)?;
                                     Some(Shear::All(
@@ -499,16 +498,16 @@ impl TryFrom<Ssb> for SsbRender {
                                     ))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear '{}'!", value), event.data_location) )?
-                            ))),
-                            "shear-x" => objects.push(EventObject::Tag(EventTag::Shear(
+                            )),
+                            "shear-x" => objects.push(EventObject::TagShear(
                                 map_else_err_str(tag_value, |value| Some(Shear::X(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear x '{}'!", value), event.data_location) )?
-                            ))),
-                            "shear-y" => objects.push(EventObject::Tag(EventTag::Shear(
+                            )),
+                            "shear-y" => objects.push(EventObject::TagShear(
                                 map_else_err_str(tag_value, |value| Some(Shear::Y(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid shear y '{}'!", value), event.data_location) )?
-                            ))),
-                            "matrix" => objects.push(EventObject::Tag(EventTag::Matrix(
+                            )),
+                            "matrix" => objects.push(EventObject::TagMatrix(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(16, VALUE_SEPARATOR).filter_map(|value| value.parse().ok() );
                                     Some(Box::new([
@@ -519,11 +518,11 @@ impl TryFrom<Ssb> for SsbRender {
                                     ]))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid matrix '{}'!", value), event.data_location) )?
-                            ))),
+                            )),
                             "mode" => mode =
                                 map_or_err_str(tag_value, |value| Mode::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid mode '{}'!", value), event.data_location) )?,
-                            "border" => objects.push(EventObject::Tag(EventTag::Border(
+                            "border" => objects.push(EventObject::TagBorder(
                                 map_else_err_str(tag_value, |value| {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
@@ -538,28 +537,28 @@ impl TryFrom<Ssb> for SsbRender {
                                     )
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid border '{}'!", value), event.data_location) )?
-                            ))),
-                            "border-h" => objects.push(EventObject::Tag(EventTag::Border(
+                            )),
+                            "border-h" => objects.push(EventObject::TagBorder(
                                 map_else_err_str(tag_value, |value| Some(Border::Horizontal(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid border horizontal '{}'!", value), event.data_location) )?
-                            ))),
-                            "border-v" => objects.push(EventObject::Tag(EventTag::Border(
+                            )),
+                            "border-v" => objects.push(EventObject::TagBorder(
                                 map_else_err_str(tag_value, |value| Some(Border::Vertical(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid border vertical '{}'!", value), event.data_location) )?
-                            ))),
-                            "join" => objects.push(EventObject::Tag(EventTag::Join(
+                            )),
+                            "join" => objects.push(EventObject::TagJoin(
                                 map_or_err_str(tag_value, |value| Join::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid join '{}'!", value), event.data_location) )?
-                            ))),
-                            "cap" => objects.push(EventObject::Tag(EventTag::Cap(
+                            )),
+                            "cap" => objects.push(EventObject::TagCap(
                                 map_or_err_str(tag_value, |value| Cap::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid cap '{}'!", value), event.data_location) )?
-                            ))),
-                            "texture" => objects.push(EventObject::Tag(EventTag::Texture(
+                            )),
+                            "texture" => objects.push(EventObject::TagTexture(
                                 map_else_err_str(tag_value, |value| Some(value.to_owned()) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture '{}'!", value), event.data_location) )?
-                            ))),
-                            "texfill" => objects.push(EventObject::Tag(EventTag::TexFill(
+                            )),
+                            "texfill" => objects.push(EventObject::TagTexFill(
                                 map_else_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                                     Some(Box::new(TexFill {
@@ -571,8 +570,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     }))
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid texture filling '{}'!", value), event.data_location) )?
-                            ))),
-                            "color" => objects.push(EventObject::Tag(EventTag::Color(
+                            )),
+                            "color" => objects.push(EventObject::TagColor(
                                 map_or_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
@@ -610,8 +609,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
-                            ))),
-                            "bordercolor" => objects.push(EventObject::Tag(EventTag::BorderColor(
+                            )),
+                            "bordercolor" => objects.push(EventObject::TagBorderColor(
                                 map_or_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
@@ -649,8 +648,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
-                            ))),
-                            "alpha" => objects.push(EventObject::Tag(EventTag::Alpha(
+                            )),
+                            "alpha" => objects.push(EventObject::TagAlpha(
                                 map_or_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
@@ -688,8 +687,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
-                            ))),
-                            "borderalpha" => objects.push(EventObject::Tag(EventTag::BorderAlpha(
+                            )),
+                            "borderalpha" => objects.push(EventObject::TagBorderAlpha(
                                 map_or_err_str(tag_value, |value| {
                                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
@@ -727,8 +726,8 @@ impl TryFrom<Ssb> for SsbRender {
                                     })
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid color '{}'!", value), event.data_location) )?
-                            ))),
-                            "blur" => objects.push(EventObject::Tag(EventTag::Blur(
+                            )),
+                            "blur" => objects.push(EventObject::TagBlur(
                                 map_else_err_str(tag_value, |value| {
                                     Some(
                                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
@@ -743,31 +742,31 @@ impl TryFrom<Ssb> for SsbRender {
                                     )
                                 } )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur '{}'!", value), event.data_location) )?
-                            ))),
-                            "blur-h" => objects.push(EventObject::Tag(EventTag::Blur(
+                            )),
+                            "blur-h" => objects.push(EventObject::TagBlur(
                                 map_else_err_str(tag_value, |value| Some(Blur::Horizontal(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur horizontal '{}'!", value), event.data_location) )?
-                            ))),
-                            "blur-v" => objects.push(EventObject::Tag(EventTag::Blur(
+                            )),
+                            "blur-v" => objects.push(EventObject::TagBlur(
                                 map_else_err_str(tag_value, |value| Some(Blur::Vertical(value.parse().ok()?)) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blur vertical '{}'!", value), event.data_location) )?
-                            ))),
-                            "blend" => objects.push(EventObject::Tag(EventTag::Blend(
+                            )),
+                            "blend" => objects.push(EventObject::TagBlend(
                                 map_or_err_str(tag_value, |value| Blend::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid blend '{}'!", value), event.data_location) )?
-                            ))),
-                            "target" => objects.push(EventObject::Tag(EventTag::Target(
+                            )),
+                            "target" => objects.push(EventObject::TagTarget(
                                 map_or_err_str(tag_value, |value| Target::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid target '{}'!", value), event.data_location) )?
-                            ))),
-                            "mask-mode" => objects.push(EventObject::Tag(EventTag::MaskMode(
+                            )),
+                            "mask-mode" => objects.push(EventObject::TagMaskMode(
                                 map_or_err_str(tag_value, |value| MaskMode::try_from(value) )
                                 .map_err(|value| ParseError::new_with_pos(&format!("Invalid mask mode '{}'!", value), event.data_location) )?
-                            ))),
-                            "mask-clear" => objects.push(EventObject::Tag(
-                                if tag_value.is_none() {EventTag::MaskClear}
-                                else {return Err(ParseError::new_with_pos("Mask clear has no value!", event.data_location))}
                             )),
+                            "mask-clear" => objects.push(Some(EventObject::TagMaskClear)
+                                .filter(|_| tag_value.is_none() )
+                                .ok_or_else(|| ParseError::new_with_pos("Mask clear has no value!", event.data_location) )?
+                            ),
                             
 
                             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
@@ -779,7 +778,7 @@ impl TryFrom<Ssb> for SsbRender {
                 // Geometries
                 } else {
                     match mode {
-                        Mode::Text => objects.push(EventObject::Geometry(EventGeometry::Text(data.to_owned()))),
+                        Mode::Text => objects.push(EventObject::GeometryText(data.to_owned())),
                         Mode::Points => {
                             // Find points
                             let tokens = data.split_ascii_whitespace().collect::<Vec<&str>>();
@@ -797,7 +796,7 @@ impl TryFrom<Ssb> for SsbRender {
                                 }
                             }
                             // Save points
-                            objects.push(EventObject::Geometry(EventGeometry::Points(points)));
+                            objects.push(EventObject::GeometryPoints(points));
                         }
                         Mode::Shape => {
                             // Find segments
@@ -848,7 +847,7 @@ impl TryFrom<Ssb> for SsbRender {
                             }
                             // Save segments
                             segments.shrink_to_fit();
-                            objects.push(EventObject::Geometry(EventGeometry::Shape(segments)));
+                            objects.push(EventObject::GeometryShape(segments));
                         }
                     }
                 }

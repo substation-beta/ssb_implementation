@@ -2,8 +2,7 @@ mod grammar_tests {
     // Imports
     use ssb_parser::{
         types::ssb::*,
-        types::geometries::*,
-        types::tags::*,
+        types::objects::*,
         data::{Ssb, SsbRender}
     };
     use std::{
@@ -78,397 +77,279 @@ Texture: Fancy,data,RmFuY3k=
                     EventRender {
                         trigger: EventTrigger::Time((2000,300000)),
                         objects: vec![
-                            EventObject::Tag(
-                                EventTag::Position(Point3D {
-                                    x: 100.0,
-                                    y: 200.0,
-                                    z: -1.0
-                                })
+                            EventObject::TagPosition(Point3D {
+                                x: 100.0,
+                                y: 200.0,
+                                z: -1.0
+                            }),
+                            EventObject::TagRotate(Rotate::Z(
+                                180.0
+                            )),
+                            EventObject::TagBold(
+                                false
                             ),
-                            EventObject::Tag(
-                                EventTag::Rotate(Rotate::Z(
-                                    180.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Bold(
-                                    false
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::Color(Color::Mono([
-                                    255, 0, 0
-                                ]))
-                            ),
-                            EventObject::Geometry(
-                                EventGeometry::Text(
-                                    "I\'m a red, rotated\ntext over multiple lines.".to_owned()
-                                )
+                            EventObject::TagColor(Color::Mono([
+                                255, 0, 0
+                            ])),
+                            EventObject::GeometryText(
+                                "I\'m a red, rotated\ntext over multiple lines.".to_owned()
                             )
                         ]
                     },
                     EventRender {
                         trigger: EventTrigger::Time((300000,7500000)),
                         objects: vec![
-                            EventObject::Tag(
-                                EventTag::Bold(
-                                    false
-                                )
+                            EventObject::TagBold(
+                                false
                             ),
-                            EventObject::Tag(
-                                EventTag::Color(Color::Mono([
-                                    255, 0, 0
-                                ]))
+                            EventObject::TagColor(Color::Mono([
+                                255, 0, 0
+                            ])),
+                            EventObject::TagTexture(
+                                "cute".to_owned()
                             ),
-                            EventObject::Tag(
-                                EventTag::Texture(
-                                    "cute".to_owned()
-                                )
-                            ),
-                            EventObject::Geometry(
-                                EventGeometry::Shape(vec![
-                                    ShapeSegment::MoveTo(Point2D {
+                            EventObject::GeometryShape(vec![
+                                ShapeSegment::MoveTo(Point2D {
+                                    x: 0.0,
+                                    y: 0.0
+                                }),
+                                ShapeSegment::LineTo(Point2D {
+                                    x: 50.5,
+                                    y: 0.0
+                                }),
+                                ShapeSegment::LineTo(Point2D {
+                                    x: 50.5,
+                                    y: 20.125
+                                }),
+                                ShapeSegment::LineTo(Point2D {
+                                    x: 0.0,
+                                    y: 20.125
+                                }),
+                                ShapeSegment::CurveTo(
+                                    Point2D {
+                                        x: 42.0,
+                                        y: 1337.0
+                                    },
+                                    Point2D {
+                                        x: 26.0,
+                                        y: 0.0
+                                    },
+                                    Point2D {
+                                        x: 3.141,
+                                        y: 2.718
+                                    }
+                                ),
+                                ShapeSegment::ArcBy(
+                                    Point2D {
                                         x: 0.0,
                                         y: 0.0
-                                    }),
-                                    ShapeSegment::LineTo(Point2D {
-                                        x: 50.5,
-                                        y: 0.0
-                                    }),
-                                    ShapeSegment::LineTo(Point2D {
-                                        x: 50.5,
-                                        y: 20.125
-                                    }),
-                                    ShapeSegment::LineTo(Point2D {
-                                        x: 0.0,
-                                        y: 20.125
-                                    }),
-                                    ShapeSegment::CurveTo(
-                                        Point2D {
-                                            x: 42.0,
-                                            y: 1337.0
-                                        },
-                                        Point2D {
-                                            x: 26.0,
-                                            y: 0.0
-                                        },
-                                        Point2D {
-                                            x: 3.141,
-                                            y: 2.718
-                                        }
-                                    ),
-                                    ShapeSegment::ArcBy(
-                                        Point2D {
-                                            x: 0.0,
-                                            y: 0.0
-                                        },
-                                        180.0
-                                    ),
-                                    ShapeSegment::Close
-                                ])
-                            )
+                                    },
+                                    180.0
+                                ),
+                                ShapeSegment::Close
+                            ])
                         ]
                     },
                     EventRender {
                         trigger: EventTrigger::Time((600000,39000000)),
                         objects: vec![
-                            EventObject::Geometry(
-                                EventGeometry::Text(
-                                    "This text is\ngetting huge".to_owned()
-                                )
+                            EventObject::GeometryText(
+                                "This text is\ngetting huge".to_owned()
                             )
                         ]
                     },
                     EventRender {
                         trigger: EventTrigger::Time((1200000,1260000)),
                         objects: vec![
-                            EventObject::Tag(
-                                EventTag::Font(
-                                    "Rabi-Ribi".to_owned()
-                                )
+                            EventObject::TagFont(
+                                "Rabi-Ribi".to_owned()
                             ),
-                            EventObject::Geometry(
-                                EventGeometry::Points(vec![
-                                    Point2D {
-                                        x: 0.0,
-                                        y: 0.0
-                                    },
-                                    Point2D {
-                                        x: 100.0,
-                                        y: 0.0
-                                    },
-                                    Point2D {
-                                        x: 66.6,
-                                        y: 50.0
-                                    }
-                                ])
+                            EventObject::GeometryPoints(vec![
+                                Point2D {
+                                    x: 0.0,
+                                    y: 0.0
+                                },
+                                Point2D {
+                                    x: 100.0,
+                                    y: 0.0
+                                },
+                                Point2D {
+                                    x: 66.6,
+                                    y: 50.0
+                                }
+                            ]),
+                            EventObject::TagBold(
+                                false
                             ),
-                            EventObject::Tag(
-                                EventTag::Bold(
-                                    false
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::Color(Color::Mono([
-                                    255, 0, 0
-                                ]))
-                            ),
-                            EventObject::Geometry(
-                                EventGeometry::Points(vec![
-                                    Point2D {
-                                        x: 33.3,
-                                        y: 50.0
-                                    }
-                                ])
-                            )
+                            EventObject::TagColor(Color::Mono([
+                                255, 0, 0
+                            ])),
+                            EventObject::GeometryPoints(vec![
+                                Point2D {
+                                    x: 33.3,
+                                    y: 50.0
+                                }
+                            ])
                         ]
                     },
                     EventRender {
                         trigger: EventTrigger::Id("show-something".to_owned()),
                         objects: vec![
-                            EventObject::Tag(
-                                EventTag::Bold(
-                                    true
-                                )
+                            EventObject::TagBold(
+                                true
                             ),
-                            EventObject::Geometry(
-                                EventGeometry::Text(
-                                    "This will only be shown when the event id is given".to_owned()
-                                )
+                            EventObject::GeometryText(
+                                "This will only be shown when the event id is given".to_owned()
                             )
                         ]
                     },
                     EventRender {
                         trigger: EventTrigger::Time((0,3600000)),
                         objects: vec![
-                            EventObject::Tag(
-                                EventTag::Font(
-                                    "Arial".to_owned()
-                                )
+                            EventObject::TagFont(
+                                "Arial".to_owned()
                             ),
-                            EventObject::Tag(
-                                EventTag::Size(
-                                    20.5
-                                )
+                            EventObject::TagSize(
+                                20.5
                             ),
-                            EventObject::Tag(
-                                EventTag::Bold(
-                                    true
-                                )
+                            EventObject::TagBold(
+                                true
                             ),
-                            EventObject::Tag(
-                                EventTag::Italic(
-                                    false
-                                )
+                            EventObject::TagItalic(
+                                false
                             ),
-                            EventObject::Tag(
-                                EventTag::Underline(
-                                    true
-                                )
+                            EventObject::TagUnderline(
+                                true
                             ),
-                            EventObject::Tag(
-                                EventTag::Strikeout(
-                                    false
-                                )
+                            EventObject::TagStrikeout(
+                                false
                             ),
-                            EventObject::Tag(
-                                EventTag::Position(Point3D {
-                                    x: -20.0,
-                                    y: 1.5,
-                                    z: 0.0
-                                })
+                            EventObject::TagPosition(Point3D {
+                                x: -20.0,
+                                y: 1.5,
+                                z: 0.0
+                            }),
+                            EventObject::TagPosition(Point3D {
+                                x: 100.0,
+                                y: 100.0,
+                                z: -50.0
+                            }),
+                            EventObject::TagAlignment(Alignment::Numpad(
+                                Numpad::MiddleCenter
+                            )),
+                            EventObject::TagAlignment(Alignment::Offset(Point2D {
+                                x: 1.0,
+                                y: 2.7
+                            })),
+                            EventObject::TagMargin(Margin::All(
+                                1.0, 2.0, 3.0, 4.0
+                            )),
+                            EventObject::TagMargin(Margin::Top(
+                                -1.23
+                            )),
+                            EventObject::TagWrapStyle(
+                                WrapStyle::NoWrap
                             ),
-                            EventObject::Tag(
-                                EventTag::Position(Point3D {
-                                    x: 100.0,
-                                    y: 100.0,
-                                    z: -50.0
-                                })
+                            EventObject::TagDirection(
+                                Direction::RightToLeft
                             ),
-                            EventObject::Tag(
-                                EventTag::Alignment(Alignment::Numpad(
-                                    Numpad::MiddleCenter
-                                ))
+                            EventObject::TagSpace(Space::All(
+                                9.8, 7.6
+                            )),
+                            EventObject::TagSpace(Space::Horizontal(
+                                4.0
+                            )),
+                            EventObject::TagRotate(Rotate::All(
+                                5.0, 9.0, 1.0
+                            )),
+                            EventObject::TagRotate(Rotate::Y(
+                                90.0
+                            )),
+                            EventObject::TagScale(Scale::All(
+                                0.75, 1.25, 1.0
+                            )),
+                            EventObject::TagScale(Scale::Z(
+                                2.0
+                            )),
+                            EventObject::TagTranslate(Translate::All(
+                                100.0, 200.0, 0.0
+                            )),
+                            EventObject::TagTranslate(Translate::Z(
+                                50.0
+                            )),
+                            EventObject::TagShear(Shear::All(
+                                1.0, -1.0
+                            )),
+                            EventObject::TagShear(Shear::Y(
+                                0.33
+                            )),
+                            EventObject::TagMatrix(Box::new([
+                                0.5, 0.0, 0.0, 0.0,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                0.0, 0.0, 0.0, 1.0
+                            ])),
+                            EventObject::TagBorder(Border::All(
+                                42.0, 42.0
+                            )),
+                            EventObject::TagBorder(Border::Vertical(
+                                -17.83
+                            )),
+                            EventObject::TagJoin(
+                                Join::Round
                             ),
-                            EventObject::Tag(
-                                EventTag::Alignment(Alignment::Offset(Point2D {
-                                    x: 1.0,
-                                    y: 2.7
-                                }))
+                            EventObject::TagCap(
+                                Cap::Square
                             ),
-                            EventObject::Tag(
-                                EventTag::Margin(Margin::All(
-                                    1.0, 2.0, 3.0, 4.0
-                                ))
+                            EventObject::TagTexture(
+                                "cute".to_owned()
                             ),
-                            EventObject::Tag(
-                                EventTag::Margin(Margin::Top(
-                                    -1.23
-                                ))
+                            EventObject::TagTexFill(Box::new(TexFill {
+                                x0: 0.0,
+                                y0: 0.0,
+                                x1: 1.0,
+                                y1: 0.5,
+                                wrap: TextureWrapping::Repeat
+                            })),
+                            EventObject::TagColor(Color::CornersWithStop([
+                                [0, 0, 0],
+                                [255, 255,  255],
+                                [255, 0, 0],
+                                [0, 255, 0],
+                                [0, 0, 255]
+                            ])),
+                            EventObject::TagBorderColor(Color::LinearWithStop([
+                                [255, 255, 0],
+                                [0, 255, 255],
+                                [255, 0, 255]
+                            ])),
+                            EventObject::TagAlpha(Alpha::Mono(
+                                128
+                            )),
+                            EventObject::TagBorderAlpha(Alpha::Corners([
+                                10,
+                                11,
+                                12,
+                                13
+                            ])),
+                            EventObject::TagBlur(Blur::All(
+                                1.2, 1.5
+                            )),
+                            EventObject::TagBlur(Blur::Vertical(
+                                5.0
+                            )),
+                            EventObject::TagBlend(
+                                Blend::Screen
                             ),
-                            EventObject::Tag(
-                                EventTag::WrapStyle(
-                                    WrapStyle::NoWrap
-                                )
+                            EventObject::TagTarget(
+                                Target::Frame
                             ),
-                            EventObject::Tag(
-                                EventTag::Direction(
-                                    Direction::RightToLeft
-                                )
+                            EventObject::TagMaskMode(
+                                MaskMode::Normal
                             ),
-                            EventObject::Tag(
-                                EventTag::Space(Space::All(
-                                    9.8, 7.6
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Space(Space::Horizontal(
-                                    4.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Rotate(Rotate::All(
-                                    5.0, 9.0, 1.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Rotate(Rotate::Y(
-                                    90.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Scale(Scale::All(
-                                    0.75, 1.25, 1.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Scale(Scale::Z(
-                                    2.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Translate(Translate::All(
-                                    100.0, 200.0, 0.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Translate(Translate::Z(
-                                    50.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Shear(Shear::All(
-                                    1.0, -1.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Shear(Shear::Y(
-                                    0.33
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Matrix(Box::new([
-                                    0.5, 0.0, 0.0, 0.0,
-                                    0.0, 1.0, 0.0, 0.0,
-                                    0.0, 0.0, 1.0, 0.0,
-                                    0.0, 0.0, 0.0, 1.0
-                                ]))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Border(Border::All(
-                                    42.0, 42.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Border(Border::Vertical(
-                                    -17.83
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Join(
-                                    Join::Round
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::Cap(
-                                    Cap::Square
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::Texture(
-                                    "cute".to_owned()
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::TexFill(Box::new(TexFill {
-                                    x0: 0.0,
-                                    y0: 0.0,
-                                    x1: 1.0,
-                                    y1: 0.5,
-                                    wrap: TextureWrapping::Repeat
-                                }))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Color(Color::CornersWithStop([
-                                    [0, 0, 0],
-                                    [255, 255,  255],
-                                    [255, 0, 0],
-                                    [0, 255, 0],
-                                    [0, 0, 255]
-                                ]))
-                            ),
-                            EventObject::Tag(
-                                EventTag::BorderColor(Color::LinearWithStop([
-                                    [255, 255, 0],
-                                    [0, 255, 255],
-                                    [255, 0, 255]
-                                ]))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Alpha(Alpha::Mono(
-                                    128
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::BorderAlpha(Alpha::Corners([
-                                    10,
-                                    11,
-                                    12,
-                                    13
-                                ]))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Blur(Blur::All(
-                                    1.2, 1.5
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Blur(Blur::Vertical(
-                                    5.0
-                                ))
-                            ),
-                            EventObject::Tag(
-                                EventTag::Blend(
-                                    Blend::Screen
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::Target(
-                                    Target::Frame
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::MaskMode(
-                                    MaskMode::Normal
-                                )
-                            ),
-                            EventObject::Tag(
-                                EventTag::MaskClear
-                            ),
-                            EventObject::Geometry(
-                                EventGeometry::Text(
-                                    "Super styled :)".to_owned()
-                                )
+                            EventObject::TagMaskClear,
+                            EventObject::GeometryText(
+                                "Super styled :)".to_owned()
                             )
                         ]
                     }

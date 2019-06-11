@@ -1,10 +1,7 @@
 // Imports
 use std::fmt;
 use std::convert::TryFrom;
-use super::{
-    geometries::EventGeometry,
-    tags::EventTag
-};
+use super::objects::EventObject;
 
 
 // Data minor types
@@ -76,27 +73,6 @@ pub type FontData = Vec<u8>;
 
 pub type TextureId = String;
 pub type TextureData = Vec<u8>;
-
-
-// Object types
-#[derive(Debug, PartialEq)]
-pub enum EventObject {
-    Geometry(EventGeometry),
-    Tag(EventTag)
-}
-#[derive(Debug, PartialEq)]
-pub struct Point2D {
-    pub x: Coordinate,
-    pub y: Coordinate
-}
-#[derive(Debug, PartialEq)]
-pub struct Point3D {
-    pub x: Coordinate,
-    pub y: Coordinate,
-    pub z: Coordinate
-}
-pub type Coordinate = f32;
-pub type Degree = f64;
 
 
 // Tests

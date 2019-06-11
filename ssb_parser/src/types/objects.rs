@@ -1,45 +1,74 @@
 // Imports
 use std::convert::TryFrom;
-use super::ssb::{Coordinate,Degree,Point2D,Point3D};
 
 
-// Enums
+// General
 #[derive(Debug, PartialEq)]
-pub enum EventTag {
-    Font(String),
-    Size(f32),
-    Bold(bool),
-    Italic(bool),
-    Underline(bool),
-    Strikeout(bool),
-    Position(Point3D),
-    Alignment(Alignment),
-    Margin(Margin),
-    WrapStyle(WrapStyle),
-    Direction(Direction),
-    Space(Space),
-    Rotate(Rotate),
-    Scale(Scale),
-    Translate(Translate),
-    Shear(Shear),
-    Matrix(Box<[Degree;16]>),
-    Border(Border),
-    Join(Join),
-    Cap(Cap),
-    Texture(String),
-    TexFill(Box<TexFill>),
-    Color(Color),
-    BorderColor(Color),
-    Alpha(Alpha),
-    BorderAlpha(Alpha),
-    Blur(Blur),
-    Blend(Blend),
-    Target(Target),
-    MaskMode(MaskMode),
-    MaskClear
+pub struct Point2D {
+    pub x: Coordinate,
+    pub y: Coordinate
+}
+#[derive(Debug, PartialEq)]
+pub struct Point3D {
+    pub x: Coordinate,
+    pub y: Coordinate,
+    pub z: Coordinate
+}
+pub type Coordinate = f32;
+pub type Degree = f64;
+
+
+// Objects
+#[derive(Debug, PartialEq)]
+pub enum EventObject {
+    GeometryShape(Vec<ShapeSegment>),
+    GeometryPoints(Vec<Point2D>),
+    GeometryText(String),
+    TagFont(String),
+    TagSize(f32),
+    TagBold(bool),
+    TagItalic(bool),
+    TagUnderline(bool),
+    TagStrikeout(bool),
+    TagPosition(Point3D),
+    TagAlignment(Alignment),
+    TagMargin(Margin),
+    TagWrapStyle(WrapStyle),
+    TagDirection(Direction),
+    TagSpace(Space),
+    TagRotate(Rotate),
+    TagScale(Scale),
+    TagTranslate(Translate),
+    TagShear(Shear),
+    TagMatrix(Box<[Degree;16]>),
+    TagBorder(Border),
+    TagJoin(Join),
+    TagCap(Cap),
+    TagTexture(String),
+    TagTexFill(Box<TexFill>),
+    TagColor(Color),
+    TagBorderColor(Color),
+    TagAlpha(Alpha),
+    TagBorderAlpha(Alpha),
+    TagBlur(Blur),
+    TagBlend(Blend),
+    TagTarget(Target),
+    TagMaskMode(MaskMode),
+    TagMaskClear
 
     // TODO
 
+}
+
+
+// Object properties
+#[derive(Debug, PartialEq)]
+pub enum ShapeSegment {
+    MoveTo(Point2D),
+    LineTo(Point2D),
+    CurveTo(Point2D, Point2D, Point2D),
+    ArcBy(Point2D, Degree),
+    Close
 }
 #[derive(Debug, PartialEq)]
 pub enum Alignment {
