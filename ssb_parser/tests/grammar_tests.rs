@@ -348,6 +348,15 @@ Texture: Fancy,data,RmFuY3k=
                                 MaskMode::Normal
                             ),
                             EventObject::TagMaskClear,
+                            EventObject::TagKaraoke(
+                                260
+                            ),
+                            EventObject::TagKaraokeSet(
+                                0
+                            ),
+                            EventObject::TagKaraokeColor(
+                                [248, 0, 143]
+                            ),
                             EventObject::GeometryText(
                                 "Super styled :)".to_owned()
                             )

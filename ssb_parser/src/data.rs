@@ -316,7 +316,7 @@ impl TryFrom<Ssb> for SsbRender {
 fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
     let mut objects = vec![];
     let mut mode = Mode::default();
-    for (is_tag, data) in EscapedText::new(&event_data).iter() {
+    for (is_tag, data) in EscapedText::new(event_data).iter() {
         if is_tag {
             parse_tags(data, &mut objects, &mut mode)?;
         } else {
@@ -797,7 +797,19 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mode: &mut Mode) -> Re
                 .filter(|_| tag_value.is_none() )
                 .ok_or_else(|| ParseError::new("Mask clear has no value!") )?
             ),
-            
+            "k" => objects.push(EventObject::TagKaraoke(
+                map_or_err_str(tag_value, |value| value.parse() )
+                .map_err(|value| ParseError::new(&format!("Invalid karaoke '{}'!", value)) )?
+            )),
+            "kset" => objects.push(EventObject::TagKaraokeSet(
+                map_or_err_str(tag_value, |value| value.parse() )
+                .map_err(|value| ParseError::new(&format!("Invalid karaoke set '{}'!", value)) )?
+            )),
+            "kcolor" => objects.push(EventObject::TagKaraokeColor(
+                map_or_err_str(tag_value, |value| rgb_from_str(value) )
+                .map_err(|value| ParseError::new(&format!("Invalid karaoke color '{}'!", value)) )?
+            )),
+
 
             _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
 

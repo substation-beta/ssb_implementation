@@ -54,10 +54,13 @@ pub enum EventObject {
     TagBlend(Blend),
     TagTarget(Target),
     TagMaskMode(MaskMode),
-    TagMaskClear
+    TagMaskClear,
 
     // TODO
 
+    TagKaraoke(u32),
+    TagKaraokeSet(i32),
+    TagKaraokeColor([u8;3])
 }
 
 
