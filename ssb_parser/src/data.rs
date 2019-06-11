@@ -4,7 +4,7 @@ use super::{
         error::ParseError,
         state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData},
-        objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode}
+        objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode,Animate}
     },
     utils::{
         constants::*,
@@ -318,14 +318,14 @@ fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
     let mut mode = Mode::default();
     for (is_tag, data) in EscapedText::new(event_data).iter() {
         if is_tag {
-            parse_tags(data, &mut objects, &mut mode)?;
+            parse_tags(data, &mut objects, Some(&mut mode))?;
         } else {
             parse_geometries(data, &mut objects, &mode)?;
         }
     }
     Ok(objects)
 }
-fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mode: &mut Mode) -> Result<(), ParseError> {
+fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mut mode: Option<&mut Mode>) -> Result<(), ParseError> {
     for (tag_name, tag_value) in TagsIterator::new(data) {
         match tag_name {
             "font" => objects.push(EventObject::TagFont(
@@ -549,7 +549,7 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mode: &mut Mode) -> Re
                 } )
                 .map_err(|value| ParseError::new(&format!("Invalid matrix '{}'!", value)) )?
             )),
-            "mode" => *mode =
+            "mode" if mode.is_some() => **mode.as_mut().expect("Impossible :O Checked right before!") =
                 map_or_err_str(tag_value, |value| Mode::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid mode '{}'!", value)) )?,
             "border" => objects.push(EventObject::TagBorder(
@@ -797,6 +797,32 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mode: &mut Mode) -> Re
                 .filter(|_| tag_value.is_none() )
                 .ok_or_else(|| ParseError::new("Mask clear has no value!") )?
             ),
+            "animate" if mode.is_some() => objects.push(EventObject::TagAnimate(
+
+                // TODO: implement animate
+
+                /*
+                map_or_err_str(tag_value, |value| {
+
+                } )
+                .map_err(|value| ParseError::new(&format!("Invalid animate '{}'!", value)) )?
+                */
+                Box::new(Animate {
+                    time: Some((500, -1000)),
+                    formula: Some("t^2".to_owned()),
+                    tags: vec![
+                        EventObject::TagSize(
+                            42.0
+                        ),
+                        EventObject::TagColor(Color::Mono([
+                            0, 128, 255
+                        ])),
+                        EventObject::TagTranslate(Translate::X(
+                            99.9
+                        ))
+                    ]
+                })
+            )),
             "k" => objects.push(EventObject::TagKaraoke(
                 map_or_err_str(tag_value, |value| value.parse() )
                 .map_err(|value| ParseError::new(&format!("Invalid karaoke '{}'!", value)) )?
@@ -809,11 +835,6 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mode: &mut Mode) -> Re
                 map_or_err_str(tag_value, |value| rgb_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid karaoke color '{}'!", value)) )?
             )),
-
-
-            _ if !tag_name.is_empty() => println!("{}={:?}", tag_name, tag_value), // TODO: all other tags
-
-
             _ => return Err(ParseError::new(&format!("Invalid tag '{}'!", tag_name)))
         }
     }

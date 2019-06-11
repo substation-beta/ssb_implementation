@@ -153,6 +153,15 @@ Texture: Fancy,data,RmFuY3k=
                     EventRender {
                         trigger: EventTrigger::Time((600000,39000000)),
                         objects: vec![
+                            EventObject::TagAnimate(Box::new(Animate {
+                                time: Some((500, 1000)),
+                                formula: None,
+                                tags: vec![
+                                    EventObject::TagScale(Scale::All(
+                                        2.0, 2.0, 1.0
+                                    ))
+                                ]
+                            })),
                             EventObject::GeometryText(
                                 "This text is\ngetting huge".to_owned()
                             )
@@ -348,6 +357,21 @@ Texture: Fancy,data,RmFuY3k=
                                 MaskMode::Normal
                             ),
                             EventObject::TagMaskClear,
+                            EventObject::TagAnimate(Box::new(Animate {
+                                time: Some((100, -2000)),
+                                formula: Some("t^2".to_owned()),
+                                tags: vec![
+                                    EventObject::TagSize(
+                                        42.0
+                                    ),
+                                    EventObject::TagColor(Color::Mono([
+                                        0, 128, 255
+                                    ])),
+                                    EventObject::TagTranslate(Translate::X(
+                                        99.9
+                                    ))
+                                ]
+                            })),
                             EventObject::TagKaraoke(
                                 260
                             ),

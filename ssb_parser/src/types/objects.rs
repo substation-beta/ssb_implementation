@@ -55,9 +55,7 @@ pub enum EventObject {
     TagTarget(Target),
     TagMaskMode(MaskMode),
     TagMaskClear,
-
-    // TODO
-
+    TagAnimate(Box<Animate>),
     TagKaraoke(u32),
     TagKaraokeSet(i32),
     TagKaraokeColor([u8;3])
@@ -319,6 +317,12 @@ impl TryFrom<&str> for MaskMode {
             _ => Err(())
         }
     }
+}
+#[derive(Debug, PartialEq)]
+pub struct Animate {
+    pub time: Option<(i32, i32)>,
+    pub formula: Option<String>,
+    pub tags: Vec<EventObject>
 }
 
 
