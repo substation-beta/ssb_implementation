@@ -166,10 +166,12 @@ impl Ssb {
                                                 EventTrigger::Id(trigger[1..trigger.len()-1].to_owned())
                                             // Time
                                             } else if let Some(seperator_pos) = trigger.find(TRIGGER_SEPARATOR) {
-                                                EventTrigger::Time((
-                                                    parse_timestamp(&trigger[..seperator_pos]).map_err(|_| ParseError::new_with_pos("Start timestamp invalid!", (line_index, 0)) )?,
-                                                    parse_timestamp(&trigger[seperator_pos + 1 /* TRIGGER_SEPARATOR */..]).map_err(|_| ParseError::new_with_pos("End timestamp invalid!", (line_index, seperator_pos + 1 /* TRIGGER_SEPARATOR */) ))?
-                                                ))
+                                                let start_time = parse_timestamp(&trigger[..seperator_pos]).map_err(|_| ParseError::new_with_pos("Start timestamp invalid!", (line_index, 0)) )?;
+                                                let end_time = parse_timestamp(&trigger[seperator_pos + 1 /* TRIGGER_SEPARATOR */..]).map_err(|_| ParseError::new_with_pos("End timestamp invalid!", (line_index, seperator_pos + 1 /* TRIGGER_SEPARATOR */) ))?;
+                                                if start_time > end_time {
+                                                    return Err(ParseError::new_with_pos("Start time greater than end time!", (line_index, 0)));
+                                                }
+                                                EventTrigger::Time((start_time, end_time))
                                             // Invalid
                                             } else {
                                                 return Err(ParseError::new_with_pos("Invalid trigger format!", (line_index, 0)));
