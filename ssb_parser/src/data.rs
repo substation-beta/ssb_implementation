@@ -225,7 +225,7 @@ impl Ssb {
                                             TextureDataType::Url => {
                                                 let full_path = search_path.unwrap_or_else(|| Path::new(".")).join(data);
                                                 std::fs::read(&full_path).map_err(|err| {
-                                                    ParseError::new_with_source(
+                                                    ParseError::new_with_pos_source(
                                                         &format!("Texture data not loadable from file '{}'!", full_path.display()),
                                                         (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1)),
                                                         err
@@ -296,7 +296,7 @@ impl TryFrom<Ssb> for SsbRender {
             events.push(
                 EventRender {
                     trigger: event.trigger.clone(),
-                    objects: parse_objects(&event_data).map_err(|err| ParseError::new_with_source("Invalid event data!", event.data_location, err) )?
+                    objects: parse_objects(&event_data).map_err(|err| ParseError::new_with_pos_source("Invalid event data!", event.data_location, err) )?
                 }
             );
         }
@@ -327,7 +327,7 @@ fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
     }
     Ok(objects)
 }
-fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mut mode: Option<&mut Mode>) -> Result<(), ParseError> {
+fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Option<&mut Mode>) -> Result<&'a mut Vec<EventObject>, ParseError> {
     for (tag_name, tag_value) in TagsIterator::new(data) {
         match tag_name {
             "font" => objects.push(EventObject::TagFont(
@@ -800,30 +800,28 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mut mode: Option<&mut 
                 .ok_or_else(|| ParseError::new("Mask clear has no value!") )?
             ),
             "animate" if mode.is_some() => objects.push(EventObject::TagAnimate(
-
-                // TODO: implement animate
-
-                /*
-                map_or_err_str(tag_value, |value| {
-
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid animate '{}'!", value)) )?
-                */
-                Box::new(Animate {
-                    time: Some((500, -1000)),
-                    formula: Some("t^2".to_owned()),
-                    tags: vec![
-                        EventObject::TagSize(
-                            42.0
-                        ),
-                        EventObject::TagColor(Color::Mono([
-                            0, 128, 255
-                        ])),
-                        EventObject::TagTranslate(Translate::X(
-                            99.9
-                        ))
-                    ]
+                tag_value.map_or(Err(("", None)), |value| {
+                    let captures = ANIMATE_PATTERN.captures(value).ok_or_else(|| (value, None) )?;
+                    Ok(Box::new(Animate {
+                        time: match (captures.name("S"), captures.name("E")) {
+                            (Some(start_time), Some(end_time)) => Some((
+                                start_time.as_str().parse().map_err(|_| (value, None) )?,
+                                end_time.as_str().parse().map_err(|_| (value, None) )?
+                            )),
+                            _ => None
+                        },
+                        formula: captures.name("F").map(|value| value.as_str().to_owned() ),
+                        tags: {
+                            let mut tags = vec![];
+                            parse_tags(captures.name("T").ok_or_else(|| (value, None) )?.as_str(), &mut tags, None).map_err(|err| (value, Some(err)) )?;
+                            tags
+                        }
+                    }))
                 })
+                .map_err(|value_err| {
+                    let value = format!("Invalid animate '{}'!", value_err.0);
+                    value_err.1.map(|err| ParseError::new_with_source(&value, err) ).unwrap_or_else(|| ParseError::new(&value) )
+                } )?
             )),
             "k" => objects.push(EventObject::TagKaraoke(
                 map_or_err_str(tag_value, |value| value.parse() )
@@ -840,9 +838,9 @@ fn parse_tags(data: &str, objects: &mut Vec<EventObject>, mut mode: Option<&mut 
             _ => return Err(ParseError::new(&format!("Invalid tag '{}'!", tag_name)))
         }
     }
-    Ok(())
+    Ok(objects)
 }
-fn parse_geometries(data: &str, objects: &mut Vec<EventObject>, mode: &Mode) -> Result<(), ParseError> {
+fn parse_geometries<'a>(data: &str, objects: &'a mut Vec<EventObject>, mode: &Mode) -> Result<&'a mut Vec<EventObject>, ParseError> {
     match mode {
         Mode::Text => objects.push(EventObject::GeometryText(data.to_owned())),
         Mode::Points => {
@@ -916,5 +914,5 @@ fn parse_geometries(data: &str, objects: &mut Vec<EventObject>, mode: &Mode) -> 
             objects.push(EventObject::GeometryShape(segments));
         }
     }
-    Ok(())
+    Ok(objects)
 }

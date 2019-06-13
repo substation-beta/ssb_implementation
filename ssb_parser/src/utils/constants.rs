@@ -31,4 +31,5 @@ pub const TAG_ASSIGN: char = '=';
 lazy_static! {
     pub static ref MACRO_PATTERN: Regex = Regex::new(&(escape(MACRO_INLINE_START) + "([a-zA-Z0-9_-]+)" + &escape(MACRO_INLINE_END))).unwrap();
     pub static ref TIMESTAMP_PATTERN: Regex = Regex::new("^(?:(?:(?P<H>\\d{0,2}):(?P<HM>[0-5]?\\d?):)|(?:(?P<M>[0-5]?\\d?):))?(?:(?P<S>[0-5]?\\d?)\\.)?(?P<MS>\\d{0,3})$").unwrap();
+    pub static ref ANIMATE_PATTERN: Regex = Regex::new(&format!("^(?:(?P<S>(?:\\+|-)?\\d+){0}(?P<E>(?:\\+|-)?\\d+){0})?(?:(?P<F>.+?){0})?{1}(?P<T>.*?){2}$", escape(&VALUE_SEPARATOR.to_string()), escape(TAG_START), escape(TAG_END))).unwrap();
 }

@@ -31,7 +31,15 @@ impl ParseError {
             src: None
         }
     }
-    pub fn new_with_source<E>(msg: &str, pos: (usize, usize), src: E) -> Self
+    pub fn new_with_source<E>(msg: &str, src: E) -> Self
+        where E: Error + 'static {
+        Self {
+            msg: msg.to_owned(),
+            pos: None,
+            src: Some(Box::new(src))
+        }
+    }
+    pub fn new_with_pos_source<E>(msg: &str, pos: (usize, usize), src: E) -> Self
         where E: Error + 'static {
         Self {
             msg: msg.to_owned(),
@@ -84,6 +92,10 @@ mod tests {
 
     #[test]
     fn parse_error_with_source() {
-        assert_eq!(ParseError::new_with_source("test", (42, 26), ParseError::new("source")).to_string(), "test <42:26>\nsource");
+        assert_eq!(ParseError::new_with_source("error on error", ParseError::new("source")).to_string(), "error on error\nsource");
+    }
+    #[test]
+    fn parse_error_with_pos_and_source() {
+        assert_eq!(ParseError::new_with_pos_source("test", (42, 26), ParseError::new("sourcy")).to_string(), "test <42:26>\nsourcy");
     }
 }
