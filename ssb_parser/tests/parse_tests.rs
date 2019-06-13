@@ -1,4 +1,4 @@
-mod grammar_tests {
+mod parse_tests {
     // Imports
     use ssb_parser::{
         types::ssb::*,
