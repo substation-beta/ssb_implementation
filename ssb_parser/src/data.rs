@@ -329,6 +329,7 @@ fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
 }
 fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Option<&mut Mode>) -> Result<&'a mut Vec<EventObject>, ParseError> {
     for (tag_name, tag_value) in TagsIterator::new(data) {
+        #[allow(clippy::redundant_closure)] // Remove wrong hint because of missing lifetime on closure reduction
         match tag_name {
             "font" => objects.push(EventObject::TagFont(
                 map_else_err_str(tag_value, |value| Some(value.to_owned()) )
