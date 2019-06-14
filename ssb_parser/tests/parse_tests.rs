@@ -1,8 +1,10 @@
 mod parse_tests {
     // Imports
     use ssb_parser::{
-        types::ssb::*,
-        types::objects::*,
+        types::{
+            ssb::*,
+            objects::*
+        },
         data::{Ssb, SsbRender}
     };
     use std::{
@@ -411,6 +413,60 @@ Texture: Fancy,data,RmFuY3k=
                     textures
                 }
             }
+        );
+    }
+
+    #[test]
+    fn test_ssb_errors() {
+        // Section
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("x"), None).map_err(|err| err.to_string()),
+            Err("No section set! <0:0>".to_owned())
+        );
+        // Info
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Info\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Err("Invalid info entry! <1:0>".to_owned())
+        );
+        // Target
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Target\nWidth: 4096\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Err("Invalid target entry! <2:0>".to_owned())
+        );
+        // Macros
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Macros\nabc: []\n123: Hi!\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Err("Invalid macros entry! <3:0>".to_owned())
+        );
+        // Events
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Events\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Err("Invalid events entry! <1:0>".to_owned())
+        );
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Events\n1:-0|||"), None).map_err(|err| err.to_string()),
+            Err("Start time greater than end time! <1:0>".to_owned())
+        );
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Events\n?|||"), None).map_err(|err| err.to_string()),
+            Err("Invalid trigger format! <1:0>".to_owned())
+        );
+        // Resources
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Resources\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Err("Invalid resources entry! <1:0>".to_owned())
+        );
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Resources\nFont: myfont,Regula"), None).map_err(|err| err.to_string()),
+            Err("Font family, style and data expected! <1:6>".to_owned())
+        );
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Resources\nTexture: "), None).map_err(|err| err.to_string()),
+            Err("Texture id, data type and data expected! <1:9>".to_owned())
+        );
+        assert_eq!(
+            Ssb::default().parse(Cursor::new("#Resources\nTexture: Pikachu,url,XYZ://Chubacca/Bob.png"), None).map_err(|err| err.to_string().starts_with("Texture data not loadable from file")),
+            Err(true)
         );
     }
 }
