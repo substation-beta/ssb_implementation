@@ -255,8 +255,20 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagMargin(Margin::All(
                                 1.0, 2.0, 3.0, 4.0
                             )),
+                            EventObject::TagMargin(Margin::All(
+                                5.0, 5.0, 5.0, 5.0
+                            )),
                             EventObject::TagMargin(Margin::Top(
                                 -1.23
+                            )),
+                            EventObject::TagMargin(Margin::Right(
+                                4.56
+                            )),
+                            EventObject::TagMargin(Margin::Bottom(
+                                -7.89
+                            )),
+                            EventObject::TagMargin(Margin::Left(
+                                0.0
                             )),
                             EventObject::TagWrapStyle(
                                 WrapStyle::NoWrap
@@ -267,17 +279,35 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagSpace(Space::All(
                                 9.8, 7.6
                             )),
+                            EventObject::TagSpace(Space::All(
+                                5.5, 5.5
+                            )),
                             EventObject::TagSpace(Space::Horizontal(
                                 4.0
+                            )),
+                            EventObject::TagSpace(Space::Vertical(
+                                3.0
                             )),
                             EventObject::TagRotate(Rotate::All(
                                 5.0, 9.0, 1.0
                             )),
+                            EventObject::TagRotate(Rotate::X(
+                                45.0
+                            )),
                             EventObject::TagRotate(Rotate::Y(
                                 90.0
                             )),
+                            EventObject::TagRotate(Rotate::Z(
+                                -135.0
+                            )),
                             EventObject::TagScale(Scale::All(
                                 0.75, 1.25, 1.0
+                            )),
+                            EventObject::TagScale(Scale::X(
+                                0.5
+                            )),
+                            EventObject::TagScale(Scale::Y(
+                                1.5
                             )),
                             EventObject::TagScale(Scale::Z(
                                 2.0
@@ -285,11 +315,20 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagTranslate(Translate::All(
                                 100.0, 200.0, 0.0
                             )),
+                            EventObject::TagTranslate(Translate::X(
+                                -20.4
+                            )),
+                            EventObject::TagTranslate(Translate::Y(
+                                210.0
+                            )),
                             EventObject::TagTranslate(Translate::Z(
                                 50.0
                             )),
                             EventObject::TagShear(Shear::All(
                                 1.0, -1.0
+                            )),
+                            EventObject::TagShear(Shear::X(
+                                1.2
                             )),
                             EventObject::TagShear(Shear::Y(
                                 0.33
@@ -302,6 +341,12 @@ Texture: Fancy,data,RmFuY3k=
                             ])),
                             EventObject::TagBorder(Border::All(
                                 42.0, 42.0
+                            )),
+                            EventObject::TagBorder(Border::All(
+                                20.0, 22.0
+                            )),
+                            EventObject::TagBorder(Border::Horizontal(
+                                7.5
                             )),
                             EventObject::TagBorder(Border::Vertical(
                                 -17.83
@@ -346,6 +391,12 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagBlur(Blur::All(
                                 1.2, 1.5
                             )),
+                            EventObject::TagBlur(Blur::All(
+                                6.66, 6.66
+                            )),
+                            EventObject::TagBlur(Blur::Horizontal(
+                                11.0
+                            )),
                             EventObject::TagBlur(Blur::Vertical(
                                 5.0
                             )),
@@ -359,6 +410,11 @@ Texture: Fancy,data,RmFuY3k=
                                 MaskMode::Normal
                             ),
                             EventObject::TagMaskClear,
+                            EventObject::TagAnimate(Box::new(Animate {
+                                time: None,
+                                formula: None,
+                                tags: vec![]
+                            })),
                             EventObject::TagAnimate(Box::new(Animate {
                                 time: Some((100, -2000)),
                                 formula: Some("t^2".to_owned()),
