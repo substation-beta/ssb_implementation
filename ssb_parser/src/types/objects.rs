@@ -332,14 +332,14 @@ mod tests {
     #[test]
     fn convert() {
         use super::{Numpad, WrapStyle, Direction, Join, Cap, TextureWrapping, Blend, Target, MaskMode, TryFrom};
-        assert_eq!(Numpad::try_from(7u8).expect("Numpad expected!"), Numpad::TopLeft);
-        assert_eq!(WrapStyle::try_from("character").expect("Wrap style expected!"), WrapStyle::Character);
-        assert_eq!(Direction::try_from("ttb").expect("Direction expected!"), Direction::TopToBottom);
-        assert_eq!(Join::try_from("bevel").expect("Join expected!"), Join::Bevel);
-        assert_eq!(Cap::try_from("butt").expect("Cap expected!"), Cap::Butt);
-        assert_eq!(TextureWrapping::try_from("mirror").expect("TextureWrapping expected!"), TextureWrapping::Mirror);
-        assert_eq!(Blend::try_from("invert").expect("Blend expected!"), Blend::Invert);
-        assert_eq!(Target::try_from("mask").expect("Target expected!"), Target::Mask);
-        assert_eq!(MaskMode::try_from("invert").expect("MaskMode expected!"), MaskMode::Invert);
+        assert_eq!(Numpad::try_from(7u8), Ok(Numpad::TopLeft));
+        assert_eq!(WrapStyle::try_from("character"), Ok(WrapStyle::Character));
+        assert_eq!(Direction::try_from("ttb"), Ok(Direction::TopToBottom));
+        assert_eq!(Join::try_from("bevel"), Ok(Join::Bevel));
+        assert_eq!(Cap::try_from("butt"), Ok(Cap::Butt));
+        assert_eq!(TextureWrapping::try_from("mirror"), Ok(TextureWrapping::Mirror));
+        assert_eq!(Blend::try_from("invert"), Ok(Blend::Invert));
+        assert_eq!(Target::try_from("mask"), Ok(Target::Mask));
+        assert_eq!(MaskMode::try_from("invert"), Ok(MaskMode::Invert));
     }
 }

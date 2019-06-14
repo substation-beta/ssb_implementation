@@ -83,8 +83,11 @@ mod tests {
     #[test]
     fn convert() {
         use super::{Section, Mode, TextureDataType, TryFrom};
-        assert_eq!(Section::try_from("#Events").expect("Section instance expected!"), Section::Events);
-        assert_eq!(Mode::try_from("shape").expect("Mode instance expected!"), Mode::Shape);
-        assert_eq!(TextureDataType::try_from("data").expect("Texture data type expected!"), TextureDataType::Raw);
+        assert_eq!(Section::try_from("#Events"), Ok(Section::Events));
+        assert_eq!(Section::try_from("#Event"), Err(()));
+        assert_eq!(Mode::try_from("shape"), Ok(Mode::Shape));
+        assert_eq!(Mode::try_from("lines"), Err(()));
+        assert_eq!(TextureDataType::try_from("data"), Ok(TextureDataType::Raw));
+        assert_eq!(TextureDataType::try_from("magic"), Err(()));
     }
 }

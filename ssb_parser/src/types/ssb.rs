@@ -81,7 +81,13 @@ mod tests {
     #[test]
     fn convert() {
         use super::{View, FontStyle, TryFrom};
-        assert_eq!(View::try_from("orthogonal").expect("View instance expected!"), View::Orthogonal);
-        assert_eq!(FontStyle::try_from("bold-italic").expect("FontStyle instance expected!"), FontStyle::BoldItalic);
+        assert_eq!(View::try_from("orthogonal"), Ok(View::Orthogonal));
+        assert_eq!(View::try_from("perspective"), Ok(View::Perspective));
+        assert_eq!(View::try_from("fuzzy"), Err(()));
+        assert_eq!(FontStyle::try_from("regular"), Ok(FontStyle::Regular));
+        assert_eq!(FontStyle::try_from("bold"), Ok(FontStyle::Bold));
+        assert_eq!(FontStyle::try_from("italic"), Ok(FontStyle::Italic));
+        assert_eq!(FontStyle::try_from("bold-italic"), Ok(FontStyle::BoldItalic));
+        assert_eq!(FontStyle::try_from("ultra-bold"), Err(()));
     }
 }
