@@ -326,6 +326,7 @@ fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
     let mut objects = vec![];
     let mut mode = Mode::default();
     for (is_tag, data) in EscapedText::new(event_data).iter() {
+        debug!("{}: {}", if is_tag {"Tags"} else {"Geometry"}, data);
         if is_tag {
             parse_tags(data, &mut objects, Some(&mut mode))?;
         } else {
