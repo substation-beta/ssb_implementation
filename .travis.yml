@@ -52,21 +52,19 @@ matrix:
 addons:
   apt:
     sources:
-#      - sourceline: 'ppa:djcj/vapoursynth'
+      - sourceline: 'ppa:djcj/hybrid'
     packages:
       - python3
-#      - vapoursynth
+      - vapoursynth
 
 # Preparations for compilation
 before_script:
   # Fix Vapoursynth-Script library link
-#  - sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so.0 /usr/lib/x86_64-linux-gnu/libvapoursynth-script.so
   # Add test fonts (from windows)
   - echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections && sudo apt-get install -y ttf-mscorefonts-installer
 
 # Execute rust builds & tests
 script:
-#  - cargo build --verbose
-#  - cargo test --verbose
-  - cargo build -p ssb_parser -p ssb_renderer --verbose
-  - cargo test -p ssb_parser -p ssb_renderer --verbose
+  - cargo build --verbose
+  - cargo test --verbose
