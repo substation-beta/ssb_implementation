@@ -67,18 +67,10 @@ impl From<std::io::Error> for ParseError {
 }
 
 
-// Error identifiers
-#[derive(Debug, PartialEq)]
-pub enum MacroError {
-    NotFound(String),
-    InfiniteLoop(String)
-}
-
-
 // Tests
 #[cfg(test)]
 mod tests {
-    use super::{ParseError, MacroError};
+    use super::ParseError;
 
     #[test]
     fn parse_error() {
@@ -97,9 +89,5 @@ mod tests {
     #[test]
     fn parse_error_with_pos_and_source() {
         assert_eq!(ParseError::new_with_pos_source("test", (42, 26), ParseError::new("sourcy")).to_string(), "test <42:26>\nsourcy");
-    }
-    #[test]
-    fn compare_macro_errors() {
-        assert_ne!(MacroError::InfiniteLoop("".to_owned()), MacroError::NotFound("zzz".to_owned()));
     }
 }

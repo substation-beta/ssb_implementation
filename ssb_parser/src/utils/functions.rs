@@ -1,8 +1,5 @@
 // Imports
-use super::{
-    constants::*,
-    super::types::error::MacroError
-};
+use super::constants::*;
 use std::collections::{HashMap,HashSet};
 
 
@@ -81,6 +78,12 @@ pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macro
     );
     // Everything alright
     Ok(())
+}
+// Error identifier
+#[derive(Debug, PartialEq)]
+pub enum MacroError {
+    NotFound(String),
+    InfiniteLoop(String)
 }
 // On stable: <https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_key_value>
 fn get_key_value<'a,K,V,Q: ?Sized>(map: &'a HashMap<K,V>, k: &Q) -> Option<(&'a K, &'a V)>
@@ -229,9 +232,9 @@ mod tests {
         flatten_macro,
         map_or_err_str,
         map_else_err_str,
+        MacroError,
         EscapedText,
         TagsIterator,
-        MacroError,
         HashMap,
         HashSet
     };
@@ -290,6 +293,10 @@ mod tests {
         assert_eq!(flatten_macro("x", &mut HashSet::new(), &HashMap::new(), &mut HashMap::new()).unwrap_err(), MacroError::NotFound("x".to_owned()));
     }
 
+    #[test]
+    fn compare_macro_errors() {
+        assert_ne!(MacroError::InfiniteLoop("".to_owned()), MacroError::NotFound("zzz".to_owned()));
+    }
     #[test]
     fn map_err_str() {
         assert_eq!(map_or_err_str(Some("123"), |value| value.parse()), Ok(123));

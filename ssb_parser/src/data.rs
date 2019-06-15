@@ -2,13 +2,13 @@
 use super::{
     types::{
         error::ParseError,
-        state::{Section,Mode,ShapeSegmentType,TextureDataType},
         ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData},
         objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode,Animate}
     },
     utils::{
         constants::*,
-        functions::{parse_timestamp,flatten_macro,EscapedText,TagsIterator,bool_from_str,alpha_from_str,rgb_from_str,map_or_err_str,map_else_err_str}
+        functions::{parse_timestamp,flatten_macro,EscapedText,TagsIterator,bool_from_str,alpha_from_str,rgb_from_str,map_or_err_str,map_else_err_str},
+        state::{Section,Mode,ShapeSegmentType,TextureDataType}
     }
 };
 use std::{
