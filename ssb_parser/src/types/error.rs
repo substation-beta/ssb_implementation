@@ -90,8 +90,15 @@ mod tests {
     fn parse_error_with_source() {
         assert_eq!(ParseError::new_with_source("error on error", ParseError::new("source")).to_string(), "error on error\nsource");
     }
+
     #[test]
     fn parse_error_with_pos_and_source() {
         assert_eq!(ParseError::new_with_pos_source("test", (42, 26), ParseError::new("sourcy")).to_string(), "test <42:26>\nsourcy");
+    }
+
+    #[test]
+    fn parse_error_from_io() {
+        use std::io::{Error, ErrorKind};
+        assert_eq!(ParseError::from(Error::new(ErrorKind::NotFound, "Freddy not found!")).to_string(), "Freddy not found!".to_owned());
     }
 }

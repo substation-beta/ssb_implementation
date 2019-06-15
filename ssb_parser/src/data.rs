@@ -861,3 +861,30 @@ fn parse_geometries<'a>(data: &str, objects: &'a mut Vec<EventObject>, mode: &Mo
     }
     Ok(objects)
 }
+
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::{parse_tags, Mode, parse_geometries};
+
+    #[test]
+    fn invalid_tag() {
+        assert_eq!(
+            parse_tags("font=Arial;dummy", &mut vec![], None).map_err(|err| err.to_string() ),
+            Err("Invalid tag 'dummy'!".to_owned())
+        );
+        assert_eq!(
+            parse_tags("animate=500,-500,t,[abc]", &mut vec![], Some(&mut Mode::default())).map_err(|err| err.to_string() ),
+            Err("Invalid animate '500,-500,t,[abc]'!\nInvalid tag 'abc'!".to_owned())
+        );
+    }
+
+    #[test]
+    fn invalid_geometry() {
+        assert_eq!(
+            parse_geometries("0 0 -1 2.5 3", &mut vec![], &Mode::Points).map_err(|err| err.to_string() ),
+            Err("Points incomplete (leftover: '3')!".to_owned())
+        );
+    }
+}
