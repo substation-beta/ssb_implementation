@@ -339,6 +339,7 @@ Texture: Fancy,data,RmFuY3k=
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0
                             ])),
+                            EventObject::TagIdentity,
                             EventObject::TagBorder(Border::All(
                                 42.0, 42.0
                             )),
