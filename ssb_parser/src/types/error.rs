@@ -9,7 +9,7 @@ use std::{
 };
 
 
-// Custom error
+/// SSB parsing specific error type.
 #[derive(Debug)]
 pub struct ParseError {
     msg: String,
@@ -17,6 +17,7 @@ pub struct ParseError {
     src: Option<Box<dyn Error>>
 }
 impl ParseError {
+    /// New error with message only.
     pub fn new(msg: &str) -> Self {
         Self {
             msg: msg.to_owned(),
@@ -24,6 +25,7 @@ impl ParseError {
             src: None
         }
     }
+    /// New error with message and position.
     pub fn new_with_pos(msg: &str, pos: (usize, usize)) -> Self {
         Self {
             msg: msg.to_owned(),
@@ -31,6 +33,7 @@ impl ParseError {
             src: None
         }
     }
+    /// New error with message and source error.
     pub fn new_with_source<E>(msg: &str, src: E) -> Self
         where E: Error + 'static {
         Self {
@@ -39,6 +42,7 @@ impl ParseError {
             src: Some(Box::new(src))
         }
     }
+    /// New error with message, position and source error.
     pub fn new_with_pos_source<E>(msg: &str, pos: (usize, usize), src: E) -> Self
         where E: Error + 'static {
         Self {

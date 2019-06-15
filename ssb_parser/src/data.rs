@@ -19,7 +19,7 @@ use std::{
 };
 
 
-// Raw data
+/// Raw SSB data, representing original input one-by-one (except empty lines and comments).
 #[derive(Debug, PartialEq)]
 pub struct Ssb {
     // Info section
@@ -61,11 +61,13 @@ impl Default for Ssb {
     }
 }
 impl Ssb {
+    /// Parse SSB input and fill structure (which it owns and returns modified).
     pub fn parse_owned<R>(mut self, reader: R, search_path: Option<&Path>) -> Result<Self, ParseError>
         where R: BufRead {
         self.parse(reader, search_path)?;
         Ok(self)
     }
+    /// Parse SSB input and fill structure (which it borrows and returns as reference).
     pub fn parse<R>(&mut self, reader: R, search_path: Option<&Path>) -> Result<&mut Self, ParseError> 
         where R: BufRead {
         // Initial state
@@ -255,7 +257,7 @@ impl Ssb {
 }
 
 
-// Processed data (for rendering)
+/// Processed SSB data, reduced and evaluated for rendering purposes.
 #[derive(Debug, PartialEq)]
 pub struct SsbRender {
     // Target section

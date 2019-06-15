@@ -26,9 +26,9 @@
 )]
 
 
-/// Minor types for data in this crate.
+/// Minor types for data.
 pub mod types;
-/// Internal utility structs & functions for data processing of this crate.
+// Internal utility structures & functions for data processing.
 mod utils;
-/// Data processors and storage of this crate.
+/// Data processors and main storages.
 pub mod data;

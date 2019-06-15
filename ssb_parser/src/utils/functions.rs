@@ -79,12 +79,6 @@ pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macro
     // Everything alright
     Ok(())
 }
-// Error identifier
-#[derive(Debug, PartialEq)]
-pub enum MacroError {
-    NotFound(String),
-    InfiniteLoop(String)
-}
 // On stable: <https://doc.rust-lang.org/std/collections/struct.HashMap.html#method.get_key_value>
 fn get_key_value<'a,K,V,Q: ?Sized>(map: &'a HashMap<K,V>, k: &Q) -> Option<(&'a K, &'a V)>
     where K: std::borrow::Borrow<Q> + std::hash::Hash + std::cmp::Eq,
@@ -106,6 +100,12 @@ pub fn map_else_err_str<T,F,U>(option: Option<&T>, op: F) -> Result<U,&str>
 
 
 // Structures
+#[derive(Debug, PartialEq)]
+pub enum MacroError {
+    NotFound(String),
+    InfiniteLoop(String)
+}
+
 pub struct EscapedText {
     text: String,
     tag_starts_ends: Vec<(usize,char)>
@@ -294,15 +294,16 @@ mod tests {
     }
 
     #[test]
-    fn compare_macro_errors() {
-        assert_ne!(MacroError::InfiniteLoop("".to_owned()), MacroError::NotFound("zzz".to_owned()));
-    }
-    #[test]
     fn map_err_str() {
         assert_eq!(map_or_err_str(Some("123"), |value| value.parse()), Ok(123));
         assert_eq!(map_else_err_str(Some("987a"), |value| value.parse::<i32>().ok()), Err("987a"));
     }
 
+    #[test]
+    fn compare_macro_errors() {
+        assert_ne!(MacroError::InfiniteLoop("".to_owned()), MacroError::NotFound("zzz".to_owned()));
+    }
+    
     #[test]
     fn tag_geometry_iter() {
         let text = EscapedText::new("[tag1][tag2=[inner_tag]]geometry1\\[geometry1_continue\\\\[tag3]geometry2\\n[tag4");

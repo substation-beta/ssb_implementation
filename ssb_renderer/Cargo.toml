@@ -36,7 +36,7 @@ doctest = false
 image = "~0.21.2"   # https://crates.io/crates/image
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
-rusttype = "~0.7.6"  # https://crates.io/crates/rusttype
+rusttype = "~0.7.7"  # https://crates.io/crates/rusttype
 glyph_brush_layout = "~0.1.6"   # https://crates.io/crates/glyph_brush_layout
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
