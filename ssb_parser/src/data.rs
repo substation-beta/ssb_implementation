@@ -610,8 +610,8 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 } )
                 .map_err(|value| ParseError::new(&format!("Invalid texture filling '{}'!", value)) )?
             )),
-            "color" => objects.push(EventObject::TagColor(
-                map_or_err_str(tag_value, |value| {
+            "color" | "bordercolor" => objects.push({
+                let color = map_or_err_str(tag_value, |value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
                         (Some(color1), Some(color2), Some(color3), Some(color4), Some(color5)) =>
@@ -646,50 +646,19 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                             ),
                         _ => return Err(())
                     })
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid color '{}'!", value)) )?
-            )),
-            "bordercolor" => objects.push(EventObject::TagBorderColor(
-                map_or_err_str(tag_value, |value| {
-                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
-                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
-                        (Some(color1), Some(color2), Some(color3), Some(color4), Some(color5)) =>
-                            Color::CornersWithStop([
-                                rgb_from_str(color1)?,
-                                rgb_from_str(color2)?,
-                                rgb_from_str(color3)?,
-                                rgb_from_str(color4)?,
-                                rgb_from_str(color5)?
-                            ]),
-                        (Some(color1), Some(color2), Some(color3), Some(color4), None) =>
-                            Color::Corners([
-                                rgb_from_str(color1)?,
-                                rgb_from_str(color2)?,
-                                rgb_from_str(color3)?,
-                                rgb_from_str(color4)?
-                            ]),
-                        (Some(color1), Some(color2), Some(color3), None, None) =>
-                            Color::LinearWithStop([
-                                rgb_from_str(color1)?,
-                                rgb_from_str(color2)?,
-                                rgb_from_str(color3)?
-                            ]),
-                        (Some(color1), Some(color2), None, None, None) =>
-                            Color::Linear([
-                                rgb_from_str(color1)?,
-                                rgb_from_str(color2)?
-                            ]),
-                        (Some(color1), None, None, None, None) =>
-                            Color::Mono(
-                                rgb_from_str(color1)?
-                            ),
-                        _ => return Err(())
-                    })
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid color '{}'!", value)) )?
-            )),
-            "alpha" => objects.push(EventObject::TagAlpha(
-                map_or_err_str(tag_value, |value| {
+                } );
+                if tag_name == "color" {
+                    EventObject::TagColor(
+                        color.map_err(|value| ParseError::new(&format!("Invalid color '{}'!", value)) )?
+                    )
+                } else {
+                    EventObject::TagBorderColor(
+                        color.map_err(|value| ParseError::new(&format!("Invalid border color '{}'!", value)) )?
+                    )
+                }
+            }),
+            "alpha" | "borderalpha" => objects.push({
+                let alpha = map_or_err_str(tag_value, |value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
                         (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), Some(alpha5)) =>
@@ -724,48 +693,17 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                             ),
                         _ => return Err(())
                     })
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid color '{}'!", value)) )?
-            )),
-            "borderalpha" => objects.push(EventObject::TagBorderAlpha(
-                map_or_err_str(tag_value, |value| {
-                    let mut tokens = value.splitn(5, VALUE_SEPARATOR);
-                    Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
-                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), Some(alpha5)) =>
-                            Alpha::CornersWithStop([
-                                alpha_from_str(alpha1)?,
-                                alpha_from_str(alpha2)?,
-                                alpha_from_str(alpha3)?,
-                                alpha_from_str(alpha4)?,
-                                alpha_from_str(alpha5)?
-                            ]),
-                        (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), None) =>
-                            Alpha::Corners([
-                                alpha_from_str(alpha1)?,
-                                alpha_from_str(alpha2)?,
-                                alpha_from_str(alpha3)?,
-                                alpha_from_str(alpha4)?
-                            ]),
-                        (Some(alpha1), Some(alpha2), Some(alpha3), None, None) =>
-                            Alpha::LinearWithStop([
-                                alpha_from_str(alpha1)?,
-                                alpha_from_str(alpha2)?,
-                                alpha_from_str(alpha3)?
-                            ]),
-                        (Some(alpha1), Some(alpha2), None, None, None) =>
-                            Alpha::Linear([
-                                alpha_from_str(alpha1)?,
-                                alpha_from_str(alpha2)?
-                            ]),
-                        (Some(alpha1), None, None, None, None) =>
-                            Alpha::Mono(
-                                alpha_from_str(alpha1)?
-                            ),
-                        _ => return Err(())
-                    })
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid color '{}'!", value)) )?
-            )),
+                } );
+                if tag_name == "alpha" {
+                    EventObject::TagAlpha(
+                        alpha.map_err(|value| ParseError::new(&format!("Invalid alpha '{}'!", value)) )?
+                    )
+                } else {
+                    EventObject::TagBorderAlpha(
+                        alpha.map_err(|value| ParseError::new(&format!("Invalid border coloalphar '{}'!", value)) )?
+                    )
+                }
+            }),
             "blur" => objects.push(EventObject::TagBlur(
                 map_else_err_str(tag_value, |value| {
                     Some(
