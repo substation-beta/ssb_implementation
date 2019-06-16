@@ -60,34 +60,16 @@ impl Default for ShapeSegmentType {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum TextureDataType {
-    Raw,
-    Url
-}
-impl TryFrom<&str> for TextureDataType {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "data" => Ok(TextureDataType::Raw),
-            "url" => Ok(TextureDataType::Url),
-            _ => Err(())
-        }
-    }
-}
-
 
 // Tests
 #[cfg(test)]
 mod tests {
     #[test]
     fn convert() {
-        use super::{Section, Mode, TextureDataType, TryFrom};
+        use super::{Section, Mode, TryFrom};
         assert_eq!(Section::try_from("#Events"), Ok(Section::Events));
         assert_eq!(Section::try_from("#Event"), Err(()));
         assert_eq!(Mode::try_from("shape"), Ok(Mode::Shape));
         assert_eq!(Mode::try_from("lines"), Err(()));
-        assert_eq!(TextureDataType::try_from("data"), Ok(TextureDataType::Raw));
-        assert_eq!(TextureDataType::try_from("magic"), Err(()));
     }
 }

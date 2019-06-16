@@ -8,7 +8,7 @@ use super::{
     utils::{
         constants::*,
         functions::{parse_timestamp,flatten_macro,EscapedText,TagsIterator,bool_from_str,alpha_from_str,rgb_from_str,map_or_err_str,map_else_err_str},
-        state::{Section,Mode,ShapeSegmentType,TextureDataType}
+        state::{Section,Mode,ShapeSegmentType}
     }
 };
 use log::debug;
@@ -221,13 +221,11 @@ impl Ssb {
                                     // Save texture
                                     self.textures.insert(
                                         id.to_owned(),
-                                        match TextureDataType::try_from(data_type).map_err(|_| ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + 1 /* VALUE_SEPARATOR */)) )? {
+                                        match data_type {
                                             // Raw data
-                                            TextureDataType::Raw => {
-                                                base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?
-                                            }
+                                            "data" => base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?,
                                             // Data by url
-                                            TextureDataType::Url => {
+                                            "url" => {
                                                 let full_path = search_path.unwrap_or_else(|| Path::new(".")).join(data);
                                                 std::fs::read(&full_path).map_err(|err| {
                                                     ParseError::new_with_pos_source(
@@ -237,6 +235,7 @@ impl Ssb {
                                                     )
                                                 })?
                                             }
+                                            _ => return Err(ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + 1 /* VALUE_SEPARATOR */)))
                                         }
                                     );
                                 } else {
