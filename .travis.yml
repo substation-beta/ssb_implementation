@@ -27,7 +27,7 @@ matrix:
   include:
     # Stable
     - rust: stable
-      # CodeCov upload
+      # CodeCov upload <https://github.com/SimonKagstrom/kcov>
       after_success: |
         sudo apt-get install -y libcurl4-openssl-dev libelf-dev libdw-dev cmake gcc binutils-dev libiberty-dev && # Install kcov requirements
         wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz && # Download kcov sources
@@ -36,13 +36,12 @@ matrix:
         cmake .. && make && # Generate Makefile by CMake and build kcov
         sudo make install &&  # Install kcov to system
         cd ../.. && rm -rf kcov-master && # Delete kcov sources
-        for file in target/debug/*_tests-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done && # Generate code coverage reports
-        bash <(curl -s https://codecov.io/bash) &&  # Upload code coverage reports (by environment variable CODECOV_TOKEN)
-        echo "Uploaded code coverage" # Print finish message
+        for file in target/debug/*_*-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&  # Generate code coverage reports
+        bash <(curl -s https://codecov.io/bash) # Upload code coverage reports (by environment variable CODECOV_TOKEN)
       # Crates.io release
       deploy:
         provider: script  # Script execution
-        script: cargo login $CRATES_TOKEN; cargo publish --manifest-path ssb_parser/Cargo.toml || true; cargo publish --manifest-path ssb_renderer/Cargo.toml || true; cargo publish --manifest-path ssb_filter/Cargo.toml || true # Link to crates.io and publish ssb_* projects
+        script: cargo login $CRATES_TOKEN; cargo publish --manifest-path ssb_parser/Cargo.toml || true; cargo publish --manifest-path ssb_renderer/Cargo.toml || true; cargo publish --manifest-path ssb_filter/Cargo.toml || true  # Link to crates.io and publish ssb_* projects
         on:
           tags: true  # Commit must be tagged!
     # Nightly
