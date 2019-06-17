@@ -599,8 +599,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid cap '{}'!", value)) )?
             )),
             "texture" => objects.push(EventObject::TagTexture(
-                map_else_err_str(tag_value, |value| Some(value.to_owned()) )
-                .map_err(|value| ParseError::new(&format!("Invalid texture '{}'!", value)) )?
+                tag_value.map(ToOwned::to_owned).unwrap_or_else(|| "".to_owned() )
             )),
             "texfill" => objects.push(EventObject::TagTexFill(
                 map_else_err_str(tag_value, |value| {
