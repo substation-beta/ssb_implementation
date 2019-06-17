@@ -4,8 +4,7 @@
 //! use std::{
 //!     convert::TryFrom,
 //!     fs::File,
-//!     io::{BufReader,Cursor},
-//!     path::Path
+//!     io::{BufReader,Cursor}
 //! };
 //! use ssb_parser::data::{Ssb,SsbRender};
 //! // Data
@@ -13,8 +12,8 @@
 //! let ssb_reader2 = BufReader::new(File::open("/foo/bar.ssb").unwrap());
 //! // Parsing
 //! let ssb = Ssb::default()
-//!     .parse_owned(ssb_reader1, None).unwrap()
-//!     .parse_owned(ssb_reader2, Some(Path::new("/foo/"))).unwrap();
+//!     .parse_owned(ssb_reader1).unwrap()
+//!     .parse_owned(ssb_reader2).unwrap();
 //! let ssb_render = SsbRender::try_from(ssb).unwrap();
 //! // Print
 //! println!("{:#?}", ssb_render);
