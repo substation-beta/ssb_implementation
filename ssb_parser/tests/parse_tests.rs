@@ -10,9 +10,9 @@ mod parse_tests {
     use std::{
         collections::HashMap,
         convert::TryFrom,
+        env::set_current_dir,
         io::{BufReader, Cursor},
-        fs::File,
-        path::Path
+        fs::File
     };
 
 
@@ -38,7 +38,7 @@ foo: bar
 Font: bar,bold,dXNhZ2k=
 Texture: Fancy,data,RmFuY3k=
 "
-        ), None).unwrap();
+        )).unwrap();
         // Asserts
         assert_eq!(ssb.info_title, None);
         assert_eq!(ssb.info_author, Some("Youka".to_owned()));
@@ -51,7 +51,7 @@ Texture: Fancy,data,RmFuY3k=
         assert_eq!(event.data, "[color=123abc]Hello world!");
         assert_eq!(ssb.fonts.get(&FontFace {family: "bar".to_owned(), style: FontStyle::Bold}), Some(&vec![117, 115, 97, 103, 105]));
         assert_eq!(ssb.fonts.get(&FontFace {family: "".to_owned(), style: FontStyle::Regular}), None);
-        assert_eq!(ssb.textures.get("Fancy"), Some(&vec![70, 97, 110, 99, 121]));
+        assert_eq!(ssb.textures.get("Fancy"), Some(&TextureDataVariant::Raw(vec![70, 97, 110, 99, 121])));
         assert_eq!(ssb.textures.get("Nobody"), None);
     }
 
@@ -63,11 +63,11 @@ Texture: Fancy,data,RmFuY3k=
             BufReader::new(
                 File::open(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/test.ssb"))
                 .expect("Test SSB file must exist!")
-            ),
-            Some(Path::new(env!("CARGO_MANIFEST_DIR")))
+            )
         ).unwrap_or_else(|exception| panic!("SSB parsing error: {}", exception) );
         //println!("{:#?}", ssb);
         // Parse 2nd phase
+        set_current_dir(env!("CARGO_MANIFEST_DIR")).expect("Working directory couldn't set to manifest location?!");
         assert_eq!(
             SsbRender::try_from(ssb).unwrap_or_else(|exception| panic!("SSB render data error: {}", exception) ),
             SsbRender {
@@ -477,53 +477,53 @@ Texture: Fancy,data,RmFuY3k=
     fn test_ssb_errors() {
         // Section
         assert_eq!(
-            Ssb::default().parse(Cursor::new("x"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("x")).map_err(|err| err.to_string()),
             Err("No section set! <0:0>".to_owned())
         );
         // Info
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Info\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Info\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid info entry! <1:0>".to_owned())
         );
         // Target
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Target\nWidth: 4096\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Target\nWidth: 4096\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid target entry! <2:0>".to_owned())
         );
         // Macros
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Macros\nabc: []\n123: Hi!\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Macros\nabc: []\n123: Hi!\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid macros entry! <3:0>".to_owned())
         );
         // Events
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Events\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid events entry! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\n1:-0|||"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Events\n1:-0|||")).map_err(|err| err.to_string()),
             Err("Start time greater than end time! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\n?|||"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Events\n?|||")).map_err(|err| err.to_string()),
             Err("Invalid trigger format! <1:0>".to_owned())
         );
         // Resources
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nINVALID_ENTRY"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Resources\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid resources entry! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nFont: myfont,Regula"), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Resources\nFont: myfont,Regula")).map_err(|err| err.to_string()),
             Err("Font family, style and data expected! <1:6>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nTexture: "), None).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#Resources\nTexture: ")).map_err(|err| err.to_string()),
             Err("Texture id, data type and data expected! <1:9>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nTexture: Pikachu,url,XYZ://Chubacca/Bob.png"), None).map_err(|err| err.to_string().starts_with("Texture data not loadable from file")),
-            Err(true)
+            Ssb::default().parse(Cursor::new("#Resources\nTexture: Pikachu,data,INVALID_BASE64")).map_err(|err| err.to_string()),
+            Err("Texture data not in base64 format! <1:22>".to_owned())
         );
     }
 }

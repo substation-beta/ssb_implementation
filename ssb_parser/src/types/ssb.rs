@@ -5,7 +5,7 @@ use super::objects::EventObject;
 
 
 // Data minor types
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Event {
     pub trigger: EventTrigger,
     pub macro_name: Option<String>,
@@ -13,7 +13,7 @@ pub struct Event {
     pub data: String,
     pub data_location: (usize,usize)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct EventRender {
     pub trigger: EventTrigger,
     pub objects: Vec<EventObject>
@@ -70,8 +70,12 @@ impl TryFrom<&str> for FontStyle {
     }
 }
 pub type FontData = Vec<u8>;
-
 pub type TextureId = String;
+#[derive(Debug, PartialEq, Clone)]
+pub enum TextureDataVariant {
+    Raw(TextureData),
+    Url(String)
+}
 pub type TextureData = Vec<u8>;
 
 

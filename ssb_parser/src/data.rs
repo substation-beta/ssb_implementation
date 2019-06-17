@@ -2,7 +2,7 @@
 use super::{
     types::{
         error::ParseError,
-        ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData},
+        ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData,TextureDataVariant},
         objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode,Animate}
     },
     utils::{
@@ -15,13 +15,12 @@ use log::debug;
 use std::{
     collections::{HashMap,HashSet},
     io::BufRead,
-    path::Path,
     convert::TryFrom
 };
 
 
 /// Raw SSB data, representing original input one-by-one (except empty lines and comments).
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Ssb {
     // Info section
     pub info_title: Option<String>,
@@ -40,7 +39,7 @@ pub struct Ssb {
     pub events: Vec<Event>,
     // Resources section
     pub fonts: HashMap<FontFace, FontData>,
-    pub textures: HashMap<TextureId, TextureData>
+    pub textures: HashMap<TextureId, TextureDataVariant>
 }
 impl Default for Ssb {
     fn default() -> Self {
@@ -63,13 +62,13 @@ impl Default for Ssb {
 }
 impl Ssb {
     /// Parse SSB input and fill structure (which it owns and returns modified).
-    pub fn parse_owned<R>(mut self, reader: R, search_path: Option<&Path>) -> Result<Self, ParseError>
+    pub fn parse_owned<R>(mut self, reader: R) -> Result<Self, ParseError>
         where R: BufRead {
-        self.parse(reader, search_path)?;
+        self.parse(reader)?;
         Ok(self)
     }
     /// Parse SSB input and fill structure (which it borrows and returns as reference).
-    pub fn parse<R>(&mut self, reader: R, search_path: Option<&Path>) -> Result<&mut Self, ParseError> 
+    pub fn parse<R>(&mut self, reader: R) -> Result<&mut Self, ParseError> 
         where R: BufRead {
         // Initial state
         let mut section: Option<Section> = None;
@@ -223,18 +222,13 @@ impl Ssb {
                                         id.to_owned(),
                                         match data_type {
                                             // Raw data
-                                            "data" => base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?,
+                                            "data" => TextureDataVariant::Raw(
+                                                base64::decode(data).map_err(|_| ParseError::new_with_pos("Texture data not in base64 format!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1))) )?
+                                            ),
                                             // Data by url
-                                            "url" => {
-                                                let full_path = search_path.unwrap_or_else(|| Path::new(".")).join(data);
-                                                std::fs::read(&full_path).map_err(|err| {
-                                                    ParseError::new_with_pos_source(
-                                                        &format!("Texture data not loadable from file '{}'!", full_path.display()),
-                                                        (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + data_type.len() + (1 /* VALUE_SEPARATOR */ << 1)),
-                                                        err
-                                                    )
-                                                })?
-                                            }
+                                            "url" => TextureDataVariant::Url(
+                                                data.to_owned()
+                                            ),
                                             _ => return Err(ParseError::new_with_pos("Texture data type invalid!", (line_index, RESOURCES_TEXTURE_KEY.len() + id.len() + 1 /* VALUE_SEPARATOR */)))
                                         }
                                     );
@@ -260,7 +254,7 @@ impl Ssb {
 
 
 /// Processed SSB data, reduced and evaluated for rendering purposes.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct SsbRender {
     // Target section
     pub target_width: Option<u16>,
@@ -276,45 +270,63 @@ pub struct SsbRender {
 impl TryFrom<Ssb> for SsbRender {
     type Error = ParseError;
     fn try_from(data: Ssb) -> Result<Self, Self::Error> {
-        // Flatten macros & detect infinite recursion
-        let mut flat_macros = HashMap::with_capacity(data.macros.len());
-        for macro_name in data.macros.keys() {
-            flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros).map_err(|err| ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)) )?;
-        }
-        // Evaluate events
-        let mut events = Vec::with_capacity(data.events.len());
-        debug!("SSB event evaluation...");
-        for event in data.events {
-            // Insert base macro
-            let mut event_data = event.data.clone();
-            if let Some(macro_name) = &event.macro_name {
-                event_data.insert_str(0, flat_macros.get(macro_name.as_str()).ok_or_else(|| ParseError::new_with_pos(&format!("Base macro '{}' not found to insert!", macro_name), (event.data_location.0, 0)) )?);
-            }
-            // Insert inline macros
-            while let Some(found) = MACRO_PATTERN.find(&event_data) {
-                let macro_name = &event_data[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
-                let macro_location = found.start()..found.end();
-                let macro_value = flat_macros.get(macro_name).ok_or_else(|| ParseError::new_with_pos(&format!("Inline macro '{}' not found to insert!", macro_name), event.data_location) )?;
-                event_data.replace_range(macro_location, macro_value);
-            }
-            // Parse objects and save event for rendering
-            debug!("{:?}: {}", event.data_location, event_data);
-            events.push(
-                EventRender {
-                    trigger: event.trigger.clone(),
-                    objects: parse_objects(&event_data).map_err(|err| ParseError::new_with_pos_source("Invalid event data!", event.data_location, err) )?
-                }
-            );
-        }
-        // Return result
         Ok(SsbRender {
             target_width: data.target_width,
             target_height: data.target_height,
             target_depth: data.target_depth,
             target_view: data.target_view,
-            events,
+            events: {
+                // Flatten macros & detect infinite recursion
+                let mut flat_macros = HashMap::with_capacity(data.macros.len());
+                for macro_name in data.macros.keys() {
+                    flatten_macro(macro_name, &mut HashSet::new(), &data.macros, &mut flat_macros).map_err(|err| ParseError::new(&format!("Flattening macro '{}' caused error: {:?}", macro_name, err)) )?;
+                }
+                // Evaluate events
+                let mut events = Vec::with_capacity(data.events.len());
+                debug!("SSB event evaluation...");
+                for event in data.events {
+                    // Insert base macro
+                    let mut event_data = event.data.clone();
+                    if let Some(macro_name) = &event.macro_name {
+                        event_data.insert_str(0, flat_macros.get(macro_name.as_str()).ok_or_else(|| ParseError::new_with_pos(&format!("Base macro '{}' not found to insert!", macro_name), (event.data_location.0, 0)) )?);
+                    }
+                    // Insert inline macros
+                    while let Some(found) = MACRO_PATTERN.find(&event_data) {
+                        let macro_name = &event_data[found.start()+MACRO_INLINE_START.len()..found.end()-MACRO_INLINE_END.len()];
+                        let macro_location = found.start()..found.end();
+                        let macro_value = flat_macros.get(macro_name).ok_or_else(|| ParseError::new_with_pos(&format!("Inline macro '{}' not found to insert!", macro_name), event.data_location) )?;
+                        event_data.replace_range(macro_location, macro_value);
+                    }
+                    // Parse objects and save event for rendering
+                    debug!("{:?}: {}", event.data_location, event_data);
+                    events.push(
+                        EventRender {
+                            trigger: event.trigger.clone(),
+                            objects: parse_objects(&event_data).map_err(|err| ParseError::new_with_pos_source("Invalid event data!", event.data_location, err) )?
+                        }
+                    );
+                }
+                events
+            },
             fonts: data.fonts,
-            textures: data.textures
+            textures: {
+                let mut textures = HashMap::with_capacity(data.textures.len());
+                for (texture_name, texture_data) in data.textures {
+                    textures.insert(
+                        texture_name.clone(),
+                        match texture_data {
+                            TextureDataVariant::Raw(data) => data,
+                            TextureDataVariant::Url(url) => std::fs::read(&url).map_err(|err| {
+                                ParseError::new_with_source(
+                                    &format!("Texture data for '{}' not loadable from file '{}'!", texture_name, url),
+                                    err
+                                )
+                            })?
+                        }
+                    );
+                }
+                textures
+            }
         })
     }
 }

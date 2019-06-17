@@ -3,12 +3,12 @@ use std::convert::TryFrom;
 
 
 // General
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Point2D {
     pub x: Coordinate,
     pub y: Coordinate
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Point3D {
     pub x: Coordinate,
     pub y: Coordinate,
@@ -19,7 +19,7 @@ pub type Degree = f64;
 
 
 // Objects
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum EventObject {
     GeometryShape(Vec<ShapeSegment>),
     GeometryPoints(Vec<Point2D>),
@@ -64,7 +64,7 @@ pub enum EventObject {
 
 
 // Object properties
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum ShapeSegment {
     MoveTo(Point2D),
     LineTo(Point2D),
@@ -72,12 +72,12 @@ pub enum ShapeSegment {
     ArcBy(Point2D, Degree),
     Close
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Alignment {
     Numpad(Numpad),
     Offset(Point2D)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Numpad {
     TopLeft, TopCenter, TopRight,
     MiddleLeft, MiddleCenter, MiddleRight,
@@ -100,7 +100,7 @@ impl TryFrom<u8> for Numpad {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Margin {
     All(Coordinate, Coordinate, Coordinate, Coordinate),
     Top(Coordinate),
@@ -108,7 +108,7 @@ pub enum Margin {
     Bottom(Coordinate),
     Left(Coordinate)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum WrapStyle {
     Space,
     Character,
@@ -125,7 +125,7 @@ impl TryFrom<&str> for WrapStyle {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Direction {
     LeftToRight,
     RightToLeft,
@@ -144,46 +144,46 @@ impl TryFrom<&str> for Direction {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Space {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Rotate {
     All(Degree, Degree, Degree),
     X(Degree),
     Y(Degree),
     Z(Degree)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Scale {
     All(Degree, Degree, Degree),
     X(Degree),
     Y(Degree),
     Z(Degree)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Translate {
     All(Coordinate, Coordinate, Coordinate),
     X(Coordinate),
     Y(Coordinate),
     Z(Coordinate)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Shear {
     All(Degree, Degree),
     X(Degree),
     Y(Degree)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Border {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Join {
     Round,
     Bevel,
@@ -200,7 +200,7 @@ impl TryFrom<&str> for Join {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Cap {
     Round,
     Butt,
@@ -217,7 +217,7 @@ impl TryFrom<&str> for Cap {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TexFill {
     pub x0: Degree,
     pub y0: Degree,
@@ -225,7 +225,7 @@ pub struct TexFill {
     pub y1: Degree,
     pub wrap: TextureWrapping
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TextureWrapping {
     Pad,
     Clamp,
@@ -244,7 +244,7 @@ impl TryFrom<&str> for TextureWrapping {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Color {
     Mono([u8;3]),
     Linear([[u8;3];2]),
@@ -252,7 +252,7 @@ pub enum Color {
     Corners([[u8;3];4]),
     CornersWithStop([[u8;3];5])
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Alpha {
     Mono(u8),
     Linear([u8;2]),
@@ -260,13 +260,13 @@ pub enum Alpha {
     Corners([u8;4]),
     CornersWithStop([u8;5])
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Blur {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Blend {
     Add,
     Subtract,
@@ -289,7 +289,7 @@ impl TryFrom<&str> for Blend {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Target {
     Frame,
     Mask
@@ -304,7 +304,7 @@ impl TryFrom<&str> for Target {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum MaskMode {
     Normal,
     Invert
@@ -319,7 +319,7 @@ impl TryFrom<&str> for MaskMode {
         }
     }
 }
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Animate {
     pub time: Option<(i32, i32)>,
     pub formula: Option<String>,
