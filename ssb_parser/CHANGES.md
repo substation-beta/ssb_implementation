@@ -1,3 +1,7 @@
+# v0.2.1
+* Fixed doc example
+* Added serialization
+
 # v0.2.0
 * Minor performance improvements
 * Added clone trait to all structures
