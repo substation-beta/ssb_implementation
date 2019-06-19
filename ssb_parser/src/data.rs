@@ -21,6 +21,7 @@ use std::{
 
 /// Raw SSB data, representing original input one-by-one (except empty lines and comments).
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct Ssb {
     // Info section
     pub info_title: Option<String>,
@@ -255,6 +256,7 @@ impl Ssb {
 
 /// Processed SSB data, reduced and evaluated for rendering purposes.
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct SsbRender {
     // Target section
     pub target_width: Option<u16>,

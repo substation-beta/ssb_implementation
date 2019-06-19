@@ -4,11 +4,13 @@ use std::convert::TryFrom;
 
 // General
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct Point2D {
     pub x: Coordinate,
     pub y: Coordinate
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct Point3D {
     pub x: Coordinate,
     pub y: Coordinate,
@@ -20,6 +22,7 @@ pub type Degree = f64;
 
 // Objects
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum EventObject {
     GeometryShape(Vec<ShapeSegment>),
     GeometryPoints(Vec<Point2D>),
@@ -65,6 +68,7 @@ pub enum EventObject {
 
 // Object properties
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum ShapeSegment {
     MoveTo(Point2D),
     LineTo(Point2D),
@@ -73,11 +77,13 @@ pub enum ShapeSegment {
     Close
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Alignment {
     Numpad(Numpad),
     Offset(Point2D)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Numpad {
     TopLeft, TopCenter, TopRight,
     MiddleLeft, MiddleCenter, MiddleRight,
@@ -101,6 +107,7 @@ impl TryFrom<u8> for Numpad {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Margin {
     All(Coordinate, Coordinate, Coordinate, Coordinate),
     Top(Coordinate),
@@ -109,6 +116,7 @@ pub enum Margin {
     Left(Coordinate)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum WrapStyle {
     Space,
     Character,
@@ -126,6 +134,7 @@ impl TryFrom<&str> for WrapStyle {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Direction {
     LeftToRight,
     RightToLeft,
@@ -145,12 +154,14 @@ impl TryFrom<&str> for Direction {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Space {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Rotate {
     All(Degree, Degree, Degree),
     X(Degree),
@@ -158,6 +169,7 @@ pub enum Rotate {
     Z(Degree)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Scale {
     All(Degree, Degree, Degree),
     X(Degree),
@@ -165,6 +177,7 @@ pub enum Scale {
     Z(Degree)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Translate {
     All(Coordinate, Coordinate, Coordinate),
     X(Coordinate),
@@ -172,18 +185,21 @@ pub enum Translate {
     Z(Coordinate)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Shear {
     All(Degree, Degree),
     X(Degree),
     Y(Degree)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Border {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Join {
     Round,
     Bevel,
@@ -201,6 +217,7 @@ impl TryFrom<&str> for Join {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Cap {
     Round,
     Butt,
@@ -218,6 +235,7 @@ impl TryFrom<&str> for Cap {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct TexFill {
     pub x0: Degree,
     pub y0: Degree,
@@ -226,6 +244,7 @@ pub struct TexFill {
     pub wrap: TextureWrapping
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum TextureWrapping {
     Pad,
     Clamp,
@@ -245,6 +264,7 @@ impl TryFrom<&str> for TextureWrapping {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Color {
     Mono([u8;3]),
     Linear([[u8;3];2]),
@@ -253,6 +273,7 @@ pub enum Color {
     CornersWithStop([[u8;3];5])
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Alpha {
     Mono(u8),
     Linear([u8;2]),
@@ -261,12 +282,14 @@ pub enum Alpha {
     CornersWithStop([u8;5])
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Blur {
     All(Coordinate, Coordinate),
     Horizontal(Coordinate),
     Vertical(Coordinate)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Blend {
     Add,
     Subtract,
@@ -290,6 +313,7 @@ impl TryFrom<&str> for Blend {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Target {
     Frame,
     Mask
@@ -305,6 +329,7 @@ impl TryFrom<&str> for Target {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum MaskMode {
     Normal,
     Invert
@@ -320,6 +345,7 @@ impl TryFrom<&str> for MaskMode {
     }
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct Animate {
     pub time: Option<(i32, i32)>,
     pub formula: Option<String>,

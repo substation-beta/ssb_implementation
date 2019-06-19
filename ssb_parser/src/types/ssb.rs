@@ -6,6 +6,7 @@ use super::objects::EventObject;
 
 // Data minor types
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct Event {
     pub trigger: EventTrigger,
     pub macro_name: Option<String>,
@@ -14,17 +15,20 @@ pub struct Event {
     pub data_location: (usize,usize)
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct EventRender {
     pub trigger: EventTrigger,
     pub objects: Vec<EventObject>
 }
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum EventTrigger {
     Id(String),
     Time((u32,u32))
 }
 
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum View {
     Perspective,
     Orthogonal
@@ -41,6 +45,7 @@ impl TryFrom<&str> for View {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub struct FontFace {
     pub family: String,
     pub style: FontStyle
@@ -51,6 +56,7 @@ impl fmt::Display for FontFace {
     }
 }
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum FontStyle {
     Regular,
     Bold,
@@ -72,6 +78,7 @@ impl TryFrom<&str> for FontStyle {
 pub type FontData = Vec<u8>;
 pub type TextureId = String;
 #[derive(Debug, PartialEq, Clone)]
+#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum TextureDataVariant {
     Raw(TextureData),
     Url(String)
