@@ -18,6 +18,7 @@ pub struct Point3D {
 }
 pub type Coordinate = f32;
 pub type Degree = f64;
+pub type Rgb = [u8;3];
 
 
 // Objects
@@ -68,7 +69,7 @@ pub enum EventObject {
     TagAnimate(Box<Animate>),
     TagKaraoke(u32),
     TagKaraokeSet(i32),
-    TagKaraokeColor([u8;3])
+    TagKaraokeColor(Rgb)
 }
 
 
@@ -263,11 +264,11 @@ impl TryFrom<&str> for TextureWrapping {
 #[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Color {
-    Mono([u8;3]),
-    Linear([[u8;3];2]),
-    LinearWithStop([[u8;3];3]),
-    Corners([[u8;3];4]),
-    CornersWithStop([[u8;3];5])
+    Mono(Rgb),
+    Linear([Rgb;2]),
+    LinearWithStop([Rgb;3]),
+    Corners([Rgb;4]),
+    CornersWithStop([Rgb;5])
 }
 #[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
