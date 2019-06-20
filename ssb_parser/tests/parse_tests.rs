@@ -361,13 +361,13 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagTexture(
                                 "cute".to_owned()
                             ),
-                            EventObject::TagTexFill(Box::new(TexFill {
+                            EventObject::TagTexFill {
                                 x0: 0.0,
                                 y0: 0.0,
                                 x1: 1.0,
                                 y1: 0.5,
                                 wrap: TextureWrapping::Repeat
-                            })),
+                            },
                             EventObject::TagColor(Color::CornersWithStop([
                                 [0, 0, 0],
                                 [255, 255,  255],

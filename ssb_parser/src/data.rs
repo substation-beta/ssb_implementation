@@ -3,7 +3,7 @@ use super::{
     types::{
         error::ParseError,
         ssb::{View,Event,EventRender,EventTrigger,FontFace,FontStyle,FontData,TextureId,TextureData,TextureDataVariant},
-        objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TexFill,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode,Animate}
+        objects::{Point2D,Point3D,EventObject,ShapeSegment,Alignment,Numpad,Margin,WrapStyle,Direction,Space,Rotate,Scale,Translate,Shear,Border,Join,Cap,TextureWrapping,Color,Alpha,Blur,Blend,Target,MaskMode,Animate}
     },
     utils::{
         constants::*,
@@ -615,19 +615,19 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
             "texture" => objects.push(EventObject::TagTexture(
                 tag_value.map(ToOwned::to_owned).unwrap_or_else(|| "".to_owned() )
             )),
-            "texfill" => objects.push(EventObject::TagTexFill(
+            "texfill" => objects.push(
                 map_else_err_str(tag_value, |value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
-                    Some(Box::new(TexFill {
+                    Some(EventObject::TagTexFill {
                         x0: tokens.next()?.parse().ok()?,
                         y0: tokens.next()?.parse().ok()?,
                         x1: tokens.next()?.parse().ok()?,
                         y1: tokens.next()?.parse().ok()?,
                         wrap: TextureWrapping::try_from(tokens.next()?).ok()?
-                    }))
+                    })
                 } )
                 .map_err(|value| ParseError::new(&format!("Invalid texture filling '{}'!", value)) )?
-            )),
+            ),
             "color" | "bordercolor" => objects.push({
                 let color = map_or_err_str(tag_value, |value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);

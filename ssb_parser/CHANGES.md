@@ -1,5 +1,6 @@
 # v0.2.2
 * Added logging tests
+* Reduced heap allocations
 
 # v0.2.1
 * Fixed doc example

@@ -49,7 +49,13 @@ pub enum EventObject {
     TagJoin(Join),
     TagCap(Cap),
     TagTexture(String),
-    TagTexFill(Box<TexFill>),
+    TagTexFill{
+        x0: Degree,
+        y0: Degree,
+        x1: Degree,
+        y1: Degree,
+        wrap: TextureWrapping
+    },
     TagColor(Color),
     TagBorderColor(Color),
     TagAlpha(Alpha),
@@ -233,15 +239,6 @@ impl TryFrom<&str> for Cap {
             _ => Err(())
         }
     }
-}
-#[derive(Debug, PartialEq, Clone)]
-#[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
-pub struct TexFill {
-    pub x0: Degree,
-    pub y0: Degree,
-    pub x1: Degree,
-    pub y1: Degree,
-    pub wrap: TextureWrapping
 }
 #[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
