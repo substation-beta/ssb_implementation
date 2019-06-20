@@ -3,6 +3,8 @@
 
 ---
 
+2nd level component of [ssb_implementation](https://github.com/substation-beta/ssb_implementation).
+
 ## Planned
 * Platform-independent font handling
 * Bidirectional, context-sensitive text?
