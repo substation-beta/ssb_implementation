@@ -1,3 +1,6 @@
+# v0.2.2
+* Added logging tests
+
 # v0.2.1
 * Fixed doc example
 * Added serialization
