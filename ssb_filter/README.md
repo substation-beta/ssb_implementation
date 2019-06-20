@@ -9,4 +9,4 @@
 * [GStreamer](https://en.wikipedia.org/wiki/GStreamer)
 * [MediaFoundation](https://en.wikipedia.org/wiki/Media_Foundation)
 
-[Changes](./CHANGES.md)
+[Changes](CHANGES.md)

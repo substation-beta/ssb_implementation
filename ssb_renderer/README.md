@@ -11,4 +11,4 @@
 * SIMD by AVX
 * OpenCL option
 
-[Changes](./CHANGES.md)
+[Changes](CHANGES.md)

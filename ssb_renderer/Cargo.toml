@@ -31,7 +31,7 @@ doctest = false
 
 [dependencies]
 # Depend on parser module
-ssb_parser = {path = "../ssb_parser", version = "0.2.1", default-features = false}
+ssb_parser = {path = "../ssb_parser", version = "0.2.2", default-features = false}
 # Render targets
 image = "~0.21.2"   # https://crates.io/crates/image
 # Fonts & text
