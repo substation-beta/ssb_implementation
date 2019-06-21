@@ -10,7 +10,7 @@
 * Bidirectional, context-sensitive text?
 * Caching repetitive contents
 * Multithreading with pool
-* SIMD by AVX
-* OpenCL option
+* SIMD (SSE2, AVX)
+* GPGPU (OpenCL, Cuda) option
 
 [Changes](CHANGES.md)

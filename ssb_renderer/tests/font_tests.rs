@@ -3,7 +3,10 @@ mod font_tests {
     use font_loader::system_fonts;
     use rusttype::{point, Font, PositionedGlyph, Scale};
     use image::{GrayAlphaImage, LumaA};
-    use std::path::Path;
+    use std::{
+        path::Path,
+        u8::MAX as u8MAX
+    };
 
     // Native font (post-installed on linux)
     const TEST_FONT: &str = "Arial";
@@ -27,11 +30,11 @@ mod font_tests {
         // Load font (regular)
         let (data_regular, _) = system_fonts::get(
             &system_fonts::FontPropertyBuilder::new().family(TEST_FONT).build()
-        ).unwrap();
+        ).expect("Regular font not loadable!");
         // Load font (bold)
         let (data_bold, _) = system_fonts::get(
             &system_fonts::FontPropertyBuilder::new().family(TEST_FONT).bold().build()
-        ).unwrap();
+        ).expect("Bold font not loadable!");
         // Compare both font styles
         println!("{0} regular length: {1}\n{0} bold length: {2}", TEST_FONT, data_regular.len(), data_bold.len());
         assert!(data_regular.len() > 0 && data_regular.len() != data_bold.len());
@@ -42,7 +45,7 @@ mod font_tests {
         // Load font (regular)
         let (data, _) = system_fonts::get(
             &system_fonts::FontPropertyBuilder::new().family(TEST_FONT).build()
-        ).unwrap();
+        ).expect("Regular font not loadable!");
 
         // See <https://gitlab.redox-os.org/redox-os/rusttype/blob/master/examples/simple.rs>
 
@@ -73,7 +76,7 @@ mod font_tests {
                         glyph_bounding.min.x as u32 + x,
                         glyph_bounding.min.y as u32 + y,
                         LumaA {
-                            data: [std::u8::MAX >> 1, (opacity * std::u8::MAX as f32) as u8]
+                            data: [u8MAX >> 1, (opacity * u8MAX as f32) as u8]
                         }
                     );
                 });
