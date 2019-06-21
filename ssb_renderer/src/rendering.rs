@@ -1,7 +1,10 @@
 // Imports
 use ssb_parser::data::SsbRender;
 use image::RgbaImage;
-use super::error::RenderingError;
+use super::types::{
+    error::RenderingError,
+    parameter::RenderTrigger
+};
 
 
 /// Renderer for ssb data on images
@@ -15,16 +18,18 @@ impl SsbRenderer {
             data
         }
     }
-    /// Renders on image by ssb and returns new image
-    pub fn render(&self, img: RgbaImage) -> Result<RgbaImage,RenderingError> {
+    /// Renders on image by ssb matching trigger
+    pub fn render(&self, img: RgbaImage, trigger: &RenderTrigger) -> Result<RgbaImage,RenderingError> {
         let (width, height) = img.dimensions();
         let mut buffer = img.into_raw();
 
 
         // TODO: whole rendering process
-        if self.data.target_depth > 0 {
-            for channel in &mut buffer {
-                *channel = 255u8 - *channel;
+        if let RenderTrigger::Id("test") = trigger {
+            if self.data.target_depth > 0 {
+                for channel in &mut buffer {
+                    *channel = 255u8 - *channel;
+                }
             }
         }
 

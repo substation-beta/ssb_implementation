@@ -9,7 +9,7 @@ use std::{
 };
 
 
-/// SSB parsing specific error type.
+/// SSB rendering specific error type.
 #[derive(Debug)]
 pub struct RenderingError {
     msg: String,

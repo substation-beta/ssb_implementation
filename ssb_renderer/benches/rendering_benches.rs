@@ -4,7 +4,10 @@ use std::{
     time::Duration
 };
 use ssb_parser::data::{Ssb,SsbRender};
-use ssb_renderer::rendering::SsbRenderer;
+use ssb_renderer::{
+    rendering::SsbRenderer,
+    types::parameter::RenderTrigger
+};
 use microbench::{bench, Options};
 use image::RgbaImage;
 
@@ -19,7 +22,7 @@ fn main() {
 
         // TODO: more complex rendering
         let img = RgbaImage::new(1920, 1080);
-        let _new_img = renderer.render(img).expect("Image rendering mustn't fail!");
+        let _new_img = renderer.render(img, &RenderTrigger::Id("test")).expect("Image rendering mustn't fail!");
 
 
     });

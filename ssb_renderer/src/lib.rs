@@ -10,7 +10,7 @@
 
 // Rendering backend for general 2D graphics
 mod g2d;
-/// Error types for rendering process.
-pub mod error;
+/// Supporting types for rendering.
+pub mod types;
 /// High-level rendering interface
 pub mod rendering;
