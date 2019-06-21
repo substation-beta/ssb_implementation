@@ -3,7 +3,10 @@ use std::{
     convert::TryFrom,
     time::Duration
 };
-use ssb_parser::data::{Ssb,SsbRender};
+use ssb_parser::{
+    data::{Ssb,SsbRender},
+    types::ssb::{Event,EventTrigger}
+};
 use ssb_renderer::{
     rendering::SsbRenderer,
     types::parameter::RenderTrigger
@@ -15,7 +18,15 @@ use image::RgbaImage;
 // Benchmark
 fn main() {
     // Test data
-    let renderer = SsbRenderer::new(SsbRender::try_from(Ssb::default()).expect("Default ssb cannot be wrong for rendering!"));
+    let mut ssb = Ssb::default();
+    ssb.events.push(Event {
+        trigger: EventTrigger::Id("test".to_owned()),
+        macro_name: None,
+        note: None,
+        data: "".to_owned(),
+        data_location: (0,0)
+    });
+    let renderer = SsbRenderer::new(SsbRender::try_from(ssb).expect("Ssb was certainly valid!"));
     // Run test
     bench(&Options::default().time(Duration::from_secs(2)), "Basic rendering.", || {
 
