@@ -22,7 +22,7 @@ impl SsbRenderer {
         }
     }
     /// Renders on image by ssb matching trigger.
-    pub fn render(&mut self, img: RgbaImage, trigger: &RenderTrigger) -> Result<RgbaImage,RenderingError> {
+    pub fn render(&mut self, img: RgbaImage, trigger: RenderTrigger) -> Result<RgbaImage,RenderingError> {
         // Unpack image
         let (width, height) = img.dimensions();
         let mut buffer = img.into_raw();
@@ -30,7 +30,7 @@ impl SsbRenderer {
         for event in &self.data.events {
             if match (&event.trigger, trigger) {
                 (EventTrigger::Id(event_id), RenderTrigger::Id(render_id)) => event_id == render_id,
-                (EventTrigger::Time((start_ms, end_ms)), RenderTrigger::Time(current_ms)) => (start_ms..end_ms).contains(&current_ms),
+                (EventTrigger::Time((start_ms, end_ms)), RenderTrigger::Time(current_ms)) => (start_ms..end_ms).contains(&&current_ms),
                 _ => false
             } {
 
