@@ -3,26 +3,25 @@ use ssb_parser::{
     data::SsbRender,
     types::ssb::EventTrigger
 };
-use image::RgbaImage;
 use super::types::{
     error::RenderingError,
-    parameter::RenderTrigger
+    parameter::{RgbaImage,RenderTrigger}
 };
 
 
-/// Renderer for ssb data on images
+/// Renderer for ssb data on images.
 #[derive(Debug, PartialEq, Clone)]
 pub struct SsbRenderer {
     data: SsbRender
 }
 impl SsbRenderer {
-    /// Consumes ssb data as rendering blueprint
+    /// Consumes ssb data as rendering blueprint.
     pub fn new(data: SsbRender) -> Self {
         Self {
             data
         }
     }
-    /// Renders on image by ssb matching trigger
+    /// Renders on image by ssb matching trigger.
     pub fn render(&mut self, img: RgbaImage, trigger: &RenderTrigger) -> Result<RgbaImage,RenderingError> {
         // Unpack image
         let (width, height) = img.dimensions();

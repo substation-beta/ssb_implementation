@@ -9,10 +9,9 @@ use ssb_parser::{
 };
 use ssb_renderer::{
     rendering::SsbRenderer,
-    types::parameter::RenderTrigger
+    types::parameter::{RgbaImage,RenderTrigger},
 };
 use microbench::{bench, Options};
-use image::RgbaImage;
 
 
 // Benchmark
