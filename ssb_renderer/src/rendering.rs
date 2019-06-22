@@ -11,6 +11,7 @@ use super::types::{
 
 
 /// Renderer for ssb data on images
+#[derive(Debug, PartialEq, Clone)]
 pub struct SsbRenderer {
     data: SsbRender
 }
@@ -22,7 +23,7 @@ impl SsbRenderer {
         }
     }
     /// Renders on image by ssb matching trigger
-    pub fn render(&self, img: RgbaImage, trigger: &RenderTrigger) -> Result<RgbaImage,RenderingError> {
+    pub fn render(&mut self, img: RgbaImage, trigger: &RenderTrigger) -> Result<RgbaImage,RenderingError> {
         // Unpack image
         let (width, height) = img.dimensions();
         let mut buffer = img.into_raw();
@@ -36,16 +37,9 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-
-                let (_, buffer_aligned, _) = unsafe {buffer.align_to_mut::<u32>()};
-                for pixel in buffer_aligned {
-                    *pixel = std::u32::MAX;
-                }
-                /*
                 for channel in &mut buffer {
-                    *channel = std::u8::MAX;
+                    *channel = std::u8::MAX - *channel;
                 }
-                */
 
 
             }

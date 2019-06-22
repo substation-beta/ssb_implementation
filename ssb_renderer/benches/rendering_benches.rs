@@ -26,7 +26,7 @@ fn main() {
         data: "".to_owned(),
         data_location: (0,0)
     });
-    let renderer = SsbRenderer::new(SsbRender::try_from(ssb).expect("Ssb was certainly valid!"));
+    let mut renderer = SsbRenderer::new(SsbRender::try_from(ssb).expect("Ssb was certainly valid!"));
     // Run test
     bench(&Options::default().time(Duration::from_secs(2)), "Basic rendering.", || {
 

@@ -32,7 +32,7 @@ doctest = false
 [dependencies]
 # Depend on parser module
 ssb_parser = {path = "../ssb_parser", version = "0.2.2", default-features = false}
-# Render targets
+# Render target
 image = "~0.21.2"   # https://crates.io/crates/image
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
