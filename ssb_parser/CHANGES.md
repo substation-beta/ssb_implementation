@@ -1,3 +1,6 @@
+# v0.2.3
+* Changed tag 'identity' to 'reset'
+
 # v0.2.2
 * Added logging tests
 * Reduced heap allocations

@@ -573,9 +573,9 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 } )
                 .map_err(|value| ParseError::new(&format!("Invalid matrix '{}'!", value)) )?
             )),
-            "identity" => objects.push(Some(EventObject::TagIdentity)
+            "reset" => objects.push(Some(EventObject::TagReset)
                 .filter(|_| tag_value.is_none() )
-                .ok_or_else(|| ParseError::new("Identity must have no value!") )?
+                .ok_or_else(|| ParseError::new("Reset must have no value!") )?
             ),
             "mode" if mode.is_some() => **mode.as_mut().expect("Impossible :O Checked right before!") =
                 map_or_err_str(tag_value, |value| Mode::try_from(value) )

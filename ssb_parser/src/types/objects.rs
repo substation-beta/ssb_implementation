@@ -45,7 +45,7 @@ pub enum EventObject {
     TagTranslate(Translate),
     TagShear(Shear),
     TagMatrix(Box<[Degree;16]>),
-    TagIdentity,
+    TagReset,
     TagBorder(Border),
     TagJoin(Join),
     TagCap(Cap),
