@@ -3,9 +3,12 @@ use ssb_parser::{
     data::SsbRender,
     types::ssb::EventTrigger
 };
-use super::types::{
-    error::RenderingError,
-    parameter::{RgbaImage,RenderTrigger}
+use super::{
+    g2d::image::Image,
+    types::{
+        error::RenderingError,
+        parameter::RenderTrigger
+    }
 };
 
 
@@ -22,10 +25,7 @@ impl SsbRenderer {
         }
     }
     /// Renders on image by ssb matching trigger.
-    pub fn render(&mut self, img: RgbaImage, trigger: RenderTrigger) -> Result<RgbaImage,RenderingError> {
-        // Unpack image
-        let (width, height) = img.dimensions();
-        let mut buffer = img.into_raw();
+    pub fn render<'a>(&mut self, img: &'a mut Image, trigger: RenderTrigger) -> Result<&'a mut Image,RenderingError> {
         // Find match of render and ssb trigger
         for event in &self.data.events {
             if match (&event.trigger, trigger) {
@@ -36,14 +36,14 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-                for channel in &mut buffer {
+                for channel in img.data_mut() {
                     *channel = std::u8::MAX - *channel;
                 }
 
 
             }
         }
-        // Pack image for client
-        Ok(RgbaImage::from_raw(width, height, buffer).expect("Couldn't repack image buffer?!"))
+        // Return still valid image reference
+        Ok(img)
     }
 }

@@ -9,8 +9,8 @@
 )]
 
 // Rendering backend for general 2D graphics.
-mod g2d;
-/// Supporting types for rendering.
+pub mod g2d;
+/// Supportive types for rendering.
 pub mod types;
 /// High-level rendering interface.
 pub mod rendering;

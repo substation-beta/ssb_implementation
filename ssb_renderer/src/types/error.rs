@@ -7,6 +7,7 @@ use std::{
         Result
     }
 };
+use super::super::g2d::error::GraphicsError;
 
 
 /// SSB rendering specific error type.
@@ -48,6 +49,11 @@ impl From<std::io::Error> for RenderingError {
         Self::new(&err.to_string())
     }
 }
+impl From<GraphicsError> for RenderingError {
+    fn from(err: GraphicsError) -> Self {
+        Self::new(&err.to_string())
+    }
+}
 
 
 // Tests
@@ -56,17 +62,17 @@ mod tests {
     use super::RenderingError;
 
     #[test]
-    fn parse_error() {
+    fn rendering_error() {
         assert_eq!(RenderingError::new("easy").to_string(), "easy");
     }
 
     #[test]
-    fn parse_error_with_source() {
+    fn rendering_error_with_source() {
         assert_eq!(RenderingError::new_with_source("parent error", RenderingError::new("nested error")).to_string(), "parent error\nnested error");
     }
 
     #[test]
-    fn parse_error_from_io() {
+    fn rendering_error_from_io() {
         use std::io::{Error, ErrorKind};
         assert_eq!(RenderingError::from(Error::new(ErrorKind::PermissionDenied, "No access on filesystem!")).to_string(), "No access on filesystem!".to_owned());
     }

@@ -8,8 +8,9 @@ use ssb_parser::{
     types::ssb::{Event,EventTrigger}
 };
 use ssb_renderer::{
-    rendering::SsbRenderer,
-    types::parameter::{RgbaImage,RenderTrigger},
+    g2d::image::{ColorType,Image},
+    types::parameter::RenderTrigger,
+    rendering::SsbRenderer
 };
 use microbench::{bench, Options};
 
@@ -31,8 +32,8 @@ fn main() {
 
 
         // TODO: more complex rendering
-        let img = RgbaImage::new(1920, 1080);
-        let _new_img = renderer.render(img, RenderTrigger::Id("test")).expect("Image rendering mustn't fail!");
+        let mut img = Image::new(1920, 1080, ColorType::RGBA);
+        renderer.render(&mut img, RenderTrigger::Id("test")).expect("Image rendering mustn't fail!");
 
 
     });
