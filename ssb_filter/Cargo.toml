@@ -41,7 +41,7 @@ failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/fai
 # Interface frameworks
 vapoursynth = {version = "~0.2.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
 winapi = {version = "~0.3.7", optional = true}   # https://crates.io/crates/winapi
-gstreamer = {version = "~0.13.0", optional = true}   # https://crates.io/crates/gstreamer
+gstreamer = {version = "~0.14.0", optional = true}   # https://crates.io/crates/gstreamer
 
 [features]
 # Just serve to modern media frameworks

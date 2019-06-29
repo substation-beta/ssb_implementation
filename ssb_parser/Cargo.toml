@@ -44,7 +44,7 @@ lazy_static = "~1.3.0"   # https://crates.io/crates/lazy_static
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
 # Serialization
-serde = {version = "~1.0.92", features = ["derive"], optional = true}  # https://crates.io/crates/serde
+serde = {version = "~1.0.94", features = ["derive"], optional = true}  # https://crates.io/crates/serde
 
 [dev-dependencies]
 # Logging

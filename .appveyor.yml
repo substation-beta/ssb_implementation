@@ -1,7 +1,7 @@
 # See <https://www.appveyor.com/docs/build-configuration/>
 
-# Windows with MSVC 2015 (minimal requirement for rust MSVC compiler)
-os: Visual Studio 2015
+# Windows with MSVC 2017 (requirement for rust MSVC compiler)
+os: Visual Studio 2017
 # Just for 'master' branch
 branches:
   only:
@@ -57,14 +57,14 @@ install:
   # Show python version (detailed)
   - python -VV
   # VAPOURSYNTH
-  # Load vapoursynth R45
-  - curl -fsSL -o VapourSynth64-Portable-R45.7z https://github.com/vapoursynth/vapoursynth/releases/download/R45/VapourSynth64-Portable-R45.7z
+  # Load vapoursynth R46
+  - curl -fsSL -o VapourSynth64-Portable-R46.7z https://github.com/vapoursynth/vapoursynth/releases/download/R46/VapourSynth64-Portable-R46.7z
   # Extract vapoursynth archive into python
-  - 7z x VapourSynth64-Portable-R45.7z -o%PYTHON% -y
+  - 7z x VapourSynth64-Portable-R46.7z -o%PYTHON% -y
   # Show vapoursynth version
   - python -c "import vapoursynth; print(vapoursynth.core.version())"
   # Add compiler access to vapoursynth sdk (not coming with portable edition, retrieved from installer)
-  - set VAPOURSYNTH_LIB_DIR=%cd%/ssb_filter/vendor/Vapoursynth-R45/sdk/lib64
+  - set VAPOURSYNTH_LIB_DIR=%PYTHON%/sdk/lib64
 
 # Run build by scripting (instead of default MSVC project search & execute)
 build_script: echo %target% | findstr msvc >nul && cargo build --verbose || cargo build -p ssb_parser -p ssb_renderer --verbose
