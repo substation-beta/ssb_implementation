@@ -63,7 +63,7 @@ install:
   - 7z x VapourSynth64-Portable-R46.7z -o%PYTHON% -y
   # Show vapoursynth version
   - python -c "import vapoursynth; print(vapoursynth.core.version())"
-  # Add compiler access to vapoursynth sdk (not coming with portable edition, retrieved from installer)
+  # Add compiler access to vapoursynth sdk
   - set VAPOURSYNTH_LIB_DIR=%PYTHON%/sdk/lib64
 
 # Run build by scripting (instead of default MSVC project search & execute)
