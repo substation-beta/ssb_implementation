@@ -36,8 +36,10 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-                for channel in img.data_mut() {
-                    *channel = std::u8::MAX - *channel;
+                for row in img.data_rows_mut() {
+                    for channel in row {
+                        *channel = std::u8::MAX - *channel;
+                    }
                 }
 
 

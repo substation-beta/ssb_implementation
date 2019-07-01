@@ -97,6 +97,16 @@ impl Image {
     pub fn data_mut(&mut self) -> &mut [u8] {
         &mut self.data
     }
+    /// Get image data as readable row references without offsets.
+    pub fn data_rows(&self) -> impl Iterator<Item = &[u8]> {
+        let shortest_stride = self.color_type.stride(self.width) as usize;
+        self.data.chunks_exact(self.stride as usize).take(self.height as usize).map(move |row| &row[..shortest_stride])
+    }
+    /// Get image data as mutable row references without offsets.
+    pub fn data_rows_mut(&mut self) -> impl Iterator<Item = &mut [u8]> {
+        let shortest_stride = self.color_type.stride(self.width) as usize;
+        self.data.chunks_exact_mut(self.stride as usize).take(self.height as usize).map(move |row| &mut row[..shortest_stride])
+    }
 }
 impl Into<Vec<u8>> for Image {
     fn into(self) -> Vec<u8> {
