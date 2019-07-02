@@ -98,6 +98,9 @@ make_filter_function! {
     ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
         // Convert script name safely to UTF-8
         let script_utf8 = String::from_utf8(script.to_vec())?;
+
+        // TODO: Parse ssb (by raw or filename) -> create renderer -> pass to filter
+
         // Return custom filter instance
         Ok(Some(Box::new(
             Render{source: clip, _script: script_utf8}

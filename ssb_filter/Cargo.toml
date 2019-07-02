@@ -33,7 +33,7 @@ doctest = false
 
 [dependencies]
 # Depend on renderer module
-# RESERVATION: ssb_renderer = {path = "../ssb_renderer", version = "0.0.0"}
+ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
 env_logger = "~0.6.1"   # https://crates.io/crates/env_logger

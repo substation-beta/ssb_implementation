@@ -8,7 +8,10 @@
     html_root_url = "https://substation-beta.github.io"
 )]
 
-// Rendering backend for general 2D graphics.
+/// Re-exports (with interfaces required by public users).
+pub use ssb_parser;
+
+/// Rendering backend for general 2D graphics.
 pub mod g2d;
 /// Supportive types for rendering.
 pub mod types;

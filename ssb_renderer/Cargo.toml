@@ -1,7 +1,7 @@
 [package]
 # Project information
 name = "ssb_renderer"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["Christoph 'Youka' Spanknebel"]
 description = "Renderer of ssb_parser results on images."
 # Project type
