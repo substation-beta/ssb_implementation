@@ -1,19 +1,100 @@
 // See <https://github.com/YaLTeR/vapoursynth-rs/tree/master/vapoursynth/src/plugins>
 
 // Imports
-use vapoursynth::prelude::*;
-use vapoursynth::plugins::*;
-use vapoursynth::core::CoreRef;
-use vapoursynth::video_info::{VideoInfo};
-use vapoursynth::{make_filter_function, export_vapoursynth_plugin};
-use failure::{Error, format_err, bail};
+use vapoursynth::{
+    prelude::*,
+    plugins::*,
+    core::CoreRef,
+    video_info::VideoInfo,
+    make_filter_function,
+    export_vapoursynth_plugin
+};
+use failure::{Error, err_msg, format_err, bail};
+use ssb_renderer::{
+    ssb_parser::data::{Ssb,SsbRender},
+    rendering::SsbRenderer
+};
+use std::{
+    io::{BufRead,BufReader,Cursor},
+    fs::File,
+    convert::TryFrom
+};
 
-// Filter structure
-struct Render<'core> {
-    source: Node<'core>,
-    _script: String
+// Register functions to plugin
+export_vapoursynth_plugin! {
+    // Plugin configuration
+    Metadata {
+        // Internal unique key
+        identifier: "de.youka.ssb",
+        // Namespace/prefix of plugin functions
+        namespace: "ssb",
+        // Plugin description
+        name: "SSB subtitle plugin.",
+        // Plugin does changes? (optimization)
+        read_only: false
+    },
+    // Plugin functions
+    [
+        RenderFunction::new(),
+        RenderRawFunction::new()
+    ]
 }
-impl<'core> Filter<'core> for Render<'core> {
+
+// Create vapoursynth functions
+make_filter_function! {
+    // Name rust & vapoursynth function
+    RenderFunction, "render"
+    // Vapoursynth function call
+    fn create_render<'core>(
+        _api: API,
+        _core: CoreRef<'core>,
+        clip: Node<'core>,
+        script: &[u8]
+    ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+        Ok(Some(Box::new(
+            build_render_filter(clip, BufReader::new(
+                File::open(
+                    String::from_utf8( script.to_vec() )?
+                )?
+            ))?
+        )))
+    }
+}
+make_filter_function! {
+    // Name rust & vapoursynth function
+    RenderRawFunction, "render_raw"
+    // Vapoursynth function call
+    fn create_render_raw<'core>(
+        _api: API,
+        _core: CoreRef<'core>,
+        clip: Node<'core>,
+        data: &[u8]
+    ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+        Ok(Some(Box::new(
+            build_render_filter(clip, Cursor::new(data))?
+        )))
+    }
+}
+
+// Build vapoursynth filter instance
+fn build_render_filter<'core, R>(clip: Node<'core>, reader: R) -> Result<RenderFilter<'core>, Error>
+    where R: BufRead {
+    Ok(RenderFilter{
+        source: clip,
+        renderer: SsbRenderer::new(
+            Ssb::default().parse_owned(reader)
+            .and_then(|ssb| SsbRender::try_from(ssb) )
+            .map_err(|err| err_msg(err.to_string()) )?
+        )
+    })
+}
+
+// Filter class
+struct RenderFilter<'core> {
+    source: Node<'core>,
+    renderer: SsbRenderer
+}
+impl<'core> Filter<'core> for RenderFilter<'core> {
     // Output video meta information
     fn video_info(&self, _api: API, _core: CoreRef<'core>) -> Vec<VideoInfo<'core>> {
         // Just take from local video node
@@ -45,6 +126,10 @@ impl<'core> Filter<'core> for Render<'core> {
         let frame = self.source
             .get_frame_filter(context, n)
             .ok_or_else(|| format_err!("Couldn't get the source frame"))?;
+
+
+        // TODO: check RGB format and use renderer
+
 
         // Validate frame format
         if frame.format().sample_type() == SampleType::Float {
@@ -83,46 +168,4 @@ impl<'core> Filter<'core> for Render<'core> {
         // Pass processed frame copy further the pipeline
         Ok(frame.into())
     }
-}
-
-// Create vapoursynth function of filter type
-make_filter_function! {
-    // Name rust & vapoursynth function
-    RenderFunction, "render"
-    // Vapoursynth function call
-    fn create_render<'core>(
-        _api: API,
-        _core: CoreRef<'core>,
-        clip: Node<'core>,
-        script: &[u8]
-    ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
-        // Convert script name safely to UTF-8
-        let script_utf8 = String::from_utf8(script.to_vec())?;
-
-        // TODO: Parse ssb (by raw or filename) -> create renderer -> pass to filter
-
-        // Return custom filter instance
-        Ok(Some(Box::new(
-            Render{source: clip, _script: script_utf8}
-        )))
-    }
-}
-
-// Register filters to plugin
-export_vapoursynth_plugin! {
-    // Plugin configuration
-    Metadata {
-        // Internal unique key
-        identifier: "de.youka.ssb",
-        // Namespace/prefix of plugin functions
-        namespace: "ssb",
-        // Plugin description
-        name: "SSB subtitle plugin.",
-        // Plugin does changes? (optimization)
-        read_only: false,
-    },
-    // Plugin functions
-    [
-        RenderFunction::new()
-    ]
 }

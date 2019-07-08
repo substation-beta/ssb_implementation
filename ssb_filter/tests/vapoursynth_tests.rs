@@ -64,7 +64,7 @@ mod vapoursynth_tests {
                 concat!(
                     "from vapoursynth import core;",
                     "core.std.LoadPlugin({:?});",
-                    "core.ssb.render(core.std.BlankClip(None, 100, 100), \"test.ssb\").get_frame(0)"
+                    "core.ssb.render_raw(core.std.BlankClip(None, 100, 100), '').get_frame(0)"
                 ),
                 plugin_path
             ))
