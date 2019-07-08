@@ -8,7 +8,7 @@ use ssb_parser::{
     types::ssb::{Event,EventTrigger}
 };
 use ssb_renderer::{
-    g2d::image::{ColorType,Image},
+    image::{ColorType,Image},
     types::parameter::RenderTrigger,
     rendering::SsbRenderer
 };
