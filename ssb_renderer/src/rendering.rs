@@ -4,7 +4,7 @@ use ssb_parser::{
     types::ssb::EventTrigger
 };
 use super::{
-    g2d::image::Image,
+    g2d::image::ImageView,
     types::{
         error::RenderingError,
         parameter::RenderTrigger
@@ -25,7 +25,7 @@ impl SsbRenderer {
         }
     }
     /// Renders on image by ssb matching trigger.
-    pub fn render<'a>(&mut self, img: &'a mut Image, trigger: RenderTrigger) -> Result<&'a mut Image,RenderingError> {
+    pub fn render<'data>(&mut self, img: ImageView<'data>, trigger: RenderTrigger) -> Result<ImageView<'data>,RenderingError> {
         // Find match of render and ssb trigger
         for event in &self.data.events {
             if match (&event.trigger, trigger) {
@@ -36,11 +36,13 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
+                /*
                 for row in img.data_rows_mut() {
                     for channel in row {
                         *channel = std::u8::MAX - *channel;
                     }
                 }
+                */
 
 
             }
