@@ -12,12 +12,17 @@ use vapoursynth::{
 use failure::{Error, err_msg, format_err, bail};
 use ssb_renderer::{
     ssb_parser::data::{Ssb,SsbRender},
-    rendering::SsbRenderer
+    rendering::SsbRenderer,
+    image::{ColorType,ImageView},
+    types::parameter::RenderTrigger
 };
 use std::{
     io::{BufRead,BufReader,Cursor},
     fs::File,
-    convert::TryFrom
+    convert::TryFrom,
+    sync::Mutex,
+    cell::RefCell,
+    slice::from_raw_parts_mut
 };
 
 // Register functions to plugin
@@ -81,18 +86,18 @@ fn build_render_filter<'core, R>(clip: Node<'core>, reader: R) -> Result<RenderF
     where R: BufRead {
     Ok(RenderFilter{
         source: clip,
-        renderer: SsbRenderer::new(
+        renderer: Mutex::new(RefCell::new(SsbRenderer::new(
             Ssb::default().parse_owned(reader)
             .and_then(|ssb| SsbRender::try_from(ssb) )
             .map_err(|err| err_msg(err.to_string()) )?
-        )
+        )))
     })
 }
 
 // Filter class
 struct RenderFilter<'core> {
     source: Node<'core>,
-    renderer: SsbRenderer
+    renderer: Mutex<RefCell<SsbRenderer>>
 }
 impl<'core> Filter<'core> for RenderFilter<'core> {
     // Output video meta information
@@ -126,46 +131,45 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
         let frame = self.source
             .get_frame_filter(context, n)
             .ok_or_else(|| format_err!("Couldn't get the source frame"))?;
-
-
-        // TODO: check RGB format and use renderer
-
-
-        // Validate frame format
-        if frame.format().sample_type() == SampleType::Float {
-            bail!("Floating point formats are not supported");
-        }
-
-        // Make frame copy
-        let mut frame = FrameRefMut::copy_of(core, &frame);
-
-        // Iterate through color planes of frame
-        for plane in 0..frame.format().plane_count() {
-            // Iterate through pixel rows
-            for row in 0..frame.height(plane) {
-                // Get sample sizes
-                let bits_per_sample = frame.format().bits_per_sample();
-                let bytes_per_sample = frame.format().bytes_per_sample();
-                // Invert row pixels value by color depth
-                match bytes_per_sample {
-                    // 8-bit
-                    1 => for pixel in frame.plane_row_mut::<u8>(plane, row) {
-                        *pixel = 255 - *pixel;
-                    }
-                    // 16-bit
-                    2 => for pixel in frame.plane_row_mut::<u16>(plane, row) {
-                        *pixel = ((1u64 << bits_per_sample) - 1) as u16 - *pixel;
-                    }
-                    // 32-bit (that's a lot)
-                    4 => for pixel in frame.plane_row_mut::<u32>(plane, row) {
-                        *pixel = ((1u64 << bits_per_sample) - 1) as u32 - *pixel;
-                    }
-                    _ => unreachable!(),
+        // Check RGB24 format
+        let format = frame.format();
+        if format.sample_type() == SampleType::Integer || format.color_family() == ColorFamily::RGB || format.plane_count() == 3 || format.bits_per_sample() == 8 {
+            // Check constant framerate
+            if let Property::Constant(framerate) = self.source.info().framerate {
+                // Create lock on renderer
+                if let Ok(renderer_refcell) = self.renderer.lock() {
+                    // Make frame copy
+                    let mut frame = FrameRefMut::copy_of(core, &frame);
+                    // Edit frame by SSB
+                    renderer_refcell.borrow_mut().render(
+                        ImageView::new(
+                            frame.width(0) as u16,
+                            frame.height(0) as u16,
+                            frame.stride(0) as u32,
+                            ColorType::R8G8B8,
+                            unsafe {
+                                let frame_size = frame.height(0) * frame.stride(0);
+                                vec![
+                                    from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(2), frame_size)
+                                ]
+                            }
+                        ).map_err(|err| err_msg(err.to_string()) )?,
+                        RenderTrigger::Time(
+                            (n as u64 * framerate.numerator / framerate.denominator) as u32
+                        )
+                    ).map_err(|err| err_msg(err.to_string()) )?;
+                    // Pass processed frame copy further the pipeline
+                    Ok(frame.into())
+                } else {
+                    bail!("Couldn't lock renderer!")
                 }
+            } else {
+                bail!("Framerate must be constant!")
             }
+        } else {
+            bail!("Frame format must be RGB24!")
         }
-
-        // Pass processed frame copy further the pipeline
-        Ok(frame.into())
     }
 }
