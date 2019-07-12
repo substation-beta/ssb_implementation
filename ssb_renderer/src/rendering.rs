@@ -25,7 +25,7 @@ impl SsbRenderer {
         }
     }
     /// Renders on image by ssb matching trigger.
-    pub fn render<'data>(&mut self, img: ImageView<'data>, trigger: RenderTrigger) -> Result<ImageView<'data>,RenderingError> {
+    pub fn render<'data>(&mut self, mut img: ImageView<'data>, trigger: RenderTrigger) -> Result<ImageView<'data>,RenderingError> {
         // Find match of render and ssb trigger
         for event in &self.data.events {
             if match (&event.trigger, trigger) {
@@ -36,13 +36,16 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-                /*
-                for row in img.data_rows_mut() {
-                    for channel in row {
-                        *channel = std::u8::MAX - *channel;
-                    }
+                let color_type = img.color_type();
+                for plane_i in 0..color_type.planes() {
+                    if let Some(plane_rows) = img.plane_rows_mut(plane_i) {
+                        for row in plane_rows {
+                            for sample in row {
+                                *sample = std::u8::MAX - *sample;
+                            }
+                        }
+                    } 
                 }
-                */
 
 
             }

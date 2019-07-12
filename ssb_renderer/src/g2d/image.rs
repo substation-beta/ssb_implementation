@@ -2,51 +2,60 @@
 use super::error::GraphicsError;
 
 
+/// Color type for image data.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum ColorType {
+    RGB24,
+    BGR24,
+    R8G8B8
+}
+impl ColorType {
+    /// Size of one color sample.
+    pub fn sample_size(&self) -> u8 {
+        match self {
+            ColorType::RGB24 | ColorType::BGR24 => 3,
+            ColorType::R8G8B8 => 1
+        }
+    }
+    /// Size of all color samples in one image row.
+    pub fn row_size(&self, width: u16) -> u32 {
+        self.sample_size() as u32 * width as u32
+    }
+    /// Number of color planes for a type.
+    pub fn planes(&self) -> u8 {
+        match self {
+            ColorType::RGB24 | ColorType::BGR24 => 1,
+            ColorType::R8G8B8 => 3
+        }
+    }
+}
+
 /// Reference on image data with meta information.
 #[derive(Debug, PartialEq)]
 pub struct ImageView<'data> {
     width: u16,
     height: u16,
     stride: u32,
-    channels: Channels<'data>
+    color_type: ColorType,
+    planes: Vec<&'data mut [u8]>
 }
 impl<'data> ImageView<'data> {
-    // Construction template.
-    fn new(width: u16, height: u16, stride: u32, channels: Channels<'data>) -> Result<Self,GraphicsError> {
-        if stride < channels.row_size(width) {
-            Err(GraphicsError::new("Stride too small, must cover row size!"))
+    /// New image view on given data.
+    pub fn new(width: u16, height: u16, stride: u32, color_type: ColorType, planes: Vec<&'data mut [u8]>) -> Result<Self, GraphicsError> {
+        if stride < color_type.row_size(width) {
+            Err(GraphicsError::new("Stride must at least cover row size!"))
+        } else if planes.len() != color_type.planes() as usize {
+            Err(GraphicsError::new("Number of planes doesn't fit color type!"))
+        } else if planes.iter().map(|plane| plane.len()).min().unwrap_or(0) < stride as usize * height as usize {
+            Err(GraphicsError::new("At least one plane isn't big enough for expected data size!"))
         } else {
             Ok(Self {
                 width,
                 height,
                 stride,
-                channels
+                color_type,
+                planes
             })
-        }
-    }
-    /// New image view on RGB24 data.
-    pub fn new_rgb24(width: u16, height: u16, stride: u32, data: &'data mut [u8]) -> Result<Self,GraphicsError> {
-        if data.len() < height as usize * stride as usize {
-            Err(GraphicsError::new("Data buffer not big enough!"))
-        } else {
-            Self::new(width, height, stride, Channels::RGB24(data))
-        }
-    }
-    /// New image view on BGR24 data.
-    pub fn new_bgr24(width: u16, height: u16, stride: u32, data: &'data mut [u8]) -> Result<Self,GraphicsError> {
-        if data.len() < height as usize * stride as usize {
-            Err(GraphicsError::new("Data buffer not big enough!"))
-        } else {
-            Self::new(width, height, stride, Channels::BGR24(data))
-        }
-    }
-    /// New image view on R8G8B8 data.
-    pub fn new_r8g8b8(width: u16, height: u16, stride: u32, red_data: &'data mut [u8], green_data: &'data mut [u8], blue_data: &'data mut [u8]) -> Result<Self,GraphicsError> {
-        let image_size = height as usize * stride as usize;
-        if red_data.len() < image_size || green_data.len() < image_size || blue_data.len() < image_size {
-            Err(GraphicsError::new("Data buffer not big enough!"))
-        } else {
-            Self::new(width, height, stride, Channels::R8G8B8(red_data, green_data, blue_data))
         }
     }
     /// Get image width.
@@ -61,53 +70,30 @@ impl<'data> ImageView<'data> {
     pub fn stride(&self) -> u32 {
         self.stride
     }
-    /// Get image sample size.
-    pub fn sample_size(&self) -> u8 {
-        self.channels.sample_size()
+    /// Get image color type.
+    pub fn color_type(&self) -> ColorType {
+        self.color_type
     }
-    /// Get image row size (=width * sample size).
-    pub fn row_size(&self) -> u32 {
-        self.channels.row_size(self.width)
+    /// Get image plane of color data as readable reference.
+    pub fn plane(&self, index: u8) -> Option<&&'data mut [u8]> {
+        self.planes.get(index as usize)
     }
-    /// Get image channels (data separated in color channels) as readable reference.
-    pub fn channels(&mut self) -> &Channels<'data> {
-        &self.channels
+    /// Get image plane of color data as mutable reference.
+    pub fn plane_mut(&mut self, index: u8) -> Option<&mut &'data mut [u8]> {
+        self.planes.get_mut(index as usize)
     }
-    /// Get image channels (data separated in color channels) as mutable reference.
-    pub fn channels_mut(&mut self) -> &mut Channels<'data> {
-        &mut self.channels
+    /// Get image plane of color data as readable row references without offsets.
+    pub fn plane_rows(&self, index: u8) -> Option<impl Iterator<Item = &[u8]>> {
+        self.plane(index).map(|data| {
+            let row_size = self.color_type.row_size(self.width) as usize;
+            data.chunks_exact(self.stride as usize).take(self.height as usize).map(move |row| &row[..row_size])
+        })
     }
-
-
-    // TODO: add convenient functions for data iteration
-    /*
-    /// Get channel data as mutable row references without offsets.
-    pub fn channel_rows(&mut self) -> impl Iterator<Item = &mut [u8]> {
-        let row_size = self.row_size() as usize;
-        self.data.chunks_exact_mut(self.stride as usize).take(self.height as usize).map(move |row| &mut row[..row_size])
-    }
-    */
-
-    
-}
-
-/// Color type & channels.
-#[derive(Debug, PartialEq)]
-pub enum Channels<'data> {
-    RGB24(&'data mut [u8]),
-    BGR24(&'data mut [u8]),
-    R8G8B8(&'data mut [u8], &'data mut [u8], &'data mut [u8])
-}
-impl<'data> Channels<'data> {
-    // Size of channel samples (=color) in bytes.
-    fn sample_size(&self) -> u8 {
-        match self {
-            Channels::RGB24(_) | Channels::BGR24(_) => 3,
-            Channels::R8G8B8(_, ..) => 1
-        }
-    }
-    // Size of channel row (samples in one stride) in bytes.
-    fn row_size(&self, width: u16) -> u32 {
-        self.sample_size() as u32 * width as u32
+    /// Get image plane of color data as mutable row references without offsets.
+    pub fn plane_rows_mut(&mut self, index: u8) -> Option<impl Iterator<Item = &mut [u8]>> {
+        let (row_size, stride, height) = (self.color_type.row_size(self.width) as usize, self.stride, self.height);
+        self.plane_mut(index).map(|data| {
+            data.chunks_exact_mut(stride as usize).take(height as usize).map(move |row| &mut row[..row_size])
+        })
     }
 }
