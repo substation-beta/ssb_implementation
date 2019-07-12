@@ -157,7 +157,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
                             }
                         ).map_err(|err| err_msg(err.to_string()) )?,
                         RenderTrigger::Time(
-                            (n as u64 * framerate.numerator / framerate.denominator) as u32
+                            (framerate.denominator as f64 / framerate.numerator as f64 * 1000.0 * n as f64) as u32
                         )
                     ).map_err(|err| err_msg(err.to_string()) )?;
                     // Pass processed frame copy further the pipeline
