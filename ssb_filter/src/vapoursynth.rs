@@ -130,7 +130,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
         // Get frame
         let frame = self.source
             .get_frame_filter(context, n)
-            .ok_or_else(|| format_err!("Couldn't get the source frame"))?;
+            .ok_or_else(|| format_err!("Couldn't get the source frame!"))?;
         // Check RGB24 format
         let format = frame.format();
         if format.sample_type() == SampleType::Integer || format.color_family() == ColorFamily::RGB || format.plane_count() == 3 || format.bits_per_sample() == 8 {
