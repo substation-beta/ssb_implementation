@@ -34,11 +34,12 @@ fn main() {
 
         // TODO: more complex rendering
         let img = RgbImage::new(1920, 1080);
-        let (width, height, stride, color_type, mut data) = (img.width() as u16, img.height() as u16, img.sample_layout().height_stride as u32, ColorType::RGB24, img.into_raw());
+        let (width, height, stride, color_type, mut data) = (img.width(), img.height(), img.sample_layout().height_stride, ColorType::RGB24, img.into_raw());
         renderer.render(
-            ImageView::new(width, height, stride, color_type, vec![&mut data]).expect("ImageView must've valid dimensions!"),
+            ImageView::new(width as u16, height as u16, stride as u32, color_type, vec![&mut data]).expect("ImageView must've valid dimensions!"),
             RenderTrigger::Id("test")
         ).expect("Image rendering mustn't fail!");
+        let _img = RgbImage::from_raw(width, height, data).expect("Image rebuild mustn't fail!");
         
 
     });
