@@ -134,39 +134,46 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
         // Check RGB24 format
         let format = frame.format();
         if format.sample_type() == SampleType::Integer || format.color_family() == ColorFamily::RGB || format.plane_count() == 3 || format.bits_per_sample() == 8 {
-            // Check constant framerate
-            if let Property::Constant(framerate) = self.source.info().framerate {
-                // Create lock on renderer
-                if let Ok(renderer_refcell) = self.renderer.lock() {
-                    // Make frame copy
-                    let mut frame = FrameRefMut::copy_of(core, &frame);
-                    // Edit frame by SSB
-                    renderer_refcell.borrow_mut().render(
-                        ImageView::new(
-                            frame.width(0) as u16,
-                            frame.height(0) as u16,
-                            frame.stride(0) as u32,
-                            ColorType::R8G8B8,
-                            unsafe {
-                                let frame_size = frame.height(0) * frame.stride(0);
-                                vec![
-                                    from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
-                                    from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
-                                    from_raw_parts_mut(frame.data_ptr_mut(2), frame_size)
-                                ]
+            // Create lock on renderer
+            if let Ok(renderer_refcell) = self.renderer.lock() {
+                // Make frame copy
+                let mut frame = FrameRefMut::copy_of(core, &frame);
+                // Edit frame by SSB
+                renderer_refcell.borrow_mut().render(
+                    ImageView::new(
+                        frame.width(0) as u16,
+                        frame.height(0) as u16,
+                        frame.stride(0) as u32,
+                        ColorType::R8G8B8,
+                        unsafe {
+                            // Extract color planes
+                            let frame_size = frame.height(0) * frame.stride(0);
+                            vec![
+                                from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
+                                from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
+                                from_raw_parts_mut(frame.data_ptr_mut(2), frame_size)
+                            ]
+                        }
+                    ).map_err(|err| err_msg(err.to_string()) )?,
+                    RenderTrigger::Time(
+                        // Calculate frame time (in milliseconds)
+                        match self.source.info().framerate {
+                            Property::Constant(framerate) => (framerate.denominator as f64 / framerate.numerator as f64 * 1000.0 * n as f64) as u32,
+                            Property::Variable => { // Reserved frame properties: <http://www.vapoursynth.com/doc/apireference.html#reserved-frame-properties>
+                                let frame_props = frame.props();
+                                if let (Ok(duration_numerator), Ok(duration_denominator)) = (frame_props.get_int("_DurationNum"), frame_props.get_int("_DurationDen")) {
+                                    (duration_numerator as f64 / duration_denominator as f64 * 1000.0) as u32
+                                } else {
+                                    0
+                                }
                             }
-                        ).map_err(|err| err_msg(err.to_string()) )?,
-                        RenderTrigger::Time(
-                            (framerate.denominator as f64 / framerate.numerator as f64 * 1000.0 * n as f64) as u32
-                        )
-                    ).map_err(|err| err_msg(err.to_string()) )?;
-                    // Pass processed frame copy further the pipeline
-                    Ok(frame.into())
-                } else {
-                    bail!("Couldn't lock renderer!")
-                }
+                        }
+                    )
+                ).map_err(|err| err_msg(err.to_string()) )?;
+                // Pass processed frame copy further through the pipeline
+                Ok(frame.into())
             } else {
-                bail!("Framerate must be constant!")
+                bail!("Couldn't lock renderer!")
             }
         } else {
             bail!("Frame format must be RGB24!")
