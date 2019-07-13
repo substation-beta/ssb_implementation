@@ -131,9 +131,9 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
         let frame = self.source
             .get_frame_filter(context, n)
             .ok_or_else(|| format_err!("Couldn't get the source frame!"))?;
-        // Check RGB24 format
+        // Check RGB(A) format
         let format = frame.format();
-        if format.sample_type() == SampleType::Integer || format.color_family() == ColorFamily::RGB || format.plane_count() == 3 || format.bits_per_sample() == 8 {
+        if format.color_family() == ColorFamily::RGB || (3..4).contains(&format.plane_count()) || format.sample_type() == SampleType::Integer || format.bits_per_sample() == 8 {
             // Create lock on renderer
             if let Ok(renderer_refcell) = self.renderer.lock() {
                 // Make frame copy
@@ -144,15 +144,24 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
                         frame.width(0) as u16,
                         frame.height(0) as u16,
                         frame.stride(0) as u32,
-                        ColorType::R8G8B8,
+                        if format.plane_count() == 4 {ColorType::R8G8B8A8} else {ColorType::R8G8B8},
                         unsafe {
                             // Serve color planes
                             let frame_size = frame.height(0) * frame.stride(0);
-                            vec![
-                                from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
-                                from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
-                                from_raw_parts_mut(frame.data_ptr_mut(2), frame_size)
-                            ]
+                            if format.plane_count() == 4 {
+                                vec![
+                                    from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(2), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(3), frame_size)
+                                ]
+                            } else {
+                                vec![
+                                    from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(1), frame_size),
+                                    from_raw_parts_mut(frame.data_ptr_mut(2), frame_size)
+                                ]
+                            }
                         }
                     ).map_err(|err| err_msg(err.to_string()) )?,
                     RenderTrigger::Time(
@@ -176,7 +185,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
                 bail!("Couldn't lock renderer!")
             }
         } else {
-            bail!("Frame format must be RGB24!")
+            bail!("Frame format must be RGB24 or RGBA32!")
         }
     }
 }
