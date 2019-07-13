@@ -36,12 +36,10 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-                if img.color_type() == ColorType::R8G8B8 {
-                    if let Some(red_plane_rows) = img.plane_rows_mut(0) {
-                        for row in red_plane_rows {
-                            for sample in row {
-                                *sample = std::u8::MAX - *sample;
-                            }
+                if let (ColorType::R8G8B8, Some(red_plane_rows)) = (img.color_type(), img.plane_rows_mut(0)) {
+                    for row in red_plane_rows {
+                        for sample in row {
+                            *sample = std::u8::MAX - *sample;
                         }
                     }
                 }

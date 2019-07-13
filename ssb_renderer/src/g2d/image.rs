@@ -35,6 +35,20 @@ impl ColorType {
             ColorType::R8G8B8A8 => 4
         }
     }
+    /// Color contains alpha channel?
+    pub fn alpha(&self) -> bool {
+        match self {
+            ColorType::RGB24 | ColorType::BGR24 | ColorType::R8G8B8 => false,
+            ColorType::RGBA32 | ColorType::ABGR32 | ColorType::R8G8B8A8 => true
+        }
+    }
+    /// Usual color channels are swapped?
+    pub fn swapped(&self) -> bool {
+        match self {
+            ColorType::RGB24 | ColorType::RGBA32 | ColorType::R8G8B8 | ColorType::R8G8B8A8 => false,
+            ColorType::BGR24 | ColorType::ABGR32 => true
+        }
+    }
 }
 
 /// Reference on image data with meta information.
