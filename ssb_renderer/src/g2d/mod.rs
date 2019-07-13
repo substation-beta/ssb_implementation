@@ -2,7 +2,7 @@
 pub mod base;
 // Error types.
 pub mod error;
-// Image with different properties.
+/// Image components for rastering.
 pub mod image;
 // Path flattening algorithm.
 mod flatten;
