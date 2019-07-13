@@ -61,11 +61,7 @@ mod vapoursynth_tests {
         let output = Command::new(platform::PYTHON_CMD)
             .arg("-c")
             .arg(format!(
-                concat!(
-                    "from vapoursynth import core;",
-                    "core.std.LoadPlugin({:?});",
-                    "core.ssb.render_raw(core.std.BlankClip(None, 100, 100), '#Events\\n0-1.|||').get_frame(0)"
-                ),
+                include_str!("test.vpy"),
                 plugin_path
             ))
             .output().expect("Couldn't load vapoursynth plugin!");
