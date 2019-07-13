@@ -5,7 +5,7 @@ pub type Coordinate = f32;
 pub type Degree = f32;
 
 // Point of path segment
-#[derive(Debug, Clone, Copy, PartialEq, Default)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct Point {
     pub x: Coordinate,
     pub y: Coordinate

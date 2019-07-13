@@ -146,7 +146,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
                         frame.stride(0) as u32,
                         ColorType::R8G8B8,
                         unsafe {
-                            // Extract color planes
+                            // Serve color planes
                             let frame_size = frame.height(0) * frame.stride(0);
                             vec![
                                 from_raw_parts_mut(frame.data_ptr_mut(0), frame_size),
@@ -164,7 +164,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
                                 if let (Ok(duration_numerator), Ok(duration_denominator)) = (frame_props.get_int("_DurationNum"), frame_props.get_int("_DurationDen")) {
                                     (duration_numerator as f64 / duration_denominator as f64 * 1000.0) as u32
                                 } else {
-                                    0
+                                    bail!("Couldn't get frame time! No constant framerate or variable frame property.")
                                 }
                             }
                         }
