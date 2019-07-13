@@ -12,6 +12,7 @@ use ssb_renderer::{
     types::parameter::RenderTrigger,
     rendering::SsbRenderer
 };
+use image::RgbImage;
 use microbench::{bench, Options};
 
 
@@ -32,16 +33,13 @@ fn main() {
 
 
         // TODO: more complex rendering
-        let width = 1920u16;
-        let height = 1080u16;
-        let color_type = ColorType::RGB24;
-        let stride = color_type.row_size(width);
-        let mut data = vec![0u8;height as usize * stride as usize];
+        let img = RgbImage::new(1920, 1080);
+        let (width, height, stride, color_type, mut data) = (img.width() as u16, img.height() as u16, img.sample_layout().height_stride as u32, ColorType::RGB24, img.into_raw());
         renderer.render(
             ImageView::new(width, height, stride, color_type, vec![&mut data]).expect("ImageView must've valid dimensions!"),
             RenderTrigger::Id("test")
         ).expect("Image rendering mustn't fail!");
-
+        
 
     });
 }
