@@ -5,16 +5,22 @@ use super::error::GraphicsError;
 /// Color type for image data.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum ColorType {
+    // RGB
     RGB24,
     BGR24,
-    R8G8B8
+    R8G8B8,
+    // RGBA
+    RGBA32,
+    ABGR32,
+    R8G8B8A8
 }
 impl ColorType {
     /// Size of one color sample.
     pub fn sample_size(&self) -> u8 {
         match self {
             ColorType::RGB24 | ColorType::BGR24 => 3,
-            ColorType::R8G8B8 => 1
+            ColorType::RGBA32 | ColorType::ABGR32 => 4,
+            ColorType::R8G8B8 | ColorType::R8G8B8A8 => 1
         }
     }
     /// Size of all color samples in one image row.
@@ -24,8 +30,9 @@ impl ColorType {
     /// Number of color planes for a type.
     pub fn planes(&self) -> u8 {
         match self {
-            ColorType::RGB24 | ColorType::BGR24 => 1,
-            ColorType::R8G8B8 => 3
+            ColorType::RGB24 | ColorType::BGR24 | ColorType::RGBA32 | ColorType::ABGR32 => 1,
+            ColorType::R8G8B8 => 3,
+            ColorType::R8G8B8A8 => 4
         }
     }
 }
