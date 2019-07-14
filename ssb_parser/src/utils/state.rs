@@ -15,11 +15,11 @@ impl TryFrom<&str> for Section {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "#Info" => Ok(Section::Info),
-            "#Target" => Ok(Section::Target),
-            "#Macros" => Ok(Section::Macros),
-            "#Events" => Ok(Section::Events),
-            "#Resources" => Ok(Section::Resources),
+            "#INFO" => Ok(Section::Info),
+            "#TARGET" => Ok(Section::Target),
+            "#MACROS" => Ok(Section::Macros),
+            "#EVENTS" => Ok(Section::Events),
+            "#RESOURCES" => Ok(Section::Resources),
             _ => Err(())
         }
     }
@@ -67,8 +67,8 @@ mod tests {
     #[test]
     fn convert() {
         use super::{Section, Mode, TryFrom};
-        assert_eq!(Section::try_from("#Events"), Ok(Section::Events));
-        assert_eq!(Section::try_from("#Event"), Err(()));
+        assert_eq!(Section::try_from("#EVENTS"), Ok(Section::Events));
+        assert_eq!(Section::try_from("#EVENT"), Err(()));
         assert_eq!(Mode::try_from("shape"), Ok(Mode::Shape));
         assert_eq!(Mode::try_from("lines"), Err(()));
     }

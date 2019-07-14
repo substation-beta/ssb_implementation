@@ -37,7 +37,7 @@ harness = false
 
 [dependencies]
 # Depend on parser module
-ssb_parser = {path = "../ssb_parser", version = "0.2.3", default-features = false}
+ssb_parser = {path = "../ssb_parser", version = "0.2.4", default-features = false}
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
 rusttype = "~0.7.7"  # https://crates.io/crates/rusttype

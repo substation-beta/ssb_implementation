@@ -30,7 +30,7 @@ mod c_tests {
             let render_fn = lib.get::<unsafe extern fn(*mut c_void, c_ushort, c_ushort, c_uint, *const c_char, *const *mut c_uchar, c_uint, *mut c_char, c_ushort) -> c_int>(b"ssb_render\0").expect("Couldn't load symbol 'ssb_render' from DLL!");
             // Try rendering
             let renderer = new_renderer_fn(
-                "#Events\n0-1.|||\0".as_ptr() as *const c_char,
+                "#EVENTS\n0-1.|||\0".as_ptr() as *const c_char,
                 null_mut(), 0
             );
             assert_ne!(renderer, null_mut());

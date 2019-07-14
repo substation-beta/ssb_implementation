@@ -22,19 +22,19 @@ mod parse_tests {
         // Parse
         let ssb = Ssb::default().parse_owned(Cursor::new(
 "
-#Info
+#INFO
 Author: Youka
 
-#Target
+#TARGET
 Width: 123
 
-#Macros
+#MACROS
 foo: bar
 
-#Events
+#EVENTS
 0-1::.|foo|I'm a note!|[color=123abc]Hello world!
 
-#Resources
+#RESOURCES
 Font: bar,bold,dXNhZ2k=
 Texture: Fancy,data,RmFuY3k=
 "
@@ -482,47 +482,47 @@ Texture: Fancy,data,RmFuY3k=
         );
         // Info
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Info\nINVALID_ENTRY")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#INFO\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid info entry! <1:0>".to_owned())
         );
         // Target
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Target\nWidth: 4096\nINVALID_ENTRY")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#TARGET\nWidth: 4096\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid target entry! <2:0>".to_owned())
         );
         // Macros
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Macros\nabc: []\n123: Hi!\nINVALID_ENTRY")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#MACROS\nabc: []\n123: Hi!\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid macros entry! <3:0>".to_owned())
         );
         // Events
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\nINVALID_ENTRY")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#EVENTS\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid events entry! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\n1:-0|||")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#EVENTS\n1:-0|||")).map_err(|err| err.to_string()),
             Err("Start time greater than end time! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Events\n?|||")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#EVENTS\n?|||")).map_err(|err| err.to_string()),
             Err("Invalid trigger format! <1:0>".to_owned())
         );
         // Resources
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nINVALID_ENTRY")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#RESOURCES\nINVALID_ENTRY")).map_err(|err| err.to_string()),
             Err("Invalid resources entry! <1:0>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nFont: myfont,Regula")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#RESOURCES\nFont: myfont,Regula")).map_err(|err| err.to_string()),
             Err("Font family, style and data expected! <1:6>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nTexture: ")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#RESOURCES\nTexture: ")).map_err(|err| err.to_string()),
             Err("Texture id, data type and data expected! <1:9>".to_owned())
         );
         assert_eq!(
-            Ssb::default().parse(Cursor::new("#Resources\nTexture: Pikachu,data,INVALID_BASE64")).map_err(|err| err.to_string()),
+            Ssb::default().parse(Cursor::new("#RESOURCES\nTexture: Pikachu,data,INVALID_BASE64")).map_err(|err| err.to_string()),
             Err("Texture data not in base64 format! <1:22>".to_owned())
         );
     }

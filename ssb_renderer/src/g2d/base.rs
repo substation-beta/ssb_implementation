@@ -2,7 +2,7 @@
 pub type Coordinate = f32;
 
 // Angle precision
-pub type Degree = f32;
+pub type Degree = f64;
 
 // Point of path segment
 #[derive(Debug, PartialEq, Clone, Copy, Default)]

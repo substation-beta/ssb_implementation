@@ -1,5 +1,5 @@
 // Test script for ssb development
-#Info
+#INFO
 // Documentation is important!
 Title: test
 Author: Youka
@@ -8,19 +8,19 @@ Version: 1.0.0
 // Custom entry
 Foo: Bar
 
-#Target
+#TARGET
 Width: 1280
 Height: 720
 // 2.5D supported
 Depth: 800
 View: orthogonal
 
-#Macros
+#MACROS
 Default: [bold=y]
 Mine: [bold=n;color=FF0000]
 Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a 
 
-#Events
+#EVENTS
 //0-2.0|||This line is a comment over 2 seconds!
 2.0-5:0.0|Another|Hello, i'm a note!|red, rotated\ntext over multiple lines.
 5:0.0-2:5:0.0|Mine|Draw sth.|[mode=shape;texture=cute]m 0 0 l 50.5 0 50.5 20.125 0 20.125 b 42 1337 26 0 3.141 2.718 a 0 0 180 c
@@ -29,7 +29,7 @@ Another: [position=100,200,-1;rotate-z=180]${Mine}I'm a
 'show-something'|Default||This will only be shown when the event id is given
 0-1::.||Let's test it!|[font=Arial;size=20.5;bold=y;italic=n;underline=y;strikeout=n;position=-20,1.5;position=100,100,-50;alignment=5;alignment=1,2.7;margin=1,2,3,4;margin=5;margin-top=-1.23;margin-right=+4.56;margin-bottom=-7.89;margin-left=0;wrap-style=nowrap;direction=rtl;space=9.8,7.6;space=5.5;space-h=4;space-v=3;rotate=5,9,1;rotate-x=45;rotate-y=90;rotate-z=-135;scale=0.75,1.25,1;scale-x=0.5;scale-y=1.5;scale-z=2;translate=100,200,0;translate-x=-20.4;translate-y=210;translate-z=50;shear=1,-1;shear-x=1.2;shear-y=0.33;matrix=0.5,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1;reset;border=42;border=20,22;border-h=7.5;border-v=-17.83;join=round;cap=square;texture=cute;texfill=0,0,1,0.5,repeat;color=000000,FFFFFF,FF0000,00FF00,0000FF;bordercolor=FFFF00,00FFFF,FF00FF;alpha=80;borderalpha=A,B,C,D;blur=1.2,1.5;blur=6.66;blur-h=11;blur-v=5;blend=screen;target=frame;mask-mode=normal;mask-clear;animate=[];animate=100,-2000,t^2,[size=42;color=0080FF;translate-x=99.9];k=260;kset=0;kcolor=F8008F]Super styled :)
 
-#Resources
+#RESOURCES
 Font: Rabi-Ribi,bold,UmFiaS1SaWJp
 Texture: Jitter,data,Sml0dGVy
 Texture: cute,url,tests/cute.png
