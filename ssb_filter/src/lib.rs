@@ -8,6 +8,9 @@
     html_root_url = "https://substation-beta.github.io"
 )]
 
+
+/// C API (usable f.e. with [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface)).
+pub mod c;
 /// [Vapoursynth](www.vapoursynth.com) frameserver.
 #[cfg(feature = "vapoursynth-interface")]
 pub mod vapoursynth;
