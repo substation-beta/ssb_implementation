@@ -2,24 +2,27 @@
 use libc::*;
 use ssb_renderer::{
     ssb_parser::data::{Ssb, SsbRender},
-    rendering::SsbRenderer
+    rendering::SsbRenderer,
+    image::{ColorType, ImageView},
+    types::parameter::RenderTrigger
 };
 use std::{
     convert::TryFrom,
     error::Error,
     ffi::CStr,
     io::Cursor,
-    ptr::{copy, null_mut}
+    ptr::null_mut,
+    slice::{from_raw_parts, from_raw_parts_mut}
 };
 
 
 // Helpers
 fn error_to_c(error: Box<Error>, error_message: *mut c_char, error_message_capacity: c_ushort) {
-    if error_message != null_mut() && error_message_capacity > 0 {
+    if !error_message.is_null() && error_message_capacity > 0 {
         let mut msg = error.to_string();
         msg.truncate((error_message_capacity-1) as usize);
         msg.push('\0');
-        unsafe {copy(msg.as_ptr() as *const c_char, error_message, msg.len());}
+        unsafe {msg.as_ptr().copy_to(error_message as *mut u8, msg.len());}
     }
 }
 
@@ -54,7 +57,7 @@ fn ssb_new_renderer_inner(script: *const c_char) -> Result<SsbRenderer, Box::<Er
 /// **renderer** can be *null*.
 #[no_mangle]
 pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
-    if renderer != null_mut() {
+    if !renderer.is_null() {
         unsafe {Box::from_raw(renderer);}
     }
 }
@@ -85,14 +88,25 @@ fn ssb_render_inner(
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     time: c_uint
 ) -> Result<(), Box<Error>> {
-    if renderer != null_mut() {
+    if !renderer.is_null() {
         unsafe {
-            let renderer = Box::from_raw(renderer);
-
-
-            // TODO: render on c image
-
-
+            let color_type = ColorType::by_name( CStr::from_ptr(color_type).to_str()? )?;
+            (*(renderer as *mut SsbRenderer)).render(
+                ImageView::new(
+                    width,
+                    height,
+                    stride,
+                    color_type,
+                    {
+                        let min_data_size = height as usize * stride as usize;
+                        from_raw_parts(planes, color_type.planes() as usize)
+                        .iter()
+                        .map(|plane| from_raw_parts_mut(*plane, min_data_size) )
+                        .collect()
+                    }
+                )?,
+                RenderTrigger::Time(time)
+            )?;
         }
     }
     Ok(())
