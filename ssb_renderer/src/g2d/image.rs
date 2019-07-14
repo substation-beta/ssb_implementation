@@ -50,15 +50,15 @@ impl ColorType {
         }
     }
     /// Get variant by name.
-    pub fn by_name(name: &str) -> Option<Self> {
+    pub fn by_name(name: &str) -> Result<Self, GraphicsError> {
         match name.to_uppercase().as_str() {
-            "RGB24" => Some(ColorType::RGB24),
-            "BGR24" => Some(ColorType::BGR24),
-            "R8G8B8" => Some(ColorType::R8G8B8),
-            "RGBA32" => Some(ColorType::RGBA32),
-            "ABGR32" => Some(ColorType::ABGR32),
-            "R8G8B8A8" => Some(ColorType::R8G8B8A8),
-            _ => None
+            "RGB24" => Ok(ColorType::RGB24),
+            "BGR24" => Ok(ColorType::BGR24),
+            "R8G8B8" => Ok(ColorType::R8G8B8),
+            "RGBA32" => Ok(ColorType::RGBA32),
+            "ABGR32" => Ok(ColorType::ABGR32),
+            "R8G8B8A8" => Ok(ColorType::R8G8B8A8),
+            _ => Err(GraphicsError::new(&format!("'{}' isn't a valid color type!", name)))
         }
     }
 }
@@ -138,12 +138,12 @@ mod tests {
 
     #[test]
     fn color_type_by_name() {
-        assert_eq!(ColorType::by_name("rgb24"), Some(ColorType::RGB24));
-        assert_eq!(ColorType::by_name("BGR24"), Some(ColorType::BGR24));
-        assert_eq!(ColorType::by_name("r8g8b8"), Some(ColorType::R8G8B8));
-        assert_eq!(ColorType::by_name("RGBA32"), Some(ColorType::RGBA32));
-        assert_eq!(ColorType::by_name("abgr32"), Some(ColorType::ABGR32));
-        assert_eq!(ColorType::by_name("r8g8b8a8"), Some(ColorType::R8G8B8A8));
-        assert_eq!(ColorType::by_name("yuv"), None);
+        assert_eq!(ColorType::by_name("rgb24").expect("RGB24 name wasn't valid?!"), ColorType::RGB24);
+        assert_eq!(ColorType::by_name("BGR24").expect("BGR24 name wasn't valid?!"), ColorType::BGR24);
+        assert_eq!(ColorType::by_name("r8g8b8").expect("R8G8B8 name wasn't valid?!"), ColorType::R8G8B8);
+        assert_eq!(ColorType::by_name("RGBA32").expect("RGBA32 name wasn't valid?!"), ColorType::RGBA32);
+        assert_eq!(ColorType::by_name("abgr32").expect("ABGR32 name wasn't valid?!"), ColorType::ABGR32);
+        assert_eq!(ColorType::by_name("r8g8b8a8").expect("R8G8B8A8 name wasn't valid?!"), ColorType::R8G8B8A8);
+        assert!(ColorType::by_name("yuv").is_err());
     }
 }
