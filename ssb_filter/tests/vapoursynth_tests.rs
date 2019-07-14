@@ -3,7 +3,7 @@ mod vapoursynth_tests {
     // Imports
     use vapoursynth::prelude::*;
     use std::process::Command;
-    include!("platform.irs");    // Tests are separated, thus include code (::constants::, ::dll_path)
+    include!("platform.irs");    // Tests are separated, thus include code
 
     #[test]
     fn test_core_available() {

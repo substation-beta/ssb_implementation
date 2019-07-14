@@ -4,7 +4,7 @@ use ssb_parser::{
     types::ssb::EventTrigger
 };
 use super::{
-    g2d::image::{ColorType,ImageView},
+    g2d::image::ImageView,
     types::{
         error::RenderingError,
         parameter::RenderTrigger
@@ -36,11 +36,9 @@ impl SsbRenderer {
 
 
                 // TODO: whole rendering process
-                if let (ColorType::R8G8B8, Some(red_plane_rows)) = (img.color_type(), img.plane_rows_mut(0)) {
-                    for row in red_plane_rows {
-                        for sample in row {
-                            *sample = std::u8::MAX - *sample;
-                        }
+                for row in img.plane_rows_mut(0).expect("One plane should always exist!") {
+                    for sample in row {
+                        *sample = std::u8::MAX - *sample;
                     }
                 }
 

@@ -6,7 +6,7 @@ mod c_tests {
         ffi::CStr,
         ptr::null_mut
     };
-    include!("platform.irs");    // Tests are separated, thus include code (::dll_path)
+    include!("platform.irs");    // Tests are separated, thus include code
 
     #[test]
     fn test_version() {
@@ -39,7 +39,7 @@ mod c_tests {
                     renderer,
                     640, 480, 640*3,
                     "RGB24\0".as_ptr() as *const c_char,
-                    vec![vec![0u8;640*480*3]].iter_mut().map(|plane| plane.as_mut_ptr() ).collect::<Vec<*mut u8>>().as_ptr(),
+                    vec![vec![0u8;640*480*3]].iter_mut().map(|plane| plane.as_mut_ptr() ).collect::<Vec<_>>().as_ptr(),
                     1000,
                     null_mut(), 0
                 ),
