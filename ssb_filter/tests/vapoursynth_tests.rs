@@ -18,7 +18,7 @@ mod vapoursynth_tests {
     #[test]
     fn test_python_available() {
         // Get python version
-        let output = Command::new(constants::PYTHON_CMD)
+        let output = Command::new(platform::constants::PYTHON_CMD)
             .arg("--version")
             .output().expect("Couldn't find python!");
         // Python 3 at least required
@@ -28,11 +28,11 @@ mod vapoursynth_tests {
     #[test]
     fn test_plugin_load() {
         // Load plugin with vapoursynth by python execution
-        let output = Command::new(constants::PYTHON_CMD)
+        let output = Command::new(platform::constants::PYTHON_CMD)
             .arg("-c")
             .arg(format!(
                 include_str!("test.vpy"),
-                dll_path()
+                platform::dll_path()
             ))
             .output().expect("Couldn't load vapoursynth plugin!");
         // No output on standard error stream -> success!
