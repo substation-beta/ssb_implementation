@@ -1,0 +1,32 @@
+// Platform properties
+#[cfg(target_os = "windows")]
+pub mod constants {
+    pub const PYTHON_CMD: &str = "python";
+    pub const LIB_PREFIX: &str = "";
+    pub const LIB_EXTENSION: &str = ".dll";
+}
+#[cfg(target_os = "linux")]
+pub mod constants {
+    pub const PYTHON_CMD: &str = "python3";
+    pub const LIB_PREFIX: &str = "lib";
+    pub const LIB_EXTENSION: &str = ".so";
+}
+#[cfg(target_os = "macos")]
+pub mod constants {
+    pub const PYTHON_CMD: &str = "python3";
+    pub const LIB_PREFIX: &str = "lib";
+    pub const LIB_EXTENSION: &str = ".dylib";
+}
+
+// Output DLL
+pub fn dll_path() -> std::path::PathBuf {
+    std::path::Path::new(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../target/",
+        env!("PROFILE") // Set by build script
+    )).join(
+        constants::LIB_PREFIX.to_owned() +
+        &env!("CARGO_PKG_NAME") +
+        constants::LIB_EXTENSION
+    )
+}

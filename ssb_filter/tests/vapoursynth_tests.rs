@@ -3,27 +3,7 @@ mod vapoursynth_tests {
     // Imports
     use vapoursynth::prelude::*;
     use std::process::Command;
-    use std::path::Path;
-
-    // Platform properties
-    #[cfg(target_os = "windows")]
-    mod platform {
-        pub const PYTHON_CMD: &str = "python";
-        pub const LIB_PREFIX: &str = "";
-        pub const LIB_EXTENSION: &str = ".dll";
-    }
-    #[cfg(target_os = "linux")]
-    mod platform {
-        pub const PYTHON_CMD: &str = "python3";
-        pub const LIB_PREFIX: &str = "lib";
-        pub const LIB_EXTENSION: &str = ".so";
-    }
-    #[cfg(target_os = "macos")]
-    mod platform {
-        pub const PYTHON_CMD: &str = "python3";
-        pub const LIB_PREFIX: &str = "lib";
-        pub const LIB_EXTENSION: &str = ".dylib";
-    }
+    include!("platform.irs");    // Tests are separated, thus include code (::constants::, ::dll_path)
 
     #[test]
     fn test_core_available() {
@@ -38,7 +18,7 @@ mod vapoursynth_tests {
     #[test]
     fn test_python_available() {
         // Get python version
-        let output = Command::new(platform::PYTHON_CMD)
+        let output = Command::new(constants::PYTHON_CMD)
             .arg("--version")
             .output().expect("Couldn't find python!");
         // Python 3 at least required
@@ -47,22 +27,12 @@ mod vapoursynth_tests {
 
     #[test]
     fn test_plugin_load() {
-        // Path to compiled plugin
-        let plugin_path = Path::new(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../target/",
-            env!("PROFILE") // Set by build script
-        )).join(
-            platform::LIB_PREFIX.to_owned() +
-            &env!("CARGO_PKG_NAME") +
-            platform::LIB_EXTENSION
-        );
         // Load plugin with vapoursynth by python execution
-        let output = Command::new(platform::PYTHON_CMD)
+        let output = Command::new(constants::PYTHON_CMD)
             .arg("-c")
             .arg(format!(
                 include_str!("test.vpy"),
-                plugin_path
+                dll_path()
             ))
             .output().expect("Couldn't load vapoursynth plugin!");
         // No output on standard error stream -> success!

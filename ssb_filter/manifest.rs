@@ -7,13 +7,8 @@ fn main() {
     // Embed version information to binary
     #[cfg(windows)]
     {
-        // Imports
-        use std::path::Path;
-        use std::fs;
-        use chrono::{Local, Datelike};
-
         // Path for temporary manifest file
-        let file_path = Path::new(&env::var("OUT_DIR").expect("Build output directory should be known!")).join("manifest.rs");
+        let file_path = std::path::Path::new(&env::var("OUT_DIR").expect("Build output directory should be known!")).join("manifest.rs");
         // Manifest data
         let pkg_name = env!("CARGO_PKG_NAME");
         let pkg_description = env!("CARGO_PKG_DESCRIPTION");
@@ -22,9 +17,10 @@ fn main() {
         let patch_version = env!("CARGO_PKG_VERSION_PATCH");
         let version_string = env!("CARGO_PKG_VERSION");
         let authors = env!("CARGO_PKG_AUTHORS");
-        let date = Local::today();
+        use chrono::Datelike;
+        let date = chrono::Local::today();
         // Write manifest code into file
-        fs::write(&file_path, format!(
+        std::fs::write(&file_path, format!(
             r#"// Version informations
             1 VERSIONINFO
             FILEVERSION {},{},{},0
