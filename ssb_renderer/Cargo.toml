@@ -29,6 +29,12 @@ crate-type = ["rlib"]
 # Documentation embedded code doesn't need tests
 doctest = false
 
+[[bench]]
+# File to execute
+name = "rendering_benches"
+# Disable standard benchmarking harness in favor of microbench
+harness = false
+
 [dependencies]
 # Depend on parser module
 ssb_parser = {path = "../ssb_parser", version = "0.2.3", default-features = false}
@@ -40,12 +46,6 @@ glyph_brush_layout = "~0.1.6"   # https://crates.io/crates/glyph_brush_layout
 meval = "~0.2.0"  # https://crates.io/crates/meval
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
-
-[[bench]]
-# File to execute
-name = "rendering_benches"
-# Disable standard benchmarking harness in favor of microbench
-harness = false
 
 [dev-dependencies]
 # Profiling

@@ -23,17 +23,17 @@ appveyor = {repository = "Youka/ssb_implementation", branch = "master", service 
 codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
 maintenance = {status = "actively-developed"}
 
-[features]
-# All features used by default
-default = ["serialization"]
-# Serialization
-serialization = ["serde"]
-
 [lib]
 # Compile to Rust static library
 crate-type = ["rlib"]
 # Documentation embedded code doesn't need tests
 doctest = false
+
+[features]
+# All features used by default
+default = ["serialization"]
+# Serialization
+serialization = ["serde"]
 
 [dependencies]
 # Text parsing

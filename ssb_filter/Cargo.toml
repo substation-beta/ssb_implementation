@@ -31,6 +31,13 @@ crate-type = ["cdylib"]
 # Documentation embedded code doesn't need tests
 doctest = false
 
+[features]
+# Just serve to modern media frameworks
+default = ["vapoursynth-interface"]
+vapoursynth-interface = ["vapoursynth", "failure"]
+mediafoundation-interface = ["winapi"]
+gstreamer-interface = ["gstreamer"]
+
 [dependencies]
 # Depend on renderer module
 ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
@@ -42,13 +49,6 @@ failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/fai
 vapoursynth = {version = "~0.2.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
 winapi = {version = "~0.3.7", optional = true}   # https://crates.io/crates/winapi
 gstreamer = {version = "~0.14.0", optional = true}   # https://crates.io/crates/gstreamer
-
-[features]
-# Just serve to modern media frameworks
-default = ["vapoursynth-interface"]
-vapoursynth-interface = ["vapoursynth", "failure"]
-mediafoundation-interface = ["winapi"]
-gstreamer-interface = ["gstreamer"]
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest
