@@ -47,16 +47,16 @@ mod c_tests {
             );
             destroy_renderer_fn(renderer);
             // Error case
-            let mut error_message = vec![0u8;128];
+            let mut error_message = vec![0 as c_char;128];
             assert_eq!(
                 new_renderer_fn(
                     "INVALID\0".as_ptr() as *const c_char,
-                    error_message.as_mut_ptr() as *mut c_char, error_message.len() as c_ushort
+                    error_message.as_mut_ptr(), error_message.len() as c_ushort
                 ),
                 null_mut()
             );
             assert_eq!(
-                CStr::from_ptr(error_message.as_ptr() as *const c_char).to_string_lossy(),
+                CStr::from_ptr(error_message.as_ptr()).to_string_lossy(),
                 "No section set! <0:0>"
             );
         }
