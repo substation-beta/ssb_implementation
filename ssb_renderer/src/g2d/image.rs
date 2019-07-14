@@ -49,6 +49,18 @@ impl ColorType {
             ColorType::BGR24 | ColorType::ABGR32 => true
         }
     }
+    /// Get variant by name.
+    pub fn by_name(name: &str) -> Option<Self> {
+        match name.to_uppercase().as_str() {
+            "RGB24" => Some(ColorType::RGB24),
+            "BGR24" => Some(ColorType::BGR24),
+            "R8G8B8" => Some(ColorType::R8G8B8),
+            "RGBA32" => Some(ColorType::RGBA32),
+            "ABGR32" => Some(ColorType::ABGR32),
+            "R8G8B8A8" => Some(ColorType::R8G8B8A8),
+            _ => None
+        }
+    }
 }
 
 /// Reference on image data with meta information.
@@ -116,5 +128,22 @@ impl<'data> ImageView<'data> {
         self.plane_mut(index).map(|data| {
             data.chunks_exact_mut(stride as usize).take(height as usize).map(move |row| &mut row[..row_size])
         })
+    }
+}
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use super::ColorType;
+
+    #[test]
+    fn color_type_by_name() {
+        assert_eq!(ColorType::by_name("rgb24"), Some(ColorType::RGB24));
+        assert_eq!(ColorType::by_name("BGR24"), Some(ColorType::BGR24));
+        assert_eq!(ColorType::by_name("r8g8b8"), Some(ColorType::R8G8B8));
+        assert_eq!(ColorType::by_name("RGBA32"), Some(ColorType::RGBA32));
+        assert_eq!(ColorType::by_name("abgr32"), Some(ColorType::ABGR32));
+        assert_eq!(ColorType::by_name("r8g8b8a8"), Some(ColorType::R8G8B8A8));
+        assert_eq!(ColorType::by_name("yuv"), None);
     }
 }
