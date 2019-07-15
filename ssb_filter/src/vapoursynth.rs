@@ -10,6 +10,7 @@ use vapoursynth::{
     export_vapoursynth_plugin
 };
 use failure::{Error, err_msg, format_err, bail};
+use log::debug;
 use ssb_renderer::{
     ssb_parser::data::{Ssb,SsbRender},
     rendering::SsbRenderer,
@@ -56,6 +57,7 @@ make_filter_function! {
         clip: Node<'core>,
         script: &[u8]
     ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+        debug!("Called ssb.render function in vapoursynth.");
         Ok(Some(Box::new(
             build_render_filter(clip, BufReader::new(
                 File::open(
@@ -75,6 +77,7 @@ make_filter_function! {
         clip: Node<'core>,
         data: &[u8]
     ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+        debug!("Called ssb.render_raw in vapoursynth.");
         Ok(Some(Box::new(
             build_render_filter(clip, Cursor::new(data))?
         )))

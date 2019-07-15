@@ -43,7 +43,6 @@ gstreamer-interface = ["gstreamer"]
 ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
 log = "~0.4.6"  # https://crates.io/crates/log
-env_logger = "~0.6.1"   # https://crates.io/crates/env_logger
 failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/failure
 # Interface frameworks
 libc = "~0.2.59"    # https://crates.io/crates/libc
