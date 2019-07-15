@@ -101,7 +101,7 @@ pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
     free_ptr(renderer);
 }
 
-/// Render on image.
+/// Render on image by time.
 /// 
 /// **renderer** can be *null*.
 /// 
@@ -113,13 +113,13 @@ pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
 /// 
 /// Returns 0 on success, 1 on error.
 #[no_mangle]
-pub extern fn ssb_render(
+pub extern fn ssb_render_by_time(
     renderer: *mut c_void,
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     time: c_uint,
     error_message: *mut c_char, error_message_capacity: c_ushort
 ) -> c_int {
-    match ssb_render_inner(renderer, width, height, stride, color_type, planes, time) {
+    match ssb_render_by_time_inner(renderer, width, height, stride, color_type, planes, time) {
         Ok(()) => 0,
         Err(error) => {
             error_to_c(error, error_message, error_message_capacity);
@@ -127,10 +127,21 @@ pub extern fn ssb_render(
         }
     }
 }
-fn ssb_render_inner(
+fn ssb_render_by_time_inner(
     renderer: *mut c_void,
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     time: c_uint
+) -> Result<(), Box<Error>> {
+    ssb_render_inner(
+        renderer,
+        width, height, stride, color_type, planes,
+        RenderTrigger::Time(time)
+    )
+}
+fn ssb_render_inner(
+    renderer: *mut c_void,
+    width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
+    trigger: RenderTrigger
 ) -> Result<(), Box<Error>> {
     if !renderer.is_null() {
         unsafe {
@@ -149,9 +160,49 @@ fn ssb_render_inner(
                         .collect()
                     }
                 )?,
-                RenderTrigger::Time(time)
+                trigger
             )?;
         }
     }
     Ok(())
+}
+
+/// Render on image by id.
+/// 
+/// **renderer** can be *null*.
+/// 
+/// **color_type** mustn't be *null*.
+/// 
+/// **planes** mustn't be *null* and contains enough pointers with enough data for given **color_type**.
+/// 
+/// **id** mustn't be *null*.
+/// 
+/// **error_message** can be *null*.
+/// 
+/// Returns 0 on success, 1 on error.
+#[no_mangle]
+pub extern fn ssb_render_by_id(
+    renderer: *mut c_void,
+    width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
+    id: *const c_char,
+    error_message: *mut c_char, error_message_capacity: c_ushort
+) -> c_int {
+    match ssb_render_by_id_inner(renderer, width, height, stride, color_type, planes, id) {
+        Ok(()) => 0,
+        Err(error) => {
+            error_to_c(error, error_message, error_message_capacity);
+            1
+        }
+    }
+}
+fn ssb_render_by_id_inner(
+    renderer: *mut c_void,
+    width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
+    id: *const c_char
+) -> Result<(), Box<Error>> {
+    ssb_render_inner(
+        renderer,
+        width, height, stride, color_type, planes,
+        RenderTrigger::Id(unsafe{ CStr::from_ptr(id) }.to_str()?)
+    )
 }
