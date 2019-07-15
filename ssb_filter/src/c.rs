@@ -10,7 +10,8 @@ use std::{
     convert::TryFrom,
     error::Error,
     ffi::CStr,
-    io::Cursor,
+    fs::File,
+    io::{BufRead, BufReader, Cursor},
     ptr::null_mut,
     slice::{from_raw_parts, from_raw_parts_mut}
 };
@@ -25,6 +26,14 @@ fn error_to_c(error: Box<Error>, error_message: *mut c_char, error_message_capac
         unsafe {msg.as_ptr().copy_to(error_message as *mut u8, msg.len());}
     }
 }
+fn into_ptr<T>(data: T) -> *mut c_void {
+    Box::into_raw(Box::new(data)) as *mut c_void
+}
+fn free_ptr(ptr: *mut c_void) {
+    if !ptr.is_null() {
+        unsafe {Box::from_raw(ptr);}
+    }
+}
 
 /// Get library version as C string.
 #[no_mangle]
@@ -32,41 +41,76 @@ pub extern fn ssb_version() -> *const c_char {
     concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char
 }
 
-/// Create renderer instance.
-/// **script** mustn't be *null*.
+/// Create renderer instance by file.
+/// 
+/// **file** mustn't be *null*.
+/// 
 /// **error_message** can be *null*.
+/// 
 /// Returns renderer instance or *null*.
 #[no_mangle]
-pub extern fn ssb_new_renderer(script: *const c_char, error_message: *mut c_char, error_message_capacity: c_ushort) -> *mut c_void {
-    match ssb_new_renderer_inner(script) {
-        Ok(renderer) => Box::into_raw(Box::new(renderer)) as *mut c_void,
+pub extern fn ssb_new_renderer_by_file(file: *const c_char, error_message: *mut c_char, error_message_capacity: c_ushort) -> *mut c_void {
+    match ssb_new_renderer_by_file_inner(file) {
+        Ok(renderer) => into_ptr(renderer),
         Err(error) => {
             error_to_c(error, error_message, error_message_capacity);
             null_mut()
         }
     }
 }
-fn ssb_new_renderer_inner(script: *const c_char) -> Result<SsbRenderer, Box::<Error>> {
+fn ssb_new_renderer_by_file_inner(file: *const c_char) -> Result<SsbRenderer, Box::<Error>> {
+    ssb_new_renderer_inner(BufReader::new(
+        File::open(unsafe{ CStr::from_ptr(file) }.to_str()?)?
+    ))
+}
+fn ssb_new_renderer_inner<R: BufRead>(script: R) -> Result<SsbRenderer, Box::<Error>> {
     Ok(SsbRenderer::new(
-        Ssb::default().parse_owned( Cursor::new(unsafe{ CStr::from_ptr(script) }.to_str()?) )
+        Ssb::default().parse_owned(script)
         .and_then(|ssb| SsbRender::try_from(ssb) )?
     ))
 }
 
+/// Create renderer instance by script content.
+/// 
+/// **script** mustn't be *null*.
+/// 
+/// **error_message** can be *null*.
+/// 
+/// Returns renderer instance or *null*.
+#[no_mangle]
+pub extern fn ssb_new_renderer_by_script(script: *const c_char, error_message: *mut c_char, error_message_capacity: c_ushort) -> *mut c_void {
+    match ssb_new_renderer_by_script_inner(script) {
+        Ok(renderer) => into_ptr(renderer),
+        Err(error) => {
+            error_to_c(error, error_message, error_message_capacity);
+            null_mut()
+        }
+    }
+}
+fn ssb_new_renderer_by_script_inner(script: *const c_char) -> Result<SsbRenderer, Box::<Error>> {
+    ssb_new_renderer_inner(
+        Cursor::new(unsafe{ CStr::from_ptr(script) }.to_str()?)
+    )
+}
+
 /// Destroy renderer instance.
+/// 
 /// **renderer** can be *null*.
 #[no_mangle]
 pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
-    if !renderer.is_null() {
-        unsafe {Box::from_raw(renderer);}
-    }
+    free_ptr(renderer);
 }
 
 /// Render on image.
+/// 
 /// **renderer** can be *null*.
+/// 
 /// **color_type** mustn't be *null*.
+/// 
 /// **planes** mustn't be *null* and contains enough pointers with enough data for given **color_type**.
+/// 
 /// **error_message** can be *null*.
+/// 
 /// Returns 0 on success, 1 on error.
 #[no_mangle]
 pub extern fn ssb_render(

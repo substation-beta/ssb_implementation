@@ -6,8 +6,6 @@
 3rd level component of [ssb_implementation](https://github.com/substation-beta/ssb_implementation).
 
 ## Planned
-* [C](https://en.wikipedia.org/wiki/C_(programming_language)) [API](https://en.wikipedia.org/wiki/Application_programming_interface)
-* [Vapoursynth](http://www.vapoursynth.com/)
 * [GStreamer](https://en.wikipedia.org/wiki/GStreamer)
 * [MediaFoundation](https://en.wikipedia.org/wiki/Media_Foundation)
 
