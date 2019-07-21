@@ -6,18 +6,11 @@ fn main() {
     println!("cargo:rustc-env=PROFILE={}", &profile);
 
     // Generate C header
-    cbindgen::generate(env!("CARGO_MANIFEST_DIR")).expect("Generating header files by native crate shouldn't have failed!")
+    cbindgen::generate(
+        env!("CARGO_MANIFEST_DIR")
+    ).expect("Generating C header by native crate failed!")
     .write_to_file(
-        concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../target/"
-        ).to_owned() +
-        &profile +
-        concat!(
-            "/",
-            env!("CARGO_PKG_NAME"),
-            ".h"
-        )
+        format!("{}/../target/{}/{}.h", env!("CARGO_MANIFEST_DIR"), &profile, env!("CARGO_PKG_NAME"))
     );
 
     // Embed version information to binary

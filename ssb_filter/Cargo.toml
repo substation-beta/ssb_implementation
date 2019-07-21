@@ -55,7 +55,7 @@ gstreamer = {version = "~0.14.3", optional = true}   # https://crates.io/crates/
 libloading = "~0.5.2"   # https://crates.io/crates/libloading
 
 [build-dependencies]
-# C headers
+# C header generation
 cbindgen = "~0.9.0" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
