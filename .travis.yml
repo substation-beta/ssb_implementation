@@ -28,16 +28,7 @@ matrix:
     # Stable
     - rust: stable
       # CodeCov upload <https://github.com/SimonKagstrom/kcov>
-      after_success: |
-        sudo apt-get install -y libcurl4-openssl-dev libelf-dev libdw-dev cmake gcc binutils-dev libiberty-dev && # Install kcov requirements
-        wget https://github.com/SimonKagstrom/kcov/archive/master.tar.gz && # Download kcov sources
-        tar xzf master.tar.gz && cd kcov-master &&  # Unzip kcov sources
-        mkdir build && cd build &&  # Make intermediate kcov build directory
-        cmake .. && make && # Generate Makefile by CMake and build kcov
-        sudo make install &&  # Install kcov to system
-        cd ../.. && rm -rf kcov-master && # Delete kcov sources
-        for file in target/debug/*_*-*[^\.d]; do mkdir -p "target/cov/$(basename $file)"; kcov --exclude-pattern=/.cargo,/usr/lib --verify "target/cov/$(basename $file)" "$file"; done &&  # Generate code coverage reports
-        bash <(curl -s https://codecov.io/bash) # Upload code coverage reports (by environment variable CODECOV_TOKEN)
+      after_success: sudo bash .scripts/kcov.sh
       # Crates.io release
       deploy:
         provider: script  # Script execution
@@ -50,7 +41,7 @@ matrix:
 # Preparations for compilation
 before_script:
   # Install vapoursynth
-  - sudo bash ssb_filter/deps/vapoursynth-install.sh
+  - sudo bash .scripts/vapoursynth-install.sh
   # Add test fonts (from windows)
   - echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections && sudo apt-get install -y ttf-mscorefonts-installer
 
