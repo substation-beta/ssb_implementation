@@ -1,3 +1,6 @@
+# v0.2.5
+* updated dependencies
+
 # v0.2.4
 * changed sections names to uppercase (according to SSB specification)
 

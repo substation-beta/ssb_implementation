@@ -75,9 +75,7 @@ mod font_tests {
                     text_image.put_pixel(
                         glyph_bounding.min.x as u32 + x,
                         glyph_bounding.min.y as u32 + y,
-                        LumaA {
-                            data: [u8MAX >> 1, (opacity * u8MAX as f32) as u8]
-                        }
+                        LumaA( [u8MAX >> 1, (opacity * u8MAX as f32) as u8] )
                     );
                 });
             }
