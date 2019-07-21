@@ -2,7 +2,23 @@ use std::env;
 
 fn main() {
     // Add profile to crate
-    println!("cargo:rustc-env=PROFILE={}", env::var("PROFILE").expect("Build profile should be known!"));
+    let profile = env::var("PROFILE").expect("Build profile should be known!");
+    println!("cargo:rustc-env=PROFILE={}", &profile);
+
+    // Generate C header
+    cbindgen::generate(env!("CARGO_MANIFEST_DIR")).expect("Generating header files by native crate shouldn't have failed!")
+    .write_to_file(
+        concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../target/"
+        ).to_owned() +
+        &profile +
+        concat!(
+            "/",
+            env!("CARGO_PKG_NAME"),
+            ".h"
+        )
+    );
 
     // Embed version information to binary
     #[cfg(windows)]

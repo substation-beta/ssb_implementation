@@ -15,8 +15,8 @@ license = "Apache-2.0"
 repository = "https://github.com/substation-beta/ssb_implementation"
 # Don't package development stuff
 exclude = ["tests/**/*", "benches/**/*"]
-# Manifest embedding
-build = "manifest.rs"
+# Generate metadata (manifest embedding & C header)
+build = "build.rs"
 
 [badges]
 # Development status
@@ -53,6 +53,10 @@ gstreamer = {version = "~0.14.3", optional = true}   # https://crates.io/crates/
 [dev-dependencies]
 # DLL loading
 libloading = "~0.5.2"   # https://crates.io/crates/libloading
+
+[build-dependencies]
+# C headers
+cbindgen = "~0.9.0" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest

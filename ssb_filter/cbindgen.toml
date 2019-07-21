@@ -1,0 +1,5 @@
+# <https://github.com/eqrion/cbindgen/blob/master/docs.md#cbindgentoml>
+
+language = "C"
+include_guard = "SSB_FILTER_H"
+no_includes = true
