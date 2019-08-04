@@ -57,10 +57,10 @@ install:
   # Show python version (detailed)
   - python -VV
   # VAPOURSYNTH
-  # Load vapoursynth R46
-  - curl -fsSL -o VapourSynth64-Portable-R46.7z https://github.com/vapoursynth/vapoursynth/releases/download/R46/VapourSynth64-Portable-R46.7z
+  # Load vapoursynth R47
+  - curl -fsSL -o VapourSynth64-Portable-R47.7z https://github.com/vapoursynth/vapoursynth/releases/download/R47/VapourSynth64-Portable-R47.7z
   # Extract vapoursynth archive into python
-  - 7z x VapourSynth64-Portable-R46.7z -o%PYTHON% -y
+  - 7z x VapourSynth64-Portable-R47.7z -o%PYTHON% -y
   # Show vapoursynth version
   - python -c "import vapoursynth; print(vapoursynth.core.version())"
   # Add compiler access to vapoursynth sdk

@@ -6,7 +6,7 @@ if [ $EUID -ne 0 ]; then
         exit 1
 fi
 
-# Helper functions
+# Helper function for installing
 download_and_build() {
         if wget -qO- $1 | tar -zxf- && pushd ./$2; then
                 ./autogen.sh && ./configure && make install
@@ -16,12 +16,10 @@ download_and_build() {
 
 # Install system dependencies
 apt-get install -y build-essential autoconf libtool pkg-config python3-pip && pip3 install cython
-# Install nasm (from source) [new version required]
-download_and_build https://www.nasm.us/pub/nasm/releasebuilds/2.14.02/nasm-2.14.02.tar.gz nasm-2.14.02
 # Install zimg (from source)
-download_and_build https://github.com/sekrit-twc/zimg/archive/release-2.9.1.tar.gz zimg-release-2.9.1
+download_and_build https://github.com/sekrit-twc/zimg/archive/release-2.9.2.tar.gz zimg-release-2.9.2
 # Install vapoursynth (from source)
-download_and_build https://github.com/vapoursynth/vapoursynth/archive/R46.tar.gz vapoursynth-R46
+download_and_build https://github.com/vapoursynth/vapoursynth/archive/R47.1.tar.gz vapoursynth-R47.1
 # Load vapoursynth into system libraries cache
 ldconfig /usr/local/lib
 # Fix vapoursynth (native) python path
