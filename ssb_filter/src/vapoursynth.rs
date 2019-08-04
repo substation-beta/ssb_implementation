@@ -136,7 +136,7 @@ impl<'core> Filter<'core> for RenderFilter<'core> {
             .ok_or_else(|| format_err!("Couldn't get the source frame!"))?;
         // Check RGB(A) format
         let format = frame.format();
-        if format.color_family() == ColorFamily::RGB || (3..4).contains(&format.plane_count()) || format.sample_type() == SampleType::Integer || format.bits_per_sample() == 8 {
+        if format.color_family() == ColorFamily::RGB && (3..4).contains(&format.plane_count()) && format.sample_type() == SampleType::Integer && format.bits_per_sample() == 8 {
             // Create lock on renderer
             if let Ok(renderer_refcell) = self.renderer.lock() {
                 // Make frame copy
