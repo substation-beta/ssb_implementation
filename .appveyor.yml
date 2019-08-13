@@ -18,11 +18,14 @@ environment:
     # MSVC toolchain
     - channel: stable
       target: x86_64-pc-windows-msvc
+      with_vs: true
     - channel: nightly
       target: x86_64-pc-windows-msvc
+      with_vs: false
     # GNU toolchain
     - channel: stable
       target: x86_64-pc-windows-gnu
+      with_vs: false
 
 # Configure jobs
 matrix:
@@ -37,7 +40,7 @@ cache:
   # Build output
   - target
 
-# Install software
+# Install dependencies
 install:
   # RUST
   # Load rust installer
@@ -49,25 +52,11 @@ install:
   # Show rust version (detailed)
   - rustc -Vv
   - cargo -Vv
-  # PYTHON
-  # Select pre-installed python version
-  - set PYTHON=C:\Python37-x64
-  # Add global access to python binaries (overwrite default python 2.7)
-  - set PATH=%PYTHON%;%PATH%
-  # Show python version (detailed)
-  - python -VV
-  # VAPOURSYNTH
-  # Load vapoursynth R47
-  - curl -fsSL -o VapourSynth64-Portable-R47.7z https://github.com/vapoursynth/vapoursynth/releases/download/R47/VapourSynth64-Portable-R47.7z
-  # Extract vapoursynth archive into python
-  - 7z x VapourSynth64-Portable-R47.7z -o%PYTHON% -y
-  # Show vapoursynth version
-  - python -c "import vapoursynth; print(vapoursynth.core.version())"
-  # Add compiler access to vapoursynth sdk
-  - set VAPOURSYNTH_LIB_DIR=%PYTHON%/sdk/lib64
+  # VAPOURSYNTH (+PYTHON)
+  - if %with_vs% == true call .scripts/vapoursynth64-install.bat
 
 # Run build by scripting (instead of default MSVC project search & execute)
-build_script: echo %target% | findstr msvc >nul && cargo build --verbose || cargo build -p ssb_parser -p ssb_renderer --verbose
+build_script: if %with_vs% == true (cargo build --verbose) else (cargo build -p ssb_parser -p ssb_renderer --verbose)
 
 # Run tests by scripting
-test_script: echo %target% | findstr msvc >nul && cargo test --verbose || cargo test -p ssb_parser -p ssb_renderer --verbose
+test_script: if %with_vs% == true (cargo test --verbose) else (cargo test -p ssb_parser -p ssb_renderer --verbose)
