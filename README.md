@@ -50,12 +50,12 @@ Project contents consist of multiple components which build on top of each other
 # Contributing
 We welcome contributers but insist on working by our rules. The principle **quality > quantity** has to be followed through every part of this project.
 
-For details, see [Contributing](./CONTRIBUTING.md).
+For details, see [Contributing](https://github.com/substation-beta/ssb_implementation/blob/master/CONTRIBUTING.md).
 
 # License
 This project and all of its components are licensed under **Apache-2.0**. Distributed on an "AS-IS" basis, there's no warranty, a limited liability and no grant of trademark rights.
 
-For more, see [License](./LICENSE).
+For more, see [License](https://github.com/substation-beta/ssb_implementation/blob/master/LICENSE).
 
 # Acknowledgment
 * [ASS (Advanced Substation Alpha)](https://en.wikipedia.org/wiki/SubStation_Alpha#Advanced_SubStation_Alpha)

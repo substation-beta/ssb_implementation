@@ -5,4 +5,4 @@
 
 1st level component of [ssb_implementation](https://github.com/substation-beta/ssb_implementation).
 
-[Changes](CHANGES.md)
+[Changes](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_parser/CHANGES.md)

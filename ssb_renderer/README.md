@@ -13,4 +13,4 @@
 * SIMD (SSE2, AVX)
 * GPGPU (OpenCL, Cuda) option
 
-[Changes](CHANGES.md)
+[Changes](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_renderer/CHANGES.md)

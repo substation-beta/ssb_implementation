@@ -9,4 +9,4 @@
 * [GStreamer](https://en.wikipedia.org/wiki/GStreamer)
 * [MediaFoundation](https://en.wikipedia.org/wiki/Media_Foundation)
 
-[Changes](CHANGES.md)
+[Changes](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_filter/CHANGES.md)
