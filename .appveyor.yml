@@ -60,3 +60,6 @@ build_script: if %with_vs% == true (cargo build --verbose) else (cargo build -p 
 
 # Run tests by scripting
 test_script: if %with_vs% == true (cargo test --verbose) else (cargo test -p ssb_parser -p ssb_renderer --verbose)
+
+# Create artifacts
+after_test: if %with_vs% == true call .scripts/push_artifacts.bat
