@@ -11,7 +11,6 @@ use super::{
         state::{Section,Mode,ShapeSegmentType}
     }
 };
-use log::debug;
 use std::{
     collections::{HashMap,HashSet},
     io::BufRead,
@@ -74,12 +73,10 @@ impl Ssb {
         // Initial state
         let mut section: Option<Section> = None;
         // Iterate through text lines
-        debug!("SSB parsing...");
         for (line_index, line) in reader.lines().enumerate() {
             // Check for valid UTF-8 and remove carriage return (leftover of windows-ending)
             let mut line = line?;
             if line.ends_with('\r') {line.pop();}
-            debug!("{}: {}", line_index, line);
             // Ignore empty lines & comments
             if !(line.is_empty() || line.starts_with("//")) {
                 // Switch or handle section
@@ -285,7 +282,6 @@ impl TryFrom<Ssb> for SsbRender {
                 }
                 // Evaluate events
                 let mut events = Vec::with_capacity(data.events.len());
-                debug!("SSB event evaluation...");
                 for event in data.events {
                     // Insert base macro
                     let mut event_data = event.data.clone();
@@ -300,7 +296,6 @@ impl TryFrom<Ssb> for SsbRender {
                         event_data.replace_range(macro_location, macro_value);
                     }
                     // Parse objects and save event for rendering
-                    debug!("{:?}: {}", event.data_location, event_data);
                     events.push(
                         EventRender {
                             trigger: event.trigger.clone(),
@@ -339,7 +334,6 @@ fn parse_objects(event_data: &str) -> Result<Vec<EventObject>, ParseError> {
     let mut objects = vec![];
     let mut mode = Mode::default();
     for (is_tag, data) in EscapedText::new(event_data).iter() {
-        debug!("{}: {}", if is_tag {"Tags"} else {"Geometry"}, data);
         if is_tag {
             parse_tags(data, &mut objects, Some(&mut mode))?;
         } else {

@@ -42,10 +42,9 @@ gstreamer-interface = ["gstreamer"]
 # Depend on renderer module
 ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
-log = "~0.4.7"  # https://crates.io/crates/log
 failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/failure
 # Interface frameworks
-libc = "~0.2.60"    # https://crates.io/crates/libc
+libc = "~0.2.61"    # https://crates.io/crates/libc
 vapoursynth = {version = "~0.2.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
 winapi = {version = "~0.3.7", optional = true}   # https://crates.io/crates/winapi
 gstreamer = {version = "~0.14.3", optional = true}   # https://crates.io/crates/gstreamer
