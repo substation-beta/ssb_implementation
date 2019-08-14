@@ -1,4 +1,5 @@
-# See <https://www.appveyor.com/docs/build-configuration/>
+# Build configuration: <https://www.appveyor.com/docs/build-configuration/>
+# Image software: <https://www.appveyor.com/docs/windows-images-software/>
 
 # Windows with MSVC 2017 (requirement for rust MSVC compiler)
 os: Visual Studio 2017
