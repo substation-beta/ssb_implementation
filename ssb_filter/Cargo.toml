@@ -32,11 +32,14 @@ crate-type = ["cdylib"]
 doctest = false
 
 [features]
-# Just serve to modern media frameworks
+# Add at least one media framework
 default = ["vapoursynth-interface"]
+# Modern media frameworks
 vapoursynth-interface = ["vapoursynth", "failure"]
 mediafoundation-interface = ["winapi"]
 gstreamer-interface = ["gstreamer"]
+# GPGPU support by renderer
+gpgpu = ["ssb_renderer/gpgpu"]
 
 [dependencies]
 # Depend on renderer module
