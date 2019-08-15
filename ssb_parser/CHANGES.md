@@ -1,6 +1,7 @@
-# v0.2.5
+# v0.3.0
 * updated dependencies
 * removed logging
+* changed degree type from f32 to f64 (compatible to coordinate type and sse2-based frontends)
 
 # v0.2.4
 * changed sections names to uppercase (according to SSB specification)

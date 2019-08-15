@@ -17,7 +17,7 @@ pub struct Point3D {
     pub z: Coordinate
 }
 pub type Coordinate = f32;
-pub type Degree = f64;
+pub type Degree = f32;
 pub type Rgb = [u8;3];
 
 
