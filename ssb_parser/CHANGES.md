@@ -1,3 +1,7 @@
+# v0.3.1
+* updated dependencies
+* require rust 1.37+ (updated sources to new features)
+
 # v0.3.0
 * updated dependencies
 * removed logging
