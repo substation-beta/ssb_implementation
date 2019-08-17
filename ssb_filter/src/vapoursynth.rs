@@ -55,7 +55,7 @@ make_filter_function! {
         _core: CoreRef<'core>,
         clip: Node<'core>,
         script: &[u8]
-    ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+    ) -> Result<Option<Box<dyn Filter<'core> + 'core>>, Error> {
         Ok(Some(Box::new(
             build_render_filter(clip, BufReader::new(
                 File::open(
@@ -74,7 +74,7 @@ make_filter_function! {
         _core: CoreRef<'core>,
         clip: Node<'core>,
         data: &[u8]
-    ) -> Result<Option<Box<Filter<'core> + 'core>>, Error> {
+    ) -> Result<Option<Box<dyn Filter<'core> + 'core>>, Error> {
         Ok(Some(Box::new(
             build_render_filter(clip, Cursor::new(data))?
         )))
@@ -88,7 +88,7 @@ fn build_render_filter<'core, R>(clip: Node<'core>, reader: R) -> Result<RenderF
         source: clip,
         renderer: Mutex::new(RefCell::new(SsbRenderer::new(
             Ssb::default().parse_owned(reader)
-            .and_then(|ssb| SsbRender::try_from(ssb) )
+            .and_then(SsbRender::try_from)
             .map_err(|err| err_msg(err.to_string()) )?
         )))
     })

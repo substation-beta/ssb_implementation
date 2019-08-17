@@ -100,15 +100,15 @@ impl TryFrom<u8> for Numpad {
     type Error = ();
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            1 => Ok(Numpad::BottomLeft),
-            2 => Ok(Numpad::BottomCenter),
-            3 => Ok(Numpad::BottomRight),
-            4 => Ok(Numpad::MiddleLeft),
-            5 => Ok(Numpad::MiddleCenter),
-            6 => Ok(Numpad::MiddleRight),
-            7 => Ok(Numpad::TopLeft),
-            8 => Ok(Numpad::TopCenter),
-            9 => Ok(Numpad::TopRight),
+            1 => Ok(Self::BottomLeft),
+            2 => Ok(Self::BottomCenter),
+            3 => Ok(Self::BottomRight),
+            4 => Ok(Self::MiddleLeft),
+            5 => Ok(Self::MiddleCenter),
+            6 => Ok(Self::MiddleRight),
+            7 => Ok(Self::TopLeft),
+            8 => Ok(Self::TopCenter),
+            9 => Ok(Self::TopRight),
             _ => Err(())
         }
     }
@@ -133,9 +133,9 @@ impl TryFrom<&str> for WrapStyle {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "space" => Ok(WrapStyle::Space),
-            "character" => Ok(WrapStyle::Character),
-            "nowrap" => Ok(WrapStyle::NoWrap),
+            "space" => Ok(Self::Space),
+            "character" => Ok(Self::Character),
+            "nowrap" => Ok(Self::NoWrap),
             _ => Err(())
         }
     }
@@ -152,10 +152,10 @@ impl TryFrom<&str> for Direction {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "ltr" => Ok(Direction::LeftToRight),
-            "rtl" => Ok(Direction::RightToLeft),
-            "ttb" => Ok(Direction::TopToBottom),
-            "btt" => Ok(Direction::BottomToTop),
+            "ltr" => Ok(Self::LeftToRight),
+            "rtl" => Ok(Self::RightToLeft),
+            "ttb" => Ok(Self::TopToBottom),
+            "btt" => Ok(Self::BottomToTop),
             _ => Err(())
         }
     }
@@ -216,9 +216,9 @@ impl TryFrom<&str> for Join {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "round" => Ok(Join::Round),
-            "bevel" => Ok(Join::Bevel),
-            "miter" => Ok(Join::Miter),
+            "round" => Ok(Self::Round),
+            "bevel" => Ok(Self::Bevel),
+            "miter" => Ok(Self::Miter),
             _ => Err(())
         }
     }
@@ -234,9 +234,9 @@ impl TryFrom<&str> for Cap {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "round" => Ok(Cap::Round),
-            "butt" => Ok(Cap::Butt),
-            "square" => Ok(Cap::Square),
+            "round" => Ok(Self::Round),
+            "butt" => Ok(Self::Butt),
+            "square" => Ok(Self::Square),
             _ => Err(())
         }
     }
@@ -253,10 +253,10 @@ impl TryFrom<&str> for TextureWrapping {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "pad" => Ok(TextureWrapping::Pad),
-            "clamp" => Ok(TextureWrapping::Clamp),
-            "repeat" => Ok(TextureWrapping::Repeat),
-            "mirror" => Ok(TextureWrapping::Mirror),
+            "pad" => Ok(Self::Pad),
+            "clamp" => Ok(Self::Clamp),
+            "repeat" => Ok(Self::Repeat),
+            "mirror" => Ok(Self::Mirror),
             _ => Err(())
         }
     }
@@ -300,12 +300,12 @@ impl TryFrom<&str> for Blend {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "add" => Ok(Blend::Add),
-            "subtract" => Ok(Blend::Subtract),
-            "multiply" => Ok(Blend::Multiply),
-            "invert" => Ok(Blend::Invert),
-            "difference" => Ok(Blend::Difference),
-            "screen" => Ok(Blend::Screen),
+            "add" => Ok(Self::Add),
+            "subtract" => Ok(Self::Subtract),
+            "multiply" => Ok(Self::Multiply),
+            "invert" => Ok(Self::Invert),
+            "difference" => Ok(Self::Difference),
+            "screen" => Ok(Self::Screen),
             _ => Err(())
         }
     }
@@ -320,8 +320,8 @@ impl TryFrom<&str> for Target {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "frame" => Ok(Target::Frame),
-            "mask" => Ok(Target::Mask),
+            "frame" => Ok(Self::Frame),
+            "mask" => Ok(Self::Mask),
             _ => Err(())
         }
     }
@@ -336,8 +336,8 @@ impl TryFrom<&str> for MaskMode {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "normal" => Ok(MaskMode::Normal),
-            "invert" => Ok(MaskMode::Invert),
+            "normal" => Ok(Self::Normal),
+            "invert" => Ok(Self::Invert),
             _ => Err(())
         }
     }

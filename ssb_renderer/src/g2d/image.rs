@@ -18,9 +18,9 @@ impl ColorType {
     /// Size of one color sample.
     pub fn sample_size(&self) -> u8 {
         match self {
-            ColorType::RGB24 | ColorType::BGR24 => 3,
-            ColorType::RGBA32 | ColorType::ABGR32 => 4,
-            ColorType::R8G8B8 | ColorType::R8G8B8A8 => 1
+            Self::RGB24 | Self::BGR24 => 3,
+            Self::RGBA32 | Self::ABGR32 => 4,
+            Self::R8G8B8 | Self::R8G8B8A8 => 1
         }
     }
     /// Size of all color samples in one image row.
@@ -30,34 +30,34 @@ impl ColorType {
     /// Number of color planes for a type.
     pub fn planes(&self) -> u8 {
         match self {
-            ColorType::RGB24 | ColorType::BGR24 | ColorType::RGBA32 | ColorType::ABGR32 => 1,
-            ColorType::R8G8B8 => 3,
-            ColorType::R8G8B8A8 => 4
+            Self::RGB24 | Self::BGR24 | Self::RGBA32 | Self::ABGR32 => 1,
+            Self::R8G8B8 => 3,
+            Self::R8G8B8A8 => 4
         }
     }
     /// Color contains alpha channel?
     pub fn alpha(&self) -> bool {
         match self {
-            ColorType::RGB24 | ColorType::BGR24 | ColorType::R8G8B8 => false,
-            ColorType::RGBA32 | ColorType::ABGR32 | ColorType::R8G8B8A8 => true
+            Self::RGB24 | Self::BGR24 | Self::R8G8B8 => false,
+            Self::RGBA32 | Self::ABGR32 | Self::R8G8B8A8 => true
         }
     }
     /// Usual color channels are swapped?
     pub fn swapped(&self) -> bool {
         match self {
-            ColorType::RGB24 | ColorType::RGBA32 | ColorType::R8G8B8 | ColorType::R8G8B8A8 => false,
-            ColorType::BGR24 | ColorType::ABGR32 => true
+            Self::RGB24 | Self::RGBA32 | Self::R8G8B8 | Self::R8G8B8A8 => false,
+            Self::BGR24 | Self::ABGR32 => true
         }
     }
     /// Get variant by name.
     pub fn by_name(name: &str) -> Result<Self, GraphicsError> {
         match name.to_uppercase().as_str() {
-            "RGB24" => Ok(ColorType::RGB24),
-            "BGR24" => Ok(ColorType::BGR24),
-            "R8G8B8" => Ok(ColorType::R8G8B8),
-            "RGBA32" => Ok(ColorType::RGBA32),
-            "ABGR32" => Ok(ColorType::ABGR32),
-            "R8G8B8A8" => Ok(ColorType::R8G8B8A8),
+            "RGB24" => Ok(Self::RGB24),
+            "BGR24" => Ok(Self::BGR24),
+            "R8G8B8" => Ok(Self::R8G8B8),
+            "RGBA32" => Ok(Self::RGBA32),
+            "ABGR32" => Ok(Self::ABGR32),
+            "R8G8B8A8" => Ok(Self::R8G8B8A8),
             _ => Err(GraphicsError::new(&format!("'{}' isn't a valid color type!", name)))
         }
     }

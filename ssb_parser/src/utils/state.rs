@@ -15,11 +15,11 @@ impl TryFrom<&str> for Section {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "#INFO" => Ok(Section::Info),
-            "#TARGET" => Ok(Section::Target),
-            "#MACROS" => Ok(Section::Macros),
-            "#EVENTS" => Ok(Section::Events),
-            "#RESOURCES" => Ok(Section::Resources),
+            "#INFO" => Ok(Self::Info),
+            "#TARGET" => Ok(Self::Target),
+            "#MACROS" => Ok(Self::Macros),
+            "#EVENTS" => Ok(Self::Events),
+            "#RESOURCES" => Ok(Self::Resources),
             _ => Err(())
         }
     }
@@ -32,16 +32,16 @@ pub enum Mode {
 }
 impl Default for Mode {
     fn default() -> Self {
-        Mode::Text
+        Self::Text
     }
 }
 impl TryFrom<&str> for Mode {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "text" => Ok(Mode::Text),
-            "points" => Ok(Mode::Points),
-            "shape" => Ok(Mode::Shape),
+            "text" => Ok(Self::Text),
+            "points" => Ok(Self::Points),
+            "shape" => Ok(Self::Shape),
             _ => Err(())
         }
     }
@@ -56,7 +56,7 @@ pub enum ShapeSegmentType {
 }
 impl Default for ShapeSegmentType {
     fn default() -> Self {
-        ShapeSegmentType::Move
+        Self::Move
     }
 }
 

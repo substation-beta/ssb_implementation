@@ -18,7 +18,7 @@ use std::{
 
 
 // Helpers
-fn error_to_c(error: Box<Error>, error_message: *mut c_char, error_message_capacity: c_ushort) {
+fn error_to_c(error: Box<dyn Error>, error_message: *mut c_char, error_message_capacity: c_ushort) {
     if !error_message.is_null() && error_message_capacity > 0 {
         let mut msg = error.to_string();
         msg.truncate((error_message_capacity-1) as usize);
@@ -58,15 +58,15 @@ pub extern fn ssb_new_renderer_by_file(file: *const c_char, error_message: *mut 
         }
     }
 }
-fn ssb_new_renderer_by_file_inner(file: *const c_char) -> Result<SsbRenderer, Box::<Error>> {
+fn ssb_new_renderer_by_file_inner(file: *const c_char) -> Result<SsbRenderer, Box::<dyn Error>> {
     ssb_new_renderer_inner(BufReader::new(
         File::open(unsafe{ CStr::from_ptr(file) }.to_str()?)?
     ))
 }
-fn ssb_new_renderer_inner<R: BufRead>(script: R) -> Result<SsbRenderer, Box::<Error>> {
+fn ssb_new_renderer_inner<R: BufRead>(script: R) -> Result<SsbRenderer, Box::<dyn Error>> {
     Ok(SsbRenderer::new(
         Ssb::default().parse_owned(script)
-        .and_then(|ssb| SsbRender::try_from(ssb) )?
+        .and_then(SsbRender::try_from)?
     ))
 }
 
@@ -87,7 +87,7 @@ pub extern fn ssb_new_renderer_by_script(script: *const c_char, error_message: *
         }
     }
 }
-fn ssb_new_renderer_by_script_inner(script: *const c_char) -> Result<SsbRenderer, Box::<Error>> {
+fn ssb_new_renderer_by_script_inner(script: *const c_char) -> Result<SsbRenderer, Box::<dyn Error>> {
     ssb_new_renderer_inner(
         Cursor::new(unsafe{ CStr::from_ptr(script) }.to_str()?)
     )
@@ -131,7 +131,7 @@ fn ssb_render_by_time_inner(
     renderer: *mut c_void,
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     time: c_uint
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
     ssb_render_inner(
         renderer,
         width, height, stride, color_type, planes,
@@ -142,7 +142,7 @@ fn ssb_render_inner(
     renderer: *mut c_void,
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     trigger: RenderTrigger
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
     if !renderer.is_null() {
         unsafe {
             let color_type = ColorType::by_name( CStr::from_ptr(color_type).to_str()? )?;
@@ -199,7 +199,7 @@ fn ssb_render_by_id_inner(
     renderer: *mut c_void,
     width: c_ushort, height: c_ushort, stride: c_uint, color_type: *const c_char, planes: *const *mut c_uchar,
     id: *const c_char
-) -> Result<(), Box<Error>> {
+) -> Result<(), Box<dyn Error>> {
     ssb_render_inner(
         renderer,
         width, height, stride, color_type, planes,

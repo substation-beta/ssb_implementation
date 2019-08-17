@@ -135,7 +135,7 @@ impl PathBase<PathSegment> for Path {
 impl From<FlatPath> for Path {
     fn from(flat_path: FlatPath) -> Self {
         Self::new(
-            flat_path.segments.into_iter().map(|flat_segment| PathSegment::Flat(flat_segment)).collect()
+            flat_path.segments.into_iter().map(PathSegment::Flat).collect()
         )
     }
 }

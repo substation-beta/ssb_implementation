@@ -34,13 +34,13 @@ pub fn bool_from_str(text: &str) -> Result<bool,()> {
 
 pub fn alpha_from_str(text: &str) -> Result<u8,()> {
     match text.len() {
-        1...2 => u8::from_str_radix(text, 16).map_err(|_| () ),
+        1..=2 => u8::from_str_radix(text, 16).map_err(|_| () ),
         _ => Err(())
     }
 }
 pub fn rgb_from_str(text: &str) -> Result<[u8;3],()> {
     match text.len() {
-        1...6 => u32::from_str_radix(text, 16).map(|value| {let bytes = value.to_le_bytes(); [bytes[2], bytes[1], bytes[0]]} ).map_err(|_| () ),
+        1..=6 => u32::from_str_radix(text, 16).map(|value| {let bytes = value.to_le_bytes(); [bytes[2], bytes[1], bytes[0]]} ).map_err(|_| () ),
         _ => Err(()),
     }
 }

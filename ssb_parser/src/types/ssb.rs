@@ -37,8 +37,8 @@ impl TryFrom<&str> for View {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "perspective" => Ok(View::Perspective),
-            "orthogonal" => Ok(View::Orthogonal),
+            "perspective" => Ok(Self::Perspective),
+            "orthogonal" => Ok(Self::Orthogonal),
             _ => Err(())
         }
     }
@@ -67,10 +67,10 @@ impl TryFrom<&str> for FontStyle {
     type Error = ();
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "regular" => Ok(FontStyle::Regular),
-            "bold" => Ok(FontStyle::Bold),
-            "italic" => Ok(FontStyle::Italic),
-            "bold-italic" => Ok(FontStyle::BoldItalic),
+            "regular" => Ok(Self::Regular),
+            "bold" => Ok(Self::Bold),
+            "italic" => Ok(Self::Italic),
+            "bold-italic" => Ok(Self::BoldItalic),
             _ => Err(())
         }
     }
