@@ -1,6 +1,33 @@
 mod accel_tests {
     // Imports
+    use lru::LruCache;
     use rayon::prelude::*;
+
+    #[test]
+    fn test_lru_cache() {
+        // Create initial cache
+        let mut cache = LruCache::new(2);
+        cache.put("apple", 3);
+        cache.put("banana", 2);
+
+        // Request cache
+        assert_eq!(*cache.get(&"apple").unwrap(), 3);
+        assert_eq!(*cache.get(&"banana").unwrap(), 2);
+        assert!(cache.get(&"pear").is_none());
+
+        // Modify cache & request again
+        cache.put("pear", 4);
+        assert_eq!(*cache.get(&"pear").unwrap(), 4);
+        assert_eq!(*cache.get(&"banana").unwrap(), 2);
+        assert!(cache.get(&"apple").is_none());
+
+        // Reset cached value
+        {
+            let v = cache.get_mut(&"banana").unwrap();
+            *v = 6;
+        }
+        assert_eq!(*cache.get(&"banana").unwrap(), 6);
+    }
 
     #[test]
     fn test_rayon_iter() {
