@@ -29,11 +29,35 @@ Project contents consist of multiple components which build on top of each other
 **ssb_parser** &rarr; **ssb_renderer** &rarr; **ssb_filter**
 
 ## ssb_parser
-*TODO*
+Parser of text in ssb format.
+
+* **Reads** from file or byte stream
+* **Validates** content
+* **Packs** data into ordered structures
+* Allows **serialization** in other format (like JSON)
+* Relevant for **rust developers**
+
+See sub-project [ssb_parser](https://github.com/substation-beta/ssb_implementation/tree/master/ssb_parser).
+
 ## ssb_renderer
-*TODO*
+2d graphics software renderer for ssb format.
+
+* Builds upon **ssb_parser** for input processing
+* **Renders** 2-dimensional graphics on system memory buffers
+* **High-performance** by efficient hardware workload
+* Relevant for **rust developers**
+
+See sub-project [ssb_renderer](https://github.com/substation-beta/ssb_implementation/tree/master/ssb_renderer).
+
 ## ssb_filter
-*TODO*
+Interfaces to ssb rendering for video frameserving and language wrapping.
+
+* Builds upon **ssb_renderer** for graphics rendering (including **ssb_parser** for input processing)
+* **Plugin** binary for immediate use in popular frameservers
+* **C API** provides access by [FFI](https://en.wikipedia.org/wiki/Foreign_function_interface)
+* Relevant for **c developers** and **frameserver users**
+
+See sub-project [ssb_filter](https://github.com/substation-beta/ssb_implementation/tree/master/ssb_filter).
 
 # Getting started
 *TODO*
@@ -59,5 +83,3 @@ For more, see [License](https://github.com/substation-beta/ssb_implementation/bl
 
 # Acknowledgment
 * [ASS (Advanced Substation Alpha)](https://en.wikipedia.org/wiki/SubStation_Alpha#Advanced_SubStation_Alpha)
-
-*TODO*

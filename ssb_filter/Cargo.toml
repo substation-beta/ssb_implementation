@@ -3,7 +3,7 @@
 name = "ssb_filter"
 version = "0.0.0"
 authors = ["Christoph 'Youka' Spanknebel"]
-description = "Video filter implementation of ssb_renderer."
+description = "Interfaces to ssb rendering for video frameserving and language bridges."
 # Project type
 workspace = ".."
 edition = "2018"

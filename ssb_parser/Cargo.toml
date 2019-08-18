@@ -3,7 +3,7 @@
 name = "ssb_parser"
 version = "0.3.0"
 authors = ["Christoph 'Youka' Spanknebel"]
-description = "Parser for *.ssb files."
+description = "Parser of text in ssb format."
 # Project type
 workspace = ".."
 edition = "2018"

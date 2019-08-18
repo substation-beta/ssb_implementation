@@ -3,7 +3,7 @@
 name = "ssb_renderer"
 version = "0.0.1"
 authors = ["Christoph 'Youka' Spanknebel"]
-description = "Renderer of ssb_parser results on images."
+description = "2d graphics software renderer for ssb format."
 # Project type
 workspace = ".."
 edition = "2018"
