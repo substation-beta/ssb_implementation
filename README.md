@@ -69,7 +69,24 @@ See sub-project [ssb_filter](https://github.com/substation-beta/ssb_implementati
 *TODO*
 
 # Building
-*TODO*
+All components are projects inside a **rust** workspace - the ssb_implementation repository. Build tool cargo (part of rust toolchain) already manages dependencies. Enabling features may require additional software installed on your operating system.
+
+1) Install [rust](https://www.rust-lang.org/tools/install)
+2) Get [ssb_implementation](https://github.com/substation-beta/ssb_implementation)
+	1. [HTTP download](https://github.com/substation-beta/ssb_implementation/archive/master.zip)
+	2. Git clone: `git clone https://github.com/substation-beta/ssb_implementation.git`
+3) Change current directory to new `./ssb_implementation` (git) or `./ssb_implementation-master` (http)
+4) Install software for [features](https://doc.rust-lang.org/cargo/reference/manifest.html#usage-in-end-products)
+	1) [Vapoursynth](http://www.vapoursynth.com/doc/installation.html) for [ssb_filter](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_filter/Cargo.toml) *vapoursynth-interface* (! on by default !)
+    2) [OpenCL](https://developer.nvidia.com/cuda-downloads) for [ssb_renderer](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_renderer/Cargo.toml) *gpgpu* (passed down by [ssb_filter](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_filter/Cargo.toml) as well)
+5) Build components by [cargo](https://doc.rust-lang.org/cargo/commands/index.html)
+	1) Libraries with release profile: `cargo build --release`
+    2) Documentation without dependencies: `cargo doc --no-deps`
+6) Build output can be found in `./target/release/` (libraries) and `./target/doc` (documentation)
+
+For references see continuous-integration scripts:
+* [linux](https://github.com/substation-beta/ssb_implementation/blob/master/.travis.yml)
+* [windows](https://github.com/substation-beta/ssb_implementation/blob/master/.appveyor.yml)
 
 # Contributing
 We welcome contributers but insist on working by our rules. The principle **quality > quantity** has to be followed through every part of this project.
