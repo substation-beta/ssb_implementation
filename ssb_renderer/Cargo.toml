@@ -36,8 +36,6 @@ name = "rendering_benches"
 harness = false
 
 [features]
-# No features used by default
-default = []
 # Acceleration by General-Purpose-GPU
 gpgpu = ["ocl"]
 

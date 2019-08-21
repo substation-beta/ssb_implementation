@@ -1,6 +1,7 @@
 # v0.3.1
 * updated dependencies
-* require rust 1.37+ (updated sources to new features)
+* require rust 1.37+ (updated sources to new rust features)
+* disabled serialization feature by default
 
 # v0.3.0
 * updated dependencies

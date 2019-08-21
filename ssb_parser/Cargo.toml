@@ -30,8 +30,6 @@ crate-type = ["rlib"]
 doctest = false
 
 [features]
-# All features used by default
-default = ["serialization"]
 # Serialization
 serialization = ["serde"]
 
