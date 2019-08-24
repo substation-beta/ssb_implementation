@@ -1,8 +1,20 @@
 # Contributing to Substation Beta implementation
 *TODO*
 
-## Introduction
+## Table of contents
 *TODO*
 
-## Code of Conduct
+## Expectations
+*TODO*
+
+## No-Go
+*TODO*
+
+## Style guideline
+*TODO*
+
+## How to contribute
+*TODO*
+
+## Community
 *TODO*
