@@ -61,7 +61,7 @@ libloading = "~0.5.2"   # https://crates.io/crates/libloading
 
 [build-dependencies]
 # C header generation
-cbindgen = "~0.9.0" # https://crates.io/crates/cbindgen
+cbindgen = "~0.9.1" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest
