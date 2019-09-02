@@ -15,6 +15,6 @@ pub mod types;
 /// High-level rendering interface.
 pub mod rendering;
 
-// Re-exports (with interfaces required by public users).
+// Re-exports (interfaces required by public users).
 pub use ssb_parser;
 pub use g2d::image;

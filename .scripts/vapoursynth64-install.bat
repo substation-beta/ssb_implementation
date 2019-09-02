@@ -7,9 +7,9 @@ set PATH=%PYTHON%;%PATH%
 python -VV
 :: VAPOURSYNTH
 :: Load vapoursynth R47
-curl -fsSL -o VapourSynth64-Portable-R47.7z https://github.com/vapoursynth/vapoursynth/releases/download/R47/VapourSynth64-Portable-R47.7z
+curl -fsSL -o VapourSynth64-Portable-R47.2.7z https://github.com/vapoursynth/vapoursynth/releases/download/R47.2/VapourSynth64-Portable-R47.2.7z
 :: Extract vapoursynth archive into python
-7z x VapourSynth64-Portable-R47.7z -o%PYTHON% -y
+7z x VapourSynth64-Portable-R47.2.7z -o%PYTHON% -y
 :: Show vapoursynth version
 python -c "import vapoursynth; print(vapoursynth.core.version())"
 :: Add compiler access to vapoursynth sdk
