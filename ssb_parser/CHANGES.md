@@ -1,3 +1,6 @@
+# v0.3.2
+
+
 # v0.3.1
 * updated dependencies
 * require rust 1.37+ (updated sources to new rust features)
