@@ -49,7 +49,7 @@ failure = {version = "~0.1.5", optional = true}   # https://crates.io/crates/fai
 # Interface frameworks
 libc = "~0.2.62"    # https://crates.io/crates/libc
 vapoursynth = {version = "~0.2.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
-gstreamer = {version = "~0.14.4", optional = true}   # https://crates.io/crates/gstreamer
+gstreamer = {version = "~0.14.5", optional = true}   # https://crates.io/crates/gstreamer
 
 [target.'cfg(windows)'.dependencies]
 # Interface frameworks
