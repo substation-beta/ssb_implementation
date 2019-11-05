@@ -49,7 +49,7 @@ glyph_brush_layout = "~0.1.8"   # https://crates.io/crates/glyph_brush_layout
 # Math expressions
 meval = "~0.2.0"  # https://crates.io/crates/meval
 # Acceleration
-lru = "~0.2.0" # https://crates.io/crates/lru
+lru = "~0.4.0" # https://crates.io/crates/lru
 rayon = "~1.2.0"    # https://crates.io/crates/rayon
 ocl = {version = "~0.19.3", optional = true} # https://crates.io/crates/ocl
 
@@ -57,4 +57,4 @@ ocl = {version = "~0.19.3", optional = true} # https://crates.io/crates/ocl
 # Profiling
 microbench = "~0.5.0"   # https://crates.io/crates/microbench
 # Render target
-image = "~0.22.2"   # https://crates.io/crates/image
+image = "~0.22.3"   # https://crates.io/crates/image
