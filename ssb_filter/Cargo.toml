@@ -47,7 +47,7 @@ ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
 failure = {version = "~0.1.6", optional = true}   # https://crates.io/crates/failure
 # Interface frameworks
-libc = "~0.2.65"    # https://crates.io/crates/libc
+libc = "~0.2.66"    # https://crates.io/crates/libc
 vapoursynth = {version = "~0.3.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
 gstreamer = {version = "~0.14.5", optional = true}   # https://crates.io/crates/gstreamer
 
@@ -61,7 +61,7 @@ libloading = "~0.5.2"   # https://crates.io/crates/libloading
 
 [build-dependencies]
 # C header generation
-cbindgen = "~0.10.0" # https://crates.io/crates/cbindgen
+cbindgen = "~0.11.1" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest

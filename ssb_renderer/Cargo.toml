@@ -44,12 +44,12 @@ gpgpu = ["ocl"]
 ssb_parser = {path = "../ssb_parser", version = "0.3.1", default-features = false}
 # Fonts & text
 font-loader = "~0.8.0"   # https://crates.io/crates/font-loader
-rusttype = "~0.8.1"  # https://crates.io/crates/rusttype
+rusttype = "~0.8.2"  # https://crates.io/crates/rusttype
 glyph_brush_layout = "~0.1.8"   # https://crates.io/crates/glyph_brush_layout
 # Math expressions
 meval = "~0.2.0"  # https://crates.io/crates/meval
 # Acceleration
-lru = "~0.4.0" # https://crates.io/crates/lru
+lru = "~0.4.3" # https://crates.io/crates/lru
 rayon = "~1.2.1"    # https://crates.io/crates/rayon
 ocl = {version = "~0.19.3", optional = true} # https://crates.io/crates/ocl
 
