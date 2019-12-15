@@ -1,5 +1,6 @@
 # v0.3.2
-
+* updated dependencies
+* error construction private to crate now
 
 # v0.3.1
 * updated dependencies

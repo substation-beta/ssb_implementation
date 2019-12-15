@@ -16,7 +16,7 @@ pub struct GraphicsError {
 }
 impl GraphicsError {
     /// New error with message.
-    pub fn new(msg: &str) -> Self {
+    pub(crate) fn new(msg: &str) -> Self {
         Self {
             msg: msg.to_owned()
         }

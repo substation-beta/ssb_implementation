@@ -18,14 +18,14 @@ pub struct RenderingError {
 }
 impl RenderingError {
     /// New error with message only.
-    pub fn new(msg: &str) -> Self {
+    pub(crate) fn new(msg: &str) -> Self {
         Self {
             msg: msg.to_owned(),
             src: None
         }
     }
     /// New error with message and source error.
-    pub fn new_with_source<E>(msg: &str, src: E) -> Self
+    pub(crate) fn new_with_source<E>(msg: &str, src: E) -> Self
         where E: Error + 'static {
         Self {
             msg: msg.to_owned(),
