@@ -40,7 +40,7 @@ base64 = "~0.11.0" # https://crates.io/crates/base64
 # Utilities
 lazy_static = "~1.4.0"   # https://crates.io/crates/lazy_static
 # Serialization
-serde = {version = "~1.0.103", features = ["derive"], optional = true}  # https://crates.io/crates/serde
+serde = {version = "~1.0.104", features = ["derive"], optional = true}  # https://crates.io/crates/serde
 
 [dev-dependencies]
 # Serialization
