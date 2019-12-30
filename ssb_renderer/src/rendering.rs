@@ -1,7 +1,7 @@
 // Imports
 use ssb_parser::{
-    data::SsbRender,
-    types::ssb::EventTrigger
+    SsbRender,
+    objects::ssb_objects::EventTrigger
 };
 use super::{
     g2d::image::ImageView,

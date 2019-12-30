@@ -4,8 +4,9 @@ use std::{
     time::Duration
 };
 use ssb_parser::{
-    data::{Ssb,SsbRender},
-    types::ssb::{Event,EventTrigger}
+    Ssb,
+    SsbRender,
+    objects::ssb_objects::{Event,EventTrigger}
 };
 use ssb_renderer::{
     image::{ColorType,ImageView},
@@ -40,7 +41,7 @@ fn main() {
             RenderTrigger::Id("test")
         ).expect("Image rendering mustn't fail!");
         let _img = RgbImage::from_raw(width, height, data).expect("Image rebuild mustn't fail!");
-        
+
 
     });
 }

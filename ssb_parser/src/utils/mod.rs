@@ -1,6 +1,4 @@
-// Constants and statics
-pub mod constants;
-// Functions
+// Constant pattern for parsing.
+pub mod pattern;
+// Functions to handle common data.
 pub mod functions;
-// Enums for states
-pub mod state;

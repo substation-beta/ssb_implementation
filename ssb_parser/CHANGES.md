@@ -1,6 +1,8 @@
-# v0.3.2
+# v0.4.0
 * updated dependencies
 * error construction private to crate now
+* refactoring of public API
+* changed minimal rust version to 1.40.0
 
 # v0.3.1
 * updated dependencies

@@ -1,7 +1,9 @@
 // Imports
-use std::fmt;
-use std::convert::TryFrom;
-use super::objects::EventObject;
+use std::{
+    convert::TryFrom,
+    fmt
+};
+use super::event_objects::EventObject;
 
 
 // Data minor types

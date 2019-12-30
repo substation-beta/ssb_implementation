@@ -1,7 +1,7 @@
 mod code_structure_tests {
     // Imports
     use std::mem::size_of;
-    use ssb_parser::types::objects::EventObject;
+    use ssb_parser::objects::event_objects::EventObject;
 
     #[test]
     fn test_sizes() {

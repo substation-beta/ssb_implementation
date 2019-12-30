@@ -17,7 +17,7 @@ mod serialization_tests {
 
     #[test]
     fn test_ssb() {
-        use ssb_parser::data::Ssb;
+        use ssb_parser::Ssb;
         // Serialize
         let ssb_default = Ssb::default();
         let ssb_json = serde_json::to_string(&ssb_default).expect("Ssb serialization must work!");

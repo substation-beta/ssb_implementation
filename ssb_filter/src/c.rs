@@ -1,7 +1,7 @@
 // Imports
 use libc::*;
 use ssb_renderer::{
-    ssb_parser::data::{Ssb, SsbRender},
+    ssb_parser::{Ssb, SsbRender},
     rendering::SsbRenderer,
     image::{ColorType, ImageView},
     types::parameter::RenderTrigger
@@ -42,11 +42,11 @@ pub extern fn ssb_version() -> *const c_char {
 }
 
 /// Create renderer instance by file.
-/// 
+///
 /// **file** mustn't be *null*.
-/// 
+///
 /// **error_message** can be *null*.
-/// 
+///
 /// Returns renderer instance or *null*.
 #[no_mangle]
 pub extern fn ssb_new_renderer_by_file(file: *const c_char, error_message: *mut c_char, error_message_capacity: c_ushort) -> *mut c_void {
@@ -71,11 +71,11 @@ fn ssb_new_renderer_inner<R: BufRead>(script: R) -> Result<SsbRenderer, Box::<dy
 }
 
 /// Create renderer instance by script content.
-/// 
+///
 /// **script** mustn't be *null*.
-/// 
+///
 /// **error_message** can be *null*.
-/// 
+///
 /// Returns renderer instance or *null*.
 #[no_mangle]
 pub extern fn ssb_new_renderer_by_script(script: *const c_char, error_message: *mut c_char, error_message_capacity: c_ushort) -> *mut c_void {
@@ -94,7 +94,7 @@ fn ssb_new_renderer_by_script_inner(script: *const c_char) -> Result<SsbRenderer
 }
 
 /// Destroy renderer instance.
-/// 
+///
 /// **renderer** can be *null*.
 #[no_mangle]
 pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
@@ -102,15 +102,15 @@ pub extern fn ssb_destroy_renderer(renderer: *mut c_void) {
 }
 
 /// Render on image by time.
-/// 
+///
 /// **renderer** can be *null*.
-/// 
+///
 /// **color_type** mustn't be *null*.
-/// 
+///
 /// **planes** mustn't be *null* and contains enough pointers with enough data for given **color_type**.
-/// 
+///
 /// **error_message** can be *null*.
-/// 
+///
 /// Returns 0 on success, 1 on error.
 #[no_mangle]
 pub extern fn ssb_render_by_time(
@@ -168,17 +168,17 @@ fn ssb_render_inner(
 }
 
 /// Render on image by id.
-/// 
+///
 /// **renderer** can be *null*.
-/// 
+///
 /// **color_type** mustn't be *null*.
-/// 
+///
 /// **planes** mustn't be *null* and contains enough pointers with enough data for given **color_type**.
-/// 
+///
 /// **id** mustn't be *null*.
-/// 
+///
 /// **error_message** can be *null*.
-/// 
+///
 /// Returns 0 on success, 1 on error.
 #[no_mangle]
 pub extern fn ssb_render_by_id(

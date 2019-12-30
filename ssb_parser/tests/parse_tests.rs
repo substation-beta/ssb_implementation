@@ -1,11 +1,12 @@
 mod parse_tests {
     // Imports
     use ssb_parser::{
-        types::{
-            ssb::*,
-            objects::*
+        objects::{
+            ssb_objects::*,
+            event_objects::*
         },
-        data::{Ssb, SsbRender}
+        Ssb,
+        SsbRender
     };
     use std::{
         collections::HashMap,

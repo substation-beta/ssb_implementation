@@ -6,7 +6,7 @@
 //!     fs::File,
 //!     io::{BufReader,Cursor}
 //! };
-//! use ssb_parser::data::{Ssb,SsbRender};
+//! use ssb_parser::{Ssb,SsbRender};
 //! // Data
 //! let ssb_reader1 = Cursor::new("...");
 //! let ssb_reader2 = BufReader::new(File::open("/foo/bar.ssb").unwrap());
@@ -25,9 +25,19 @@
 )]
 
 
-/// Minor types for data.
-pub mod types;
+/// Objects in SSB.
+pub mod objects;
+
+// States for SSB processing.
+mod state;
+pub use state::error::ParseError;
+
 // Internal utility structures & functions for data processing.
 mod utils;
-/// Data processors and main storages.
-pub mod data;
+
+// Parsers for different levels of SSB data.
+mod parsers;
+pub use parsers::{
+    ssb::Ssb,
+    ssb_render::SsbRender
+};
