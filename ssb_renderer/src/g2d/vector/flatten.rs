@@ -5,14 +5,6 @@ use super::{
 };
 
 
-// Flatten curve to polyline
-pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {
-
-    // TODO: flatten by fast-precise algorithm with tolerance
-    unimplemented!()
-
-}
-
 // Flatten arc to polyline
 const ARC_LINE_LENGTH: Degree = 0.75;
 pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Vec<Point> {
@@ -20,10 +12,9 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     if start_point == center_point || angle == 0.0 {
         return vec![start_point];
     }
-    // Vector between points
-    let vector = start_point - center_point;
+    // Vector between points & angle as radians
+    let (vector, angle_rad) = (start_point - center_point, angle.to_radians());
     // Number of required lines
-    let angle_rad = angle.to_radians();
     let lines_n = angle_rad.abs() * vector.len() as Degree / ARC_LINE_LENGTH;
     let lines_n_ceil = lines_n.ceil();
     // Points buffer
@@ -32,10 +23,8 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     points.push(start_point);
     // Add intermediate points
     if lines_n >= 1.0 {
-        let mut vector_part = vector;
-        let angle_rad_part = angle_rad / lines_n_ceil;
-        let angle_sin_part = angle_rad_part.sin();
-        let angle_cos_part = angle_rad_part.cos();
+        let (mut vector_part, angle_rad_part) = (vector, angle_rad / lines_n_ceil);
+        let (angle_sin_part, angle_cos_part) = (angle_rad_part.sin(), angle_rad_part.cos());
         for _ in 1..lines_n_ceil as usize {
             points.push(center_point + {
                 vector_part = Point {
@@ -48,8 +37,7 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     }
     // Add end point
     if lines_n_ceil > lines_n {
-        let angle_sin = angle_rad.sin();
-        let angle_cos = angle_rad.cos();
+        let (angle_sin, angle_cos) = (angle_rad.sin(), angle_rad.cos());
         points.push(center_point + Point {
             x: (vector.x as Degree * angle_cos - vector.y as Degree * angle_sin) as Coordinate,
             y: (vector.x as Degree * angle_sin + vector.y as Degree * angle_cos) as Coordinate
@@ -59,17 +47,19 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     points
 }
 
+// Flatten curve to polyline
+const CURVE_DEVIATION_LENGTH: Degree = 0.5;
+pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {
+
+    // TODO: flatten by fast-precise algorithm with tolerance
+    unimplemented!()
+
+}
+
 // Tests
 #[cfg(test)]
 mod tests {
     use super::{Point, flatten_curve, flatten_arc};
-
-    #[test]
-    fn flat_curve() {
-
-        // TODO
-
-    }
 
     #[test]
     fn flat_arc() {
@@ -88,7 +78,14 @@ mod tests {
             2
         );
         // Complex
-        let points = flatten_arc(Point {x: 0.0, y: -4.0}, Point {x: 0.0, y: -2.0}, 90.0);
+        let points = flatten_arc(Point {x: 0.0, y: -4.0}, Point {x: 0.0, y: -2.0}, -270.0);
         assert_eq!(points.last(), Some(&Point{x: 2.0, y: -2.0}), "Points: {:?}", points);
+    }
+
+    #[test]
+    fn flat_curve() {
+
+        // TODO
+
     }
 }
