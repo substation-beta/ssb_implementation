@@ -1,5 +1,3 @@
-// Base graphic types.
-pub mod base;
 // Error types.
 pub mod error;
 

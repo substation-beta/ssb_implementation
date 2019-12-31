@@ -1,6 +1,9 @@
 // Imports
-use crate::g2d::base::{Degree, Point};
-use super::flatten::{flatten_curve, flatten_arc};
+use super::{
+    types::Degree,
+    point::Point,
+    flatten::{flatten_curve, flatten_arc}
+};
 
 
 // PATH BASE
