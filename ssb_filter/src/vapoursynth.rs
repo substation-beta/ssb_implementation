@@ -12,9 +12,9 @@ use vapoursynth::{
 use failure::{Error, err_msg, format_err, bail};
 use ssb_renderer::{
     ssb_parser::{Ssb,SsbRender},
-    rendering::SsbRenderer,
     image::{ColorType,ImageView},
-    types::parameter::RenderTrigger
+    RenderTrigger,
+    SsbRenderer
 };
 use std::{
     io::{BufRead,BufReader,Cursor},

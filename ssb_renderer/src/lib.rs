@@ -10,11 +10,10 @@
 
 // Rendering backend for general 2D graphics.
 mod g2d;
-/// Supportive types for rendering.
-pub mod types;
-/// High-level rendering interface.
-pub mod rendering;
+pub use g2d::raster::image;
+// Rendering frontend for SSB output.
+mod ssb;
+pub use ssb::{error::RenderingError,rendering::*};
 
 // Re-exports (interfaces required by public users).
 pub use ssb_parser;
-pub use g2d::image;

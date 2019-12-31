@@ -2,9 +2,9 @@
 use libc::*;
 use ssb_renderer::{
     ssb_parser::{Ssb, SsbRender},
-    rendering::SsbRenderer,
     image::{ColorType, ImageView},
-    types::parameter::RenderTrigger
+    RenderTrigger,
+    SsbRenderer
 };
 use std::{
     convert::TryFrom,

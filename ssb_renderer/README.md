@@ -14,3 +14,5 @@
 * GPGPU (OpenCL, Cuda) option
 
 [Changes](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_renderer/CHANGES.md)
+
+_WORK IN PROGRESS_

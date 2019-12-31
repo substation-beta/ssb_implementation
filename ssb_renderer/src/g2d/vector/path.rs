@@ -1,8 +1,7 @@
 // Imports
-use super::{
-    base::{Degree, Point},
-    flatten::{flatten_curve, flatten_arc}
-};
+use crate::g2d::base::{Degree, Point};
+use super::flatten::{flatten_curve, flatten_arc};
+
 
 // PATH BASE
 trait PathBase<SegmentType> : Default + AsRef<[SegmentType]> {
@@ -155,5 +154,5 @@ impl Path {
 mod tests {
 
     // TODO: test all cases
-    
+
 }

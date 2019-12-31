@@ -3,14 +3,16 @@ use ssb_parser::{
     SsbRender,
     objects::ssb_objects::EventTrigger
 };
-use super::{
-    g2d::image::ImageView,
-    types::{
-        error::RenderingError,
-        parameter::RenderTrigger
-    }
-};
+use crate::g2d::raster::image::ImageView;
+use super::error::RenderingError;
 
+
+/// Condition to trigger rendering on specific image.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum RenderTrigger<'a> {
+    Id(&'a str),
+    Time(u32)
+}
 
 /// Renderer for ssb data on images.
 #[derive(Debug, PartialEq, Clone)]

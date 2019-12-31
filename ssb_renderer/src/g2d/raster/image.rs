@@ -1,5 +1,5 @@
 // Imports
-use super::error::GraphicsError;
+use crate::g2d::error::GraphicsError;
 
 
 /// Color type for image data.

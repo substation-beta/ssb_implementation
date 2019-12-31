@@ -10,11 +10,11 @@ use ssb_parser::{
 };
 use ssb_renderer::{
     image::{ColorType,ImageView},
-    types::parameter::RenderTrigger,
-    rendering::SsbRenderer
+    RenderTrigger,
+    SsbRenderer
 };
 use image::RgbImage;
-use microbench::{bench, Options};
+use microbench::{bench,Options};
 
 
 // Benchmark

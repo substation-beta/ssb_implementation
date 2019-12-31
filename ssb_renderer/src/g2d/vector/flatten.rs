@@ -1,5 +1,5 @@
 // Imports
-use super::base::{Degree, Point};
+use crate::g2d::base::{Degree, Point};
 
 // Flatten curve to polyline
 pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {

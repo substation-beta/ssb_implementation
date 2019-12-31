@@ -2,9 +2,8 @@
 pub mod base;
 // Error types.
 pub mod error;
-/// Image components for rastering.
-pub mod image;
-// Path flattening algorithm.
-mod flatten;
-// Graphics path processing.
-pub mod path;
+
+// Types & operations for vector graphics.
+pub mod vector;
+// Types & operations for raster graphics (building upon vector graphics).
+pub mod raster;
