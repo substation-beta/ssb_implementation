@@ -9,6 +9,7 @@ pub struct Point {
     pub x: Coordinate,
     pub y: Coordinate
 }
+
 // Point math
 impl Add for Point {
     type Output = Self;
