@@ -66,7 +66,7 @@ impl Error for ParseError {
 }
 impl From<std::io::Error> for ParseError {
     fn from(err: std::io::Error) -> Self {
-        Self::new(&err.to_string())
+        Self::new_with_source("IO error!", err)
     }
 }
 
@@ -99,6 +99,6 @@ mod tests {
     #[test]
     fn parse_error_from_io() {
         use std::io::{Error, ErrorKind};
-        assert_eq!(ParseError::from(Error::new(ErrorKind::NotFound, "Freddy not found!")).to_string(), "Freddy not found!".to_owned());
+        assert_eq!(ParseError::from(Error::new(ErrorKind::NotFound, "Freddy not found!")).to_string(), "IO error!\nFreddy not found!".to_owned());
     }
 }

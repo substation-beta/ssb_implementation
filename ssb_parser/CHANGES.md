@@ -1,3 +1,6 @@
+# v0.4.1
+* improved error messages by inheritance
+
 # v0.4.0
 * updated dependencies
 * error construction private to crate now

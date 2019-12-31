@@ -46,12 +46,12 @@ impl Error for RenderingError {
 }
 impl From<std::io::Error> for RenderingError {
     fn from(err: std::io::Error) -> Self {
-        Self::new(&err.to_string())
+        Self::new_with_source("IO error!", err)
     }
 }
 impl From<GraphicsError> for RenderingError {
     fn from(err: GraphicsError) -> Self {
-        Self::new(&err.to_string())
+        Self::new_with_source("Graphics error!", err)
     }
 }
 
@@ -74,6 +74,6 @@ mod tests {
     #[test]
     fn rendering_error_from_io() {
         use std::io::{Error, ErrorKind};
-        assert_eq!(RenderingError::from(Error::new(ErrorKind::PermissionDenied, "No access on filesystem!")).to_string(), "No access on filesystem!".to_owned());
+        assert_eq!(RenderingError::from(Error::new(ErrorKind::PermissionDenied, "No access on filesystem!")).to_string(), "IO error!\nNo access on filesystem!".to_owned());
     }
 }
