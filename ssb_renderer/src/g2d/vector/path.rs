@@ -57,7 +57,7 @@ impl PathBase<FlatPathSegment> for FlatPath {
 impl From<Path> for FlatPath {
     fn from(path: Path) -> Self {
         // Result buffer
-        let mut flat_segments = Vec::with_capacity(path.as_ref().len());
+        let mut flat_segments = Vec::with_capacity(path.segments.len());
         // Flatten path segments
         path.segments.into_iter().fold(None, |last_point, segment| {
             match segment {
@@ -73,21 +73,17 @@ impl From<Path> for FlatPath {
                 }
                 // Flatten curve
                 PathSegment::CurveTo(control_point1, control_point2, end_point) => {
-                    let curve_points = flatten_curve(last_point.unwrap_or_default(), control_point1, control_point2, end_point);
-
-                    // TODO: points to lines
-                    unimplemented!();
-
-                    Some(end_point)
+                    flatten_curve(last_point.unwrap_or_default(), control_point1, control_point2, end_point).into_iter()
+                        .skip(1)
+                        .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
+                        .last().map_or(last_point, |point| Some(point))
                 }
                 // Flatten arc
                 PathSegment::ArcBy(center_point, angle) => {
-                    let arc_points = flatten_arc(last_point.unwrap_or_default(), center_point, angle);
-
-                    // TODO: points to lines
-                    unimplemented!();
-
-                    arc_points.last().map_or(last_point, |point| Some(*point))
+                    flatten_arc(last_point.unwrap_or_default(), center_point, angle).into_iter()
+                        .skip(1)
+                        .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
+                        .last().map_or(last_point, |point| Some(point))
                 }
             }
         });
