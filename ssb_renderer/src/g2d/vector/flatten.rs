@@ -75,22 +75,21 @@ fn split_curve_mid(p: [Point;4]) -> ([Point;4], [Point;4]) {
         [p1234, p123, p23, p[3]]
     )
 }
-fn flatten_curve_recursive(out: &mut Vec<Point>, p: [Point;4]) {
-    // Flat enough = line
-    if is_curve_flat(&p) {
-        out.push(p[3]);
-    } else {
-        // Try again with subdivided curve
-        let (curve1, curve2) = split_curve_mid(p);
-        flatten_curve_recursive(out, curve1);
-        flatten_curve_recursive(out, curve2);
-    }
-}
 pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {
-    let mut out = vec![start_point];
-    flatten_curve_recursive(&mut out, [start_point, control_point1, control_point2, end_point]);
-    // Memory vs. performance: out.shrink_to_fit();
-    out
+    let mut points = vec![start_point];
+    let mut curves = vec![[start_point, control_point1, control_point2, end_point]];
+    while let Some(curve) = curves.pop() {
+        // Flat enough = line
+        if is_curve_flat(&curve) {
+            points.push(curve[3]);
+        } else {
+            // Try again with subdivided curve
+            let (curve1, curve2) = split_curve_mid(curve);
+            curves.push(curve2);
+            curves.push(curve1);
+        }
+    }
+    points
 }
 
 
