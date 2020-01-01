@@ -17,7 +17,7 @@ trait PathBase<SegmentType> : Default + AsRef<[SegmentType]> {
 
 // FLAT PATH
 // Segment of flat path
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum FlatPathSegment {
     MoveTo(Point),
     LineTo(Point),
@@ -25,7 +25,7 @@ pub enum FlatPathSegment {
 }
 
 // Flat path of 2d geometry
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct FlatPath {
     segments: Vec<FlatPathSegment>
 }
@@ -94,14 +94,14 @@ impl From<Path> for FlatPath {
 
 // PATH
 // Segment of path
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum PathSegment {
     Flat(FlatPathSegment),
     CurveTo(Point, Point, Point),   // Control points + end point
     ArcBy(Point, Degree),  // Orientation/center point + angle
 }
 // Path of 2d geometry
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Path {
     segments: Vec<PathSegment>
 }
@@ -151,7 +151,48 @@ impl Path {
 // TESTS
 #[cfg(test)]
 mod tests {
+    use super::{PathBase,Point,Path,FlatPath,PathSegment,FlatPathSegment};
 
-    // TODO: test all cases
+    fn create_path() -> Path {
+        let mut path = Path::default();
+        path.move_to(Point {x: 0.0, y: 50.0})
+            .line_to(Point {x: 0.0, y: 0.0})
+            .arc_by(Point {x: 0.0, y: 50.0}, 180.0)
+            .curve_to(Point {x: 35.0, y: 90.0}, Point {x: -75.0, y: 60.0}, Point {x: 0.0, y: 50.0})
+            .close();
+        path
+    }
 
+    #[test]
+    fn path_build() {
+        assert_eq!(
+            create_path().as_ref(),
+            &[
+                PathSegment::Flat(FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})),
+                PathSegment::Flat(FlatPathSegment::LineTo(Point { x: 0.0, y: 0.0 })),
+                PathSegment::ArcBy(Point { x: 0.0, y: 50.0 }, 180.0),
+                PathSegment::CurveTo(Point { x: 35.0, y: 90.0 }, Point { x: -75.0, y: 60.0 }, Point { x: 0.0, y: 50.0 }),
+                PathSegment::Flat(FlatPathSegment::Close)
+            ]
+        );
+    }
+
+    #[test]
+    fn path_flatten() {
+        let flat_path = FlatPath::from(create_path());
+        let flat_path_segments = flat_path.as_ref();
+        assert_eq!(flat_path_segments.first(), Some(&FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})));
+        assert_eq!(flat_path_segments.get(1), Some(&FlatPathSegment::LineTo(Point {x: 0.0, y: 0.0})));
+        assert_eq!(flat_path_segments.last(), Some(&FlatPathSegment::Close));
+        assert!(
+            flat_path_segments.into_iter()
+                .skip(2)
+                .take(flat_path_segments.len()-3)
+                .all(|segment| match segment {
+                    FlatPathSegment::LineTo(point) if (-70.0..50.0).contains(&point.x) && (0.0..100.0).contains(&point.y) => true,
+                    _ => false
+                }),
+            "Flattening curves & arcs failed: {:?}", flat_path
+        );
+    }
 }
