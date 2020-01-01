@@ -1,6 +1,6 @@
 // Imports
 use super::types::Coordinate;
-use std::ops::{Add,Sub};
+use std::ops::{Add,Sub,Mul};
 
 
 // Point of path segment
@@ -26,6 +26,15 @@ impl Sub for Point {
         Self {
             x: self.x - other.x,
             y: self.y - other.y
+        }
+    }
+}
+impl Mul<Coordinate> for Point {
+    type Output = Self;
+    fn mul(self, factor: Coordinate) -> Self::Output {
+        Self {
+            x: self.x * factor,
+            y: self.y * factor
         }
     }
 }

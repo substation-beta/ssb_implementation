@@ -48,13 +48,51 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
 }
 
 // Flatten curve to polyline
-const CURVE_DEVIATION_LENGTH: Degree = 0.5;
-pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {
-
-    // TODO: flatten by fast-precise algorithm with tolerance
-    unimplemented!()
-
+const CURVE_DEVIATION_LENGTH: Coordinate = 0.25;
+#[inline]
+fn is_curve_flat(p: &[Point;4]) -> bool {
+    (p[1] - p[0]).len() + (p[2] - p[1]).len() + (p[3] - p[2]).len()
+    <
+    (p[3] - p[0]).len() + CURVE_DEVIATION_LENGTH
 }
+#[inline]
+fn split_curve_mid(p: [Point;4]) -> ([Point;4], [Point;4]) {
+    // Calculate intermediate points
+    const T: Coordinate = 0.5;
+    let (p01, p12, p23) = (
+        p[0] + (p[1] - p[0]) * T,
+        p[1] + (p[2] - p[1]) * T,
+        p[2] + (p[3] - p[2]) * T
+    );
+    let (p012, p123) = (
+        p01 + (p12 - p01) * T,
+        p12 + (p23 - p12) * T
+    );
+    let p1234 = p012 + (p123 - p012) * T;
+    // Assemble both curves
+    (
+        [p[0], p01, p012, p1234],
+        [p1234, p123, p23, p[3]]
+    )
+}
+fn flatten_curve_recursive(out: &mut Vec<Point>, p: [Point;4]) {
+    // Flat enough = line
+    if is_curve_flat(&p) {
+        out.push(p[3]);
+    } else {
+        // Try again with subdivided curve
+        let (curve1, curve2) = split_curve_mid(p);
+        flatten_curve_recursive(out, curve1);
+        flatten_curve_recursive(out, curve2);
+    }
+}
+pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: Point, end_point: Point) -> Vec<Point> {
+    let mut out = vec![start_point];
+    flatten_curve_recursive(&mut out, [start_point, control_point1, control_point2, end_point]);
+    // Memory vs. performance: out.shrink_to_fit();
+    out
+}
+
 
 // Tests
 #[cfg(test)]
@@ -84,8 +122,13 @@ mod tests {
 
     #[test]
     fn flat_curve() {
-
-        // TODO
-
+        // Already flat/line
+        assert_eq!(
+            flatten_curve(Point {x: -2.0, y: 7.0}, Point {x: -1.0, y: 7.0}, Point {x: 0.0, y: 7.0}, Point {x: 1.0, y: 7.0}),
+            vec![Point {x: -2.0, y: 7.0}, Point {x: 1.0, y: 7.0}]
+        );
+        // Complex
+        let points = flatten_curve(Point {x: -5.0, y: 0.0}, Point {x: 0.0, y: -4.0}, Point {x: 5.0, y: 6.0}, Point {x: 10.0, y: 1.0});
+        assert!(points.len() > 5, "Points: {:?}", points);
     }
 }
