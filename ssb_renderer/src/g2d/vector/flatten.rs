@@ -13,7 +13,7 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
         return vec![start_point];
     }
     // Number of required lines
-    let (mut vector, mut angle_rad) = (start_point - center_point, angle.to_radians());
+    let (vector, mut angle_rad) = (start_point - center_point, angle.to_radians());
     let lines_n = (angle_rad.abs() * vector.len() as Degree / ARC_LINE_LENGTH).ceil() as usize;
     // Points buffer with start point
     let mut points = Vec::with_capacity(1 + lines_n);
@@ -21,13 +21,17 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     // Add remaining points
     angle_rad /= lines_n as Degree;
     let (angle_sin, angle_cos) = (angle_rad.sin(), angle_rad.cos());
+    let mut precise_vector = (vector.x as Degree, vector.y as Degree);
     for _ in 0..lines_n {
         points.push(center_point + {
-            vector = Point {
-                x: (vector.x as Degree * angle_cos - vector.y as Degree * angle_sin) as Coordinate,
-                y: (vector.x as Degree * angle_sin + vector.y as Degree * angle_cos) as Coordinate
-            };
-            vector
+            precise_vector = (
+                precise_vector.0 * angle_cos - precise_vector.1 * angle_sin,
+                precise_vector.0 * angle_sin + precise_vector.1 * angle_cos
+            );
+            Point {
+                x: precise_vector.0 as Coordinate,
+                y: precise_vector.1 as Coordinate
+            }
         });
     }
     // Return points
@@ -103,11 +107,7 @@ mod tests {
         );
         // Complex
         let points = flatten_arc(Point {x: 0.0, y: -4.0}, Point {x: 0.0, y: -2.0}, -270.0);
-        let last_point = points.last().expect("End point is missing!");
-        assert!(
-            (1.99999..2.00001).contains(&last_point.x) && (-2.00001..-1.99999).contains(&last_point.y),
-            "Last point not fitting: {:?}", points
-        );
+        assert_eq!(points.last(), Some(&Point {x: 2.0, y: -2.0}), "Last point not fitting: {:?}", points);
     }
 
     #[test]
