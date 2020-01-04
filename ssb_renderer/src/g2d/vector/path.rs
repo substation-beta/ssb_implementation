@@ -186,7 +186,7 @@ mod tests {
                 .skip(2)
                 .take(flat_path_segments.len()-3)
                 .all(|segment| match segment {
-                    FlatPathSegment::LineTo(point) if (-70.0..50.0).contains(&point.x) && (0.0..100.0).contains(&point.y) => true,
+                    FlatPathSegment::LineTo(point) if (-70.0..=50.0).contains(&point.x) && (0.0..=100.0).contains(&point.y) => true,
                     _ => false
                 }),
             "Flattening curves & arcs failed: {:?}", flat_path
