@@ -49,14 +49,12 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
         !(line.0.y < 0.0 && line.1.y < 0.0) &&  // Top-outside
         !(line.0.y >= area_height as Coordinate && line.1.y >= area_height as Coordinate)   // Bottom-outside
     )
-    // Change lines direction to downwards
-    .map(|line| if line.0.y > line.1.y {(line.1, line.0)} else {line} )
     // Generate scanlines
     .for_each(|line| {
         // Scan range
         let (mut cur_y, last_y) = (
-            (round_half_down(line.0.y) + 0.5).max(0.5),
-            (round_half_down(line.1.y) - 0.5).min(area_height as Coordinate - 0.5)
+            (round_half_down(line.0.y.min(line.1.y)) + 0.5).max(0.5),
+            (round_half_down(line.0.y.max(line.1.y)) - 0.5).min(area_height as Coordinate - 0.5)
         );
         // Straight vertical line
         if line.0.x == line.1.x {
@@ -80,15 +78,15 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
 #[inline]
 fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, area_width: u16) -> Vec<(u16,Vec<u16>)> {
     // Sort scanlines by keys/rows
-    let mut keys = scanlines.keys().copied().collect::<Vec<_>>();
-    keys.sort();
+    let mut rows = scanlines.keys().copied().collect::<Vec<_>>();
+    rows.sort();
     // Repack ordered scanlines
-    keys.into_iter()
-    .map(|key| (
-        key,
+    rows.into_iter()
+    .map(|row| (
+        row,
         {
             // Sort scanline stops
-            let mut scanline = scanlines.remove(&key).expect("Impossible! Key came from same map.");
+            let mut scanline = scanlines.remove(&row).expect("Impossible! Key came from same map.");
             scanline.sort_by(|stop1, stop2| stop1.partial_cmp(stop2).expect("There isn't a not-number. Stop twitting me!") );
             // Trim scanline stops
             let mut odd = false;
@@ -103,11 +101,11 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
                     (if odd {round_half_down(stop)} else {stop.round()}) as u16
                 }
             })
-            .collect::<Vec<_>>()
+            .collect()
         }
     ))
     // Return optimized scanlines
-    .collect::<Vec<_>>()
+    .collect()
 }
 
 // Helper
