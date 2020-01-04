@@ -17,7 +17,7 @@ pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -
 #[inline]
 fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u16, std::vec::Vec<f32>> {
     // Scanlines buffer
-    let mut scanlines = HashMap::new();
+    let mut scanlines = HashMap::with_capacity(1);
     // Path to lines
     let (mut last_point, mut last_move) = (&ORIGIN_POINT, &ORIGIN_POINT);
     path.segments().iter()
@@ -61,7 +61,7 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
         // Straight vertical line
         if line.0.x == line.1.x {
             while cur_y <= last_y {
-                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| vec![]).push(line.0.x);
+                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(line.0.x);
                 cur_y += 1.0;
             }
         }
@@ -69,7 +69,7 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
         else {
             let slope_x_by_y = {let line_vector = *line.1 - *line.0; line_vector.x / line_vector.y};
             while cur_y <= last_y {
-                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| vec![]).push(line.0.x + (cur_y - line.0.y) * slope_x_by_y);
+                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(line.0.x + (cur_y - line.0.y) * slope_x_by_y);
                 cur_y += 1.0;
             }
         }
