@@ -4,11 +4,14 @@ use crate::g2d::vector::{
     point::ORIGIN_POINT,
     path::{PathBase,FlatPath,FlatPathSegment}
 };
-use std::collections::HashMap;
+use std::{
+    ops::Range,
+    collections::HashMap
+};
 
 
 // Path to scanlines
-pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> Vec<(u16,Vec<u16>)> {
+pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> Vec<(u16,Vec<Range<u16>>)> {
     scanlines_order_and_trim(
         scanlines_from_path_unordered(path, area_height),
         area_width
@@ -43,7 +46,7 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
                 point
             ))
     })
-    // Filter out unwanted lines
+    // Discard unwanted lines
     .filter(|line|
         line.0.y != line.1.y && // Horizontal / zero-length
         !(line.0.y < 0.0 && line.1.y < 0.0) &&  // Top-outside
@@ -76,7 +79,7 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
     scanlines
 }
 #[inline]
-fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, area_width: u16) -> Vec<(u16,Vec<u16>)> {
+fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, area_width: u16) -> Vec<(u16,Vec<Range<u16>>)> {
     // Sort scanlines by keys/rows
     let mut rows = scanlines.keys().copied().collect::<Vec<_>>();
     rows.sort();
@@ -88,22 +91,21 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
             // Sort scanline stops
             let mut scanline = scanlines.remove(&row).expect("Impossible! Key came from same map.");
             scanline.sort_by(|stop1, stop2| stop1.partial_cmp(stop2).expect("There isn't a not-number. Stop twitting me!") );
-            // Trim scanline stops
-            let mut odd = false;
-            scanline.into_iter()
-            .map(|stop| {
-                odd = !odd;
-                if stop < 0.0 {
-                    0
-                } else if stop > area_width as Coordinate {
-                    area_width
-                } else {
-                    (if odd {round_half_down(stop)} else {stop.round()}) as u16
-                }
-            })
-            .collect()
+            // Pair & trim scanline stops
+            scanline.chunks_exact(2)
+            .map(|stop_pair| (
+                clamp(round_half_down(stop_pair[0]), 0.0, area_width as Coordinate) as u16
+                ..
+                clamp(stop_pair[1].round(), 0.0, area_width as Coordinate) as u16
+            ))
+            // Discard empty scanline ranges
+            .filter(|stop_range| !range_is_empty(&stop_range) )
+            // Return optimized stops
+            .collect::<Vec<_>>()
         }
     ))
+    // Discard empty scanlines after stops cleaning
+    .filter(|scanline| !scanline.1.is_empty() )
     // Return optimized scanlines
     .collect()
 }
@@ -112,6 +114,14 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
 #[inline]
 fn round_half_down(x: Coordinate) -> Coordinate {
     if x.fract() <= 0.5 {x.floor()} else {x.ceil()}
+}
+#[inline]
+fn clamp(x: Coordinate, min: Coordinate, max: Coordinate) -> Coordinate {   // Stabilization: <https://doc.rust-lang.org/std/primitive.f32.html#method.clamp>
+    x.max(min).min(max)
+}
+#[inline]
+fn range_is_empty(range: &Range<u16>) -> bool {   // Stabilization: <https://doc.rust-lang.org/std/ops/struct.Range.html#method.is_empty>
+    range.end <= range.start
 }
 
 
@@ -137,9 +147,9 @@ mod tests {
         assert_eq!(
             scanlines_from_path(&path, 5, 5),
             vec![
-                (1, vec![1, 5]),
-                (2, vec![1, 5]),
-                (3, vec![1, 5])
+                (1, vec![1..5]),
+                (2, vec![1..5]),
+                (3, vec![1..5])
             ]
         );
     }
@@ -154,11 +164,7 @@ mod tests {
         // Test
         assert_eq!(
             scanlines_from_path(&path, 4, 3),
-            vec![
-                (0, vec![1]),
-                (1, vec![1]),
-                (2, vec![1])
-            ]
+            vec![]
         );
     }
 
@@ -180,20 +186,19 @@ mod tests {
         assert_eq!(
             scanlines_from_path(&path, 10, 10),
             vec![
-                (0, vec![0, 9]),
-                (1, vec![0, 9]),
-                (2, vec![0, 2, 7, 9]),
-                (3, vec![0, 2, 7, 9]),
-                (4, vec![0, 2, 7, 9]),
-                (5, vec![0, 9]),
-                (6, vec![0, 9]),
-                (7, vec![0, 9]),
-                (8, vec![0, 9]),
-                (9, vec![0, 9])
+                (0, vec![0..9]),
+                (1, vec![0..9]),
+                (2, vec![0..2, 7..9]),
+                (3, vec![0..2, 7..9]),
+                (4, vec![0..2, 7..9]),
+                (5, vec![0..9]),
+                (6, vec![0..9]),
+                (7, vec![0..9]),
+                (8, vec![0..9]),
+                (9, vec![0..9])
             ]
         );
     }
-
 
     #[test]
     fn scanlines_subpixels() {
@@ -211,12 +216,12 @@ mod tests {
         assert_eq!(
             scanlines_from_path(&path, 10, 10),
             vec![
-                (1, vec![1, 6, 7, 10]),
-                (2, vec![1, 10]),
-                (3, vec![1, 10]),
-                (4, vec![2, 10]),
-                (5, vec![2, 10]),
-                (6, vec![2, 10])
+                (1, vec![1..6, 7..10]),
+                (2, vec![1..10]),
+                (3, vec![1..10]),
+                (4, vec![2..10]),
+                (5, vec![2..10]),
+                (6, vec![2..10])
             ]
         );
     }
