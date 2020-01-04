@@ -46,3 +46,6 @@ impl Point {
         self.x.abs() + self.y.abs()
     }
 }
+
+// Default point (possible to reference)
+pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
