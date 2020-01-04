@@ -7,8 +7,9 @@ use super::{
 
 
 // PATH BASE
-trait PathBase<SegmentType> : Default + AsRef<[SegmentType]> {
+pub trait PathBase<SegmentType> : Default {
     fn new(segments: Vec<SegmentType>) -> Self;
+    fn segments(&self) -> &[SegmentType];
 
     fn move_to(&mut self, point: Point) -> &mut Self;
     fn line_to(&mut self, point: Point) -> &mut Self;
@@ -29,16 +30,14 @@ pub enum FlatPathSegment {
 pub struct FlatPath {
     segments: Vec<FlatPathSegment>
 }
-impl AsRef<[FlatPathSegment]> for FlatPath {
-    fn as_ref(&self) -> &[FlatPathSegment] {
-        &self.segments
-    }
-}
 impl PathBase<FlatPathSegment> for FlatPath {
     fn new(segments: Vec<FlatPathSegment>) -> Self {
         Self {
             segments
         }
+    }
+    fn segments(&self) -> &[FlatPathSegment] {
+        &self.segments
     }
 
     fn move_to(&mut self, point: Point) -> &mut Self {
@@ -105,16 +104,14 @@ pub enum PathSegment {
 pub struct Path {
     segments: Vec<PathSegment>
 }
-impl AsRef<[PathSegment]> for Path {
-    fn as_ref(&self) -> &[PathSegment] {
-        &self.segments
-    }
-}
 impl PathBase<PathSegment> for Path {
     fn new(segments: Vec<PathSegment>) -> Self {
         Self {
             segments
         }
+    }
+    fn segments(&self) -> &[PathSegment] {
+        &self.segments
     }
 
     fn move_to(&mut self, point: Point) -> &mut Self {
@@ -148,7 +145,7 @@ impl Path {
     }
 }
 
-// TESTS
+// Tests
 #[cfg(test)]
 mod tests {
     use super::{PathBase,Point,Path,FlatPath,PathSegment,FlatPathSegment};
@@ -166,7 +163,7 @@ mod tests {
     #[test]
     fn path_build() {
         assert_eq!(
-            create_path().as_ref(),
+            create_path().segments(),
             &[
                 PathSegment::Flat(FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})),
                 PathSegment::Flat(FlatPathSegment::LineTo(Point { x: 0.0, y: 0.0 })),
@@ -180,7 +177,7 @@ mod tests {
     #[test]
     fn path_flatten() {
         let flat_path = FlatPath::from(create_path());
-        let flat_path_segments = flat_path.as_ref();
+        let flat_path_segments = flat_path.segments();
         assert_eq!(flat_path_segments.first(), Some(&FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})));
         assert_eq!(flat_path_segments.get(1), Some(&FlatPathSegment::LineTo(Point {x: 0.0, y: 0.0})));
         assert_eq!(flat_path_segments.last(), Some(&FlatPathSegment::Close));
