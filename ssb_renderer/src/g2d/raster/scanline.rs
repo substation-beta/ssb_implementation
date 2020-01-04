@@ -1,6 +1,6 @@
 // Imports
 use crate::g2d::vector::{
-    types::Coordinate,
+    types::{Coordinate,FloatExt,RangeExt},
     point::ORIGIN_POINT,
     path::{PathBase,FlatPath,FlatPathSegment}
 };
@@ -56,8 +56,8 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
     .for_each(|line| {
         // Scan range
         let (mut cur_y, last_y) = (
-            (round_half_down(line.0.y.min(line.1.y)) + 0.5).max(0.5),
-            (round_half_down(line.0.y.max(line.1.y)) - 0.5).min(area_height as Coordinate - 0.5)
+            (line.0.y.min(line.1.y).round_half_down() + 0.5).max(0.5),
+            (line.0.y.max(line.1.y).round_half_down() - 0.5).min(area_height as Coordinate - 0.5)
         );
         // Straight vertical line
         if line.0.x == line.1.x {
@@ -94,12 +94,12 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
             // Pair & trim scanline stops
             scanline.chunks_exact(2)
             .map(|stop_pair| (
-                clamp(round_half_down(stop_pair[0]), 0.0, area_width as Coordinate) as u16
+                stop_pair[0].round_half_down().clamp(0.0, area_width as Coordinate) as u16
                 ..
-                clamp(stop_pair[1].round(), 0.0, area_width as Coordinate) as u16
+                stop_pair[1].round().clamp(0.0, area_width as Coordinate) as u16
             ))
             // Discard empty scanline ranges
-            .filter(|stop_range| !range_is_empty(&stop_range) )
+            .filter(|stop_range| !stop_range.is_empty() )
             // Return optimized stops
             .collect::<Vec<_>>()
         }
@@ -108,20 +108,6 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
     .filter(|scanline| !scanline.1.is_empty() )
     // Return optimized scanlines
     .collect()
-}
-
-// Helper
-#[inline]
-fn round_half_down(x: Coordinate) -> Coordinate {
-    if x.fract() <= 0.5 {x.floor()} else {x.ceil()}
-}
-#[inline]
-fn clamp(x: Coordinate, min: Coordinate, max: Coordinate) -> Coordinate {   // Stabilization: <https://doc.rust-lang.org/std/primitive.f32.html#method.clamp>
-    x.max(min).min(max)
-}
-#[inline]
-fn range_is_empty(range: &Range<u16>) -> bool {   // Stabilization: <https://doc.rust-lang.org/std/ops/struct.Range.html#method.is_empty>
-    range.end <= range.start
 }
 
 
