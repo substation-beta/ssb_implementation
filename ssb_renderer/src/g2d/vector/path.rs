@@ -90,6 +90,29 @@ impl From<Path> for FlatPath {
         Self::new(flat_segments)
     }
 }
+impl FlatPath {
+    pub fn bounding(&self) -> Option<(Point, Point)> {
+        self.segments.iter()
+        .filter_map(|segment| match segment {
+            FlatPathSegment::MoveTo(point) | FlatPathSegment::LineTo(point) => Some(point),
+            FlatPathSegment::Close => None
+        })
+        .fold(None, |mut min_max_points, point|
+            if let Some((min_point, max_point)) = min_max_points.as_mut() {
+                if point.x < min_point.x {min_point.x = point.x;}
+                if point.y < min_point.y {min_point.y = point.y;}
+                if point.x > max_point.x {max_point.x = point.x;}
+                if point.y > max_point.y {max_point.y = point.y;}
+                min_max_points
+            } else {
+                Some((
+                    *point,
+                    *point
+                ))
+            }
+        )
+    }
+}
 
 // PATH
 // Segment of path
@@ -99,6 +122,7 @@ pub enum PathSegment {
     CurveTo(Point, Point, Point),   // Control points + end point
     ArcBy(Point, Degree),  // Orientation/center point + angle
 }
+
 // Path of 2d geometry
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Path {
@@ -145,6 +169,7 @@ impl Path {
     }
 }
 
+
 // Tests
 #[cfg(test)]
 mod tests {
@@ -190,6 +215,26 @@ mod tests {
                     _ => false
                 }),
             "Flattening curves & arcs failed: {:?}", flat_path
+        );
+    }
+
+    #[test]
+    fn path_bounding() {
+        let mut flat_path = FlatPath::default();
+        flat_path.move_to(Point {x: 5.0, y: 5.0})
+            .line_to(Point {x: 0.0, y: 1.0})
+            .line_to(Point {x: 99.0, y: 0.2})
+            .close()
+            .move_to(Point {x: 7.0, y: 33.0})
+            .line_to(Point {x: 2.0, y: 25.0})
+            .line_to(Point {x: 7.0, y: 31.0})
+            .close();
+        assert_eq!(
+            flat_path.bounding(),
+            Some((
+                Point {x: 0.0, y: 0.2},
+                Point {x: 99.0, y: 33.0}
+            ))
         );
     }
 }
