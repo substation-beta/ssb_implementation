@@ -1,6 +1,6 @@
 // Imports
 use super::types::Coordinate;
-use std::ops::{Add,Sub,Mul};
+use std::ops::{Add,AddAssign,Sub,Mul};
 
 
 // Point of path segment
@@ -18,6 +18,12 @@ impl Add for Point {
             x: self.x + other.x,
             y: self.y + other.y
         }
+    }
+}
+impl AddAssign for Point {
+    fn add_assign(&mut self, other: Self) {
+        self.x += other.x;
+        self.y += other.y;
     }
 }
 impl Sub for Point {

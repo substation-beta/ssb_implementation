@@ -1,6 +1,6 @@
 // Imports
 use super::{
-    types::Degree,
+    types::{Coordinate,Degree},
     point::Point,
     flatten::{flatten_curve, flatten_arc}
 };
@@ -112,6 +112,16 @@ impl FlatPath {
             }
         )
     }
+    pub fn translate(&mut self, x: Coordinate, y: Coordinate) -> &mut Self {
+        let translate_point = Point {x, y};
+        self.segments.iter_mut()
+        .filter_map(|segment| match segment {
+            FlatPathSegment::MoveTo(point) | FlatPathSegment::LineTo(point) => Some(point),
+            FlatPathSegment::Close => None
+        })
+        .for_each(|point| *point += translate_point );
+        self
+    }
 }
 
 // PATH
@@ -191,9 +201,9 @@ mod tests {
             create_path().segments(),
             &[
                 PathSegment::Flat(FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})),
-                PathSegment::Flat(FlatPathSegment::LineTo(Point { x: 0.0, y: 0.0 })),
-                PathSegment::ArcBy(Point { x: 0.0, y: 50.0 }, 180.0),
-                PathSegment::CurveTo(Point { x: 35.0, y: 90.0 }, Point { x: -75.0, y: 60.0 }, Point { x: 0.0, y: 50.0 }),
+                PathSegment::Flat(FlatPathSegment::LineTo(Point {x: 0.0, y: 0.0})),
+                PathSegment::ArcBy(Point {x: 0.0, y: 50.0}, 180.0),
+                PathSegment::CurveTo(Point {x: 35.0, y: 90.0}, Point {x: -75.0, y: 60.0}, Point {x: 0.0, y: 50.0}),
                 PathSegment::Flat(FlatPathSegment::Close)
             ]
         );
@@ -218,8 +228,7 @@ mod tests {
         );
     }
 
-    #[test]
-    fn path_bounding() {
+    fn create_flat_path() -> FlatPath {
         let mut flat_path = FlatPath::default();
         flat_path.move_to(Point {x: 5.0, y: 5.0})
             .line_to(Point {x: 0.0, y: 1.0})
@@ -229,12 +238,36 @@ mod tests {
             .line_to(Point {x: 2.0, y: 25.0})
             .line_to(Point {x: 7.0, y: 31.0})
             .close();
+        flat_path
+    }
+
+    #[test]
+    fn path_bounding() {
         assert_eq!(
-            flat_path.bounding(),
+            create_flat_path().bounding(),
             Some((
                 Point {x: 0.0, y: 0.2},
                 Point {x: 99.0, y: 33.0}
             ))
+        );
+    }
+
+    #[test]
+    fn path_translate() {
+        let mut flat_path = create_flat_path();
+        flat_path.translate(-22.5, 1.0);
+        assert_eq!(
+            flat_path.segments(),
+            &[
+                FlatPathSegment::MoveTo(Point {x: -17.5, y: 6.0}),
+                FlatPathSegment::LineTo(Point {x: -22.5, y: 2.0}),
+                FlatPathSegment::LineTo(Point {x: 76.5, y: 1.2}),
+                FlatPathSegment::Close,
+                FlatPathSegment::MoveTo(Point {x: -15.5, y: 34.0}),
+                FlatPathSegment::LineTo(Point {x: -20.5, y: 26.0}),
+                FlatPathSegment::LineTo(Point {x: -15.5, y: 32.0}),
+                FlatPathSegment::Close
+            ]
         );
     }
 }
