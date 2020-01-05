@@ -1,8 +1,11 @@
 // Imports
-use crate::g2d::vector::{
-    types::{Coordinate,FloatExt,RangeExt},
-    point::ORIGIN_POINT,
-    path::{PathBase,FlatPath,FlatPathSegment}
+use crate::g2d::{
+    math::{FloatExt,RangeExt},
+    vector::{
+        types::Coordinate,
+        point::ORIGIN_POINT,
+        path::{PathBase,FlatPath,FlatPathSegment}
+    }
 };
 use std::{
     ops::Range,
