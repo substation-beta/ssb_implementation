@@ -1,7 +1,7 @@
 // Imports
 use super::{
     types::{Coordinate,Degree},
-    point::Point,
+    point::{Point,ORIGIN_POINT},
     flatten::{flatten_curve, flatten_arc}
 };
 
@@ -58,13 +58,12 @@ impl From<Path> for FlatPath {
         // Result buffer
         let mut flat_segments = Vec::with_capacity(path.segments.len());
         // Flatten path segments
-        path.segments.into_iter().fold(None, |last_point, segment| {
+        path.segments.into_iter().fold(ORIGIN_POINT, |last_point, segment| {
             match segment {
                 // Repack already flat segments
                 PathSegment::Flat(flat_segment) => {
                     let new_last_point = match flat_segment {
-                        FlatPathSegment::MoveTo(point) => Some(point),
-                        FlatPathSegment::LineTo(point) => Some(point),
+                        FlatPathSegment::MoveTo(point) | FlatPathSegment::LineTo(point) => point,
                         FlatPathSegment::Close => last_point
                     };
                     flat_segments.push(flat_segment);
@@ -72,17 +71,17 @@ impl From<Path> for FlatPath {
                 }
                 // Flatten curve
                 PathSegment::CurveTo(control_point1, control_point2, end_point) => {
-                    flatten_curve(last_point.unwrap_or_default(), control_point1, control_point2, end_point).into_iter()
+                    flatten_curve(last_point, control_point1, control_point2, end_point).into_iter()
                         .skip(1)
                         .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
-                        .last().map_or(last_point, |point| Some(point))
+                        .last().unwrap_or(last_point)
                 }
                 // Flatten arc
                 PathSegment::ArcBy(center_point, angle) => {
-                    flatten_arc(last_point.unwrap_or_default(), center_point, angle).into_iter()
+                    flatten_arc(last_point, center_point, angle).into_iter()
                         .skip(1)
                         .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
-                        .last().map_or(last_point, |point| Some(point))
+                        .last().unwrap_or(last_point)
                 }
             }
         });
