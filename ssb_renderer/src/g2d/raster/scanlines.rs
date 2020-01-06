@@ -97,12 +97,12 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
             // Pair & trim scanline stops
             scanline.chunks_exact(2)
             .map(|stop_pair| (
-                stop_pair[0].round_half_down().clamp(0.0, area_width as Coordinate) as u16
+                FloatExt::clamp(stop_pair[0].round_half_down(), 0.0, area_width as Coordinate) as u16
                 ..
-                stop_pair[1].round().clamp(0.0, area_width as Coordinate) as u16
+                FloatExt::clamp(stop_pair[1].round(), 0.0, area_width as Coordinate) as u16
             ))
             // Discard empty scanline ranges
-            .filter(|stop_range| !stop_range.is_empty() )
+            .filter(|stop_range| !RangeExt::is_empty(stop_range) )
             // Return optimized stops
             .collect::<Vec<_>>()
         }
