@@ -1,7 +1,7 @@
 // Imports
 use super::{
     types::{Coordinate,Degree},
-    point::{Point,ORIGIN_POINT},
+    point::{Point,ORIGIN_POINT,PointMinMaxCollector},
     flatten::{flatten_curve, flatten_arc}
 };
 
@@ -96,20 +96,7 @@ impl FlatPath {
             FlatPathSegment::MoveTo(point) | FlatPathSegment::LineTo(point) => Some(point),
             FlatPathSegment::Close => None
         })
-        .fold(None, |mut min_max_points, point|
-            if let Some((min_point, max_point)) = min_max_points.as_mut() {
-                if point.x < min_point.x {min_point.x = point.x;}
-                if point.y < min_point.y {min_point.y = point.y;}
-                if point.x > max_point.x {max_point.x = point.x;}
-                if point.y > max_point.y {max_point.y = point.y;}
-                min_max_points
-            } else {
-                Some((
-                    *point,
-                    *point
-                ))
-            }
-        )
+        .min_max()
     }
     pub fn translate(&mut self, x: Coordinate, y: Coordinate) -> &mut Self {
         let translate_point = Point {x, y};

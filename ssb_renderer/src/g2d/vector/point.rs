@@ -53,5 +53,28 @@ impl Point {
     }
 }
 
+// Point collections
+pub trait PointMinMaxCollector<'origin>: Iterator<Item=&'origin Point> {
+    fn min_max(self) -> Option<(Point,Point)>;
+}
+impl <'origin, I: Iterator<Item=&'origin Point>> PointMinMaxCollector<'origin> for I {
+    fn min_max(self) -> Option<(Point,Point)> {
+        self.fold(None, |mut min_max_points, point|
+            if let Some((min_point, max_point)) = min_max_points.as_mut() {
+                if point.x < min_point.x {min_point.x = point.x;}
+                if point.y < min_point.y {min_point.y = point.y;}
+                if point.x > max_point.x {max_point.x = point.x;}
+                if point.y > max_point.y {max_point.y = point.y;}
+                min_max_points
+            } else {
+                Some((
+                    *point,
+                    *point
+                ))
+            }
+        )
+    }
+}
+
 // Default point (possible to reference)
 pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
