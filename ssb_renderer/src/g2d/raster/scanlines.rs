@@ -14,14 +14,14 @@ use std::{
 
 
 // Path to scanlines
-pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> Vec<(u16,Vec<Range<u16>>)> {
-    scanlines_order_and_trim(
-        scanlines_from_path_unordered(path, area_height),
+pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> HashMap<u16,Vec<Range<u16>>> {
+    scanlines_ranges_trimmed(
+        scanlines_stops_from_path(path, area_height),
         area_width
     )
 }
 #[inline]
-fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u16, std::vec::Vec<f32>> {
+fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,Vec<f32>> {
     // Scanlines buffer
     let mut scanlines = HashMap::with_capacity(1);
     // Path to lines
@@ -82,17 +82,13 @@ fn scanlines_from_path_unordered(path: &FlatPath, area_height: u16) -> HashMap<u
     scanlines
 }
 #[inline]
-fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, area_width: u16) -> Vec<(u16,Vec<Range<u16>>)> {
-    // Sort scanlines by keys/rows
-    let mut rows = scanlines.keys().copied().collect::<Vec<_>>();
-    rows.sort();
-    // Repack ordered scanlines
-    rows.into_iter()
-    .map(|row| (
+fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -> HashMap<u16,Vec<Range<u16>>> {
+    // Convert scanline from stops to ranges
+    scanlines.into_iter()
+    .map(|(row,mut scanline)| (
         row,
         {
             // Sort scanline stops
-            let mut scanline = scanlines.remove(&row).expect("Impossible! Key came from same map.");
             scanline.sort_by(|stop1, stop2| stop1.partial_cmp(stop2).expect("There isn't a not-number. Stop twitting me!") );
             // Pair & trim scanline stops
             scanline.chunks_exact(2)
@@ -108,7 +104,7 @@ fn scanlines_order_and_trim(mut scanlines: HashMap<u16, std::vec::Vec<f32>>, are
         }
     ))
     // Discard empty scanlines after stops cleaning
-    .filter(|scanline| !scanline.1.is_empty() )
+    .filter(|(_,scanline)| !scanline.is_empty() )
     // Return optimized scanlines
     .collect()
 }
@@ -121,7 +117,7 @@ mod tests {
         point::Point,
         path::{PathBase,FlatPath}
     };
-    use super::scanlines_from_path;
+    use super::{scanlines_from_path,HashMap};
 
     #[test]
     fn scanlines_quad_trimmed() {
@@ -135,11 +131,11 @@ mod tests {
         // Test
         assert_eq!(
             scanlines_from_path(&path, 5, 5),
-            vec![
+            [
                 (1, vec![1..5]),
                 (2, vec![1..5]),
                 (3, vec![1..5])
-            ]
+            ].into_iter().cloned().collect()
         );
     }
 
@@ -153,7 +149,7 @@ mod tests {
         // Test
         assert_eq!(
             scanlines_from_path(&path, 4, 3),
-            vec![]
+            HashMap::new()
         );
     }
 
@@ -174,7 +170,7 @@ mod tests {
         // Test
         assert_eq!(
             scanlines_from_path(&path, 10, 10),
-            vec![
+            [
                 (0, vec![0..9]),
                 (1, vec![0..9]),
                 (2, vec![0..2, 7..9]),
@@ -185,7 +181,7 @@ mod tests {
                 (7, vec![0..9]),
                 (8, vec![0..9]),
                 (9, vec![0..9])
-            ]
+            ].into_iter().cloned().collect()
         );
     }
 
@@ -204,14 +200,14 @@ mod tests {
         // Test
         assert_eq!(
             scanlines_from_path(&path, 10, 10),
-            vec![
+            [
                 (1, vec![1..6, 7..10]),
                 (2, vec![1..10]),
                 (3, vec![1..10]),
                 (4, vec![2..10]),
                 (5, vec![2..10]),
                 (6, vec![2..10])
-            ]
+            ].into_iter().cloned().collect()
         );
     }
 }
