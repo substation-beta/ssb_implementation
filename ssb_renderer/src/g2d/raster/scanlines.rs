@@ -90,7 +90,7 @@ fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -
         {
             // Sort scanline stops
             scanline.sort_by(|stop1, stop2| stop1.partial_cmp(stop2).expect("There isn't a not-number. Stop twitting me!") );
-            // Pair & trim scanline stops
+            // Pair & trim scanline stops to ranges
             scanline.chunks_exact(2)
             .map(|stop_pair| (
                 FloatExt::clamp(stop_pair[0].round_half_down(), 0.0, area_width as Coordinate) as u16
@@ -99,7 +99,7 @@ fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -
             ))
             // Discard empty scanline ranges
             .filter(|stop_range| !RangeExt::is_empty(stop_range) )
-            // Return optimized stops
+            // Return ranges
             .collect::<Vec<_>>()
         }
     ))
@@ -107,6 +107,34 @@ fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -
     .filter(|(_,scanline)| !scanline.is_empty() )
     // Return optimized scanlines
     .collect()
+}
+
+// Merge scanlines from different samples and sort everything
+pub fn merge_and_order_scanlines(mut scanlines_samples: Vec<HashMap<u16,Vec<Range<u16>>>>) -> Vec<(u16,Vec<Range<u16>>)> {
+    // Anything to do?
+    if let Some((scanlines, other_scanlines_samples)) = scanlines_samples.split_first_mut() {
+        // Merge all scanlines into first sample
+        for other_scanline in other_scanlines_samples.iter_mut().flatten() {
+            if let Some(scanline_ranges) = scanlines.get_mut(other_scanline.0) {
+                scanline_ranges.append(other_scanline.1);
+            } else {
+                scanlines.insert(*other_scanline.0, other_scanline.1.drain(..).collect());
+            }
+        }
+        // Convert scanlines map to vector with sorted ranges
+        let mut scanlines = scanlines.drain()
+        .map(|mut scanline| {
+            scanline.1.sort_by(|range1, range2| range1.start.cmp(&range2.start) );
+            scanline
+        })
+        .collect::<Vec<_>>();
+        // Sort scanlines by row/key
+        scanlines.sort_by(|(row1,_),(row2,_)| row1.cmp(&row2) );
+        // Return merged and ordered scanlines
+        scanlines
+    } else {
+        vec![]
+    }
 }
 
 
@@ -117,7 +145,7 @@ mod tests {
         point::Point,
         path::{PathBase,FlatPath}
     };
-    use super::{scanlines_from_path,HashMap};
+    use super::{scanlines_from_path,HashMap,merge_and_order_scanlines};
 
     #[test]
     fn scanlines_quad_trimmed() {
@@ -135,7 +163,7 @@ mod tests {
                 (1, vec![1..5]),
                 (2, vec![1..5]),
                 (3, vec![1..5])
-            ].into_iter().cloned().collect()
+            ].into_iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -181,7 +209,7 @@ mod tests {
                 (7, vec![0..9]),
                 (8, vec![0..9]),
                 (9, vec![0..9])
-            ].into_iter().cloned().collect()
+            ].into_iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -207,7 +235,31 @@ mod tests {
                 (4, vec![2..10]),
                 (5, vec![2..10]),
                 (6, vec![2..10])
-            ].into_iter().cloned().collect()
+            ].into_iter().cloned().collect()    // To map for comparison
+        );
+    }
+
+    #[test]
+    fn scanlines_merge() {
+        assert_eq!(
+            merge_and_order_scanlines(vec![
+                [
+                    (0, vec![0..33]),
+                    (1, vec![1..5]),
+                    (3, vec![0..50, 4..7])
+                ].into_iter().cloned().collect(),
+                [
+                    (1, vec![0..6]),
+                    (2, vec![2..8]),
+                    (3, vec![1..20, 1..3])
+                ].into_iter().cloned().collect()
+            ]),
+            vec![
+                (0, vec![0..33]),
+                (1, vec![0..6, 1..5]),
+                (2, vec![2..8]),
+                (3, vec![0..50, 1..20, 1..3, 4..7])
+            ]
         );
     }
 }

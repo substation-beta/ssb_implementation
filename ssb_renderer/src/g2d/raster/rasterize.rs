@@ -5,7 +5,7 @@ use crate::g2d::vector::{
 };
 use super::{
     mask::Mask,
-    scanlines::scanlines_from_path
+    scanlines::{scanlines_from_path,merge_and_order_scanlines}
 };
 use rayon::prelude::*;
 
@@ -25,21 +25,22 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
     // Create mask
     let (path_bounding, deviations_bounding) = (path.bounding()?, SAMPLE_DEVIATIONS.iter().min_max()?);
     let (path_offset, path_peak) = (path_bounding.0 + deviations_bounding.0, path_bounding.1 + deviations_bounding.1);
-    let path_dimensions = path_peak - path_offset;
+    let _path_dimensions = path_peak - path_offset;
 
     // TODO
 
     // Calculate scanlines in parallel
-    let scanlines = SAMPLE_DEVIATIONS.into_par_iter()
-    .map(|deviation| {
-        let mut new_path = path.clone();
-        new_path.translate(deviation.x, deviation.y);
-        scanlines_from_path(&new_path, area_width, area_height)
-    })
-    .flatten()
-    .collect::<Vec<_>>();
+    let scanlines = merge_and_order_scanlines(
+        SAMPLE_DEVIATIONS.into_par_iter()
+        .map(|deviation| {
+            let mut new_path = path.clone();
+            new_path.translate(deviation.x, deviation.y);
+            scanlines_from_path(&new_path, area_width, area_height)
+        })
+        .collect()
+    );
     // Rasterize scanlines on mask (addition with top-trim)
-    for scanline in scanlines {
+    for _scanline in scanlines {
 
         // TODO
 
