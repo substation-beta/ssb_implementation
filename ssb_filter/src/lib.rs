@@ -13,4 +13,5 @@
 pub mod c;
 /// [Vapoursynth](www.vapoursynth.com) frameserver.
 #[cfg(feature = "vapoursynth-interface")]
+#[allow(clippy::missing_safety_doc)]
 pub mod vapoursynth;

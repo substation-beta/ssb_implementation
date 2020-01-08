@@ -30,11 +30,11 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
     };
     let scanlines = merge_and_order_scanlines(
         if path.segments().len() > 1000 {
-            SAMPLE_DEVIATIONS.into_par_iter()
+            SAMPLE_DEVIATIONS.par_iter()
             .map(path_to_deviated_scanlines)
             .collect()
         } else {
-            SAMPLE_DEVIATIONS.into_iter()
+            SAMPLE_DEVIATIONS.iter()
             .map(path_to_deviated_scanlines)
             .collect()
         }

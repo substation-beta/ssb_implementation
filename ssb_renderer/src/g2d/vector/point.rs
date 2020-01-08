@@ -44,11 +44,12 @@ impl Mul<Coordinate> for Point {
         }
     }
 }
+#[allow(clippy::len_without_is_empty)]
 impl Point {
-    pub fn len(&self) -> Coordinate {
+    pub fn len(self) -> Coordinate {
         self.x.hypot(self.y)
     }
-    pub fn grid_len(&self) -> Coordinate {
+    pub fn grid_len(self) -> Coordinate {
         self.x.abs() + self.y.abs()
     }
 }

@@ -82,7 +82,7 @@ make_filter_function! {
 }
 
 // Build vapoursynth filter instance
-fn build_render_filter<'core, R>(clip: Node<'core>, reader: R) -> Result<RenderFilter<'core>, Error>
+fn build_render_filter<R>(clip: Node, reader: R) -> Result<RenderFilter, Error>
     where R: BufRead {
     Ok(RenderFilter{
         source: clip,

@@ -51,7 +51,7 @@ fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,V
     })
     // Discard unwanted lines
     .filter(|line|
-        line.0.y != line.1.y && // Horizontal / zero-length
+        !line.0.y.eq_close(line.1.y)  && // Horizontal / zero-length
         !(line.0.y < 0.0 && line.1.y < 0.0) &&  // Top-outside
         !(line.0.y >= area_height as Coordinate && line.1.y >= area_height as Coordinate)   // Bottom-outside
     )
@@ -63,7 +63,7 @@ fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,V
             (line.0.y.max(line.1.y).round_half_down() - 0.5).min(area_height as Coordinate - 0.5)
         );
         // Straight vertical line
-        if line.0.x == line.1.x {
+        if line.0.x.eq_close(line.1.x) {
             while cur_y <= last_y {
                 scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(line.0.x);
                 cur_y += 1.0;

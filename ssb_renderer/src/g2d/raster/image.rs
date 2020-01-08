@@ -16,7 +16,7 @@ pub enum ColorType {
 }
 impl ColorType {
     /// Size of one color sample.
-    pub fn sample_size(&self) -> u8 {
+    pub fn sample_size(self) -> u8 {
         match self {
             Self::RGB24 | Self::BGR24 => 3,
             Self::RGBA32 | Self::ABGR32 => 4,
@@ -24,11 +24,11 @@ impl ColorType {
         }
     }
     /// Size of all color samples in one image row.
-    pub fn row_size(&self, width: u16) -> u32 {
+    pub fn row_size(self, width: u16) -> u32 {
         self.sample_size() as u32 * width as u32
     }
     /// Number of color planes for a type.
-    pub fn planes(&self) -> u8 {
+    pub fn planes(self) -> u8 {
         match self {
             Self::RGB24 | Self::BGR24 | Self::RGBA32 | Self::ABGR32 => 1,
             Self::R8G8B8 => 3,
@@ -36,14 +36,14 @@ impl ColorType {
         }
     }
     /// Color contains alpha channel?
-    pub fn alpha(&self) -> bool {
+    pub fn alpha(self) -> bool {
         match self {
             Self::RGB24 | Self::BGR24 | Self::R8G8B8 => false,
             Self::RGBA32 | Self::ABGR32 | Self::R8G8B8A8 => true
         }
     }
     /// Usual color channels are swapped?
-    pub fn swapped(&self) -> bool {
+    pub fn swapped(self) -> bool {
         match self {
             Self::RGB24 | Self::RGBA32 | Self::R8G8B8 | Self::R8G8B8A8 => false,
             Self::BGR24 | Self::ABGR32 => true

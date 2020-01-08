@@ -9,8 +9,10 @@
 )]
 
 // Rendering backend for general 2D graphics.
-mod g2d;
+// TODO: mod g2d;
+pub mod g2d;
 pub use g2d::raster::image;
+
 // Rendering frontend for SSB output.
 mod ssb;
 pub use ssb::{error::RenderingError,rendering::*};
