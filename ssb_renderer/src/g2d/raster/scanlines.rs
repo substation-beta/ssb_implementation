@@ -9,7 +9,7 @@ use crate::g2d::{
 };
 use std::{
     ops::Range,
-    collections::HashMap
+    collections::{HashMap,BTreeMap}
 };
 
 
@@ -110,7 +110,7 @@ fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -
 }
 
 // Merge scanlines from different samples and sort everything
-pub fn merge_and_order_scanlines(mut scanlines_samples: Vec<HashMap<u16,Vec<Range<u16>>>>) -> Vec<(u16,Vec<Range<u16>>)> {
+pub fn merge_and_order_scanlines(mut scanlines_samples: Vec<HashMap<u16,Vec<Range<u16>>>>) -> BTreeMap<u16,Vec<Range<u16>>> {
     // Anything to do?
     if let Some((scanlines, other_scanlines_samples)) = scanlines_samples.split_first_mut() {
         // Merge all scanlines into first sample
@@ -121,19 +121,15 @@ pub fn merge_and_order_scanlines(mut scanlines_samples: Vec<HashMap<u16,Vec<Rang
                 scanlines.insert(*other_scanline.0, other_scanline.1.drain(..).collect());
             }
         }
-        // Convert scanlines map to vector with sorted ranges
-        let mut scanlines = scanlines.drain()
+        // Convert scanlines to sorted map with sorted ranges
+        scanlines.drain()
         .map(|mut scanline| {
             scanline.1.sort_by(|range1, range2| range1.start.cmp(&range2.start) );
             scanline
         })
-        .collect::<Vec<_>>();
-        // Sort scanlines by row/key
-        scanlines.sort_by(|(row1,_),(row2,_)| row1.cmp(&row2) );
-        // Return merged and ordered scanlines
-        scanlines
+        .collect::<BTreeMap<_,_>>()
     } else {
-        vec![]
+        BTreeMap::new()
     }
 }
 
@@ -254,12 +250,12 @@ mod tests {
                     (3, vec![1..20, 1..3])
                 ].into_iter().cloned().collect()
             ]),
-            vec![
+            [
                 (0, vec![0..33]),
                 (1, vec![0..6, 1..5]),
                 (2, vec![2..8]),
                 (3, vec![0..50, 1..20, 1..3, 4..7])
-            ]
+            ].into_iter().cloned().collect()
         );
     }
 }
