@@ -1,7 +1,7 @@
 // Imports
 use crate::g2d::vector::{
     point::{Point,PointMinMaxCollector},
-    path::FlatPath
+    path::{PathBase,FlatPath}
 };
 use super::{
     mask::Mask,
@@ -30,14 +30,21 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
     // TODO
 
     // Calculate scanlines in parallel
+    let path_to_deviated_scanlines = |deviation: &Point| {
+        let mut new_path = path.clone();
+        new_path.translate(deviation.x, deviation.y);
+        scanlines_from_path(&new_path, area_width, area_height)
+    };
     let scanlines = merge_and_order_scanlines(
-        SAMPLE_DEVIATIONS.into_par_iter()
-        .map(|deviation| {
-            let mut new_path = path.clone();
-            new_path.translate(deviation.x, deviation.y);
-            scanlines_from_path(&new_path, area_width, area_height)
-        })
-        .collect()
+        if path.segments().len() > 1000 {
+            SAMPLE_DEVIATIONS.into_par_iter()
+            .map(path_to_deviated_scanlines)
+            .collect()
+        } else {
+            SAMPLE_DEVIATIONS.into_iter()
+            .map(path_to_deviated_scanlines)
+            .collect()
+        }
     );
     // Rasterize scanlines on mask (addition with top-trim)
     for _scanline in scanlines {
