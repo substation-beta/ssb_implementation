@@ -11,12 +11,16 @@ use super::{
 
 
 // Sampling configuration
-const SAMPLE_DEVIATIONS_NUMBER: usize = 4;
+const SAMPLE_DEVIATIONS_NUMBER: usize = 8;
 const SAMPLE_DEVIATIONS: [Point;SAMPLE_DEVIATIONS_NUMBER] = [
-    Point {x: -0.25, y: -0.25},
-    Point {x: 0.25, y: -0.25},
-    Point {x: 0.25, y: 0.25},
-    Point {x: -0.25, y: 0.25}
+    Point {x: 0.125, y: -0.25},     // Top-top-right
+    Point {x: 0.25, y: -0.125},     // Top-right-right
+    Point {x: 0.25, y: 0.125},     // Bottom-right-right
+    Point {x: 0.125, y: 0.25},     // Bottom-bottom-right
+    Point {x: -0.125, y: 0.25},     // Bottom-bottom-left
+    Point {x: -0.25, y: 0.125},     // Bottom-left-left
+    Point {x: -0.25, y: -0.125},     // Top-left-left
+    Point {x: -0.125, y: -0.25}      // Top-top-left
 ];
 const SAMPLE_WEIGHT: u8 = {let weight = 256 / SAMPLE_DEVIATIONS_NUMBER; weight - ((weight & 256) >> 8)} as u8;
 
@@ -74,4 +78,50 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
         }
     );
     Some(mask)
+}
+
+
+// Tests
+#[cfg(test)]
+mod tests {
+    use crate::g2d::vector::{
+        point::Point,
+        path::PathBase
+    };
+    use super::{rasterize_path,FlatPath,Mask};
+
+    #[test]
+    fn rasterize_single_pixel() {
+        // Pixel path
+        let mut path = FlatPath::default();
+        path.move_to(Point {x: 2.0, y: 3.0})
+            .line_to(Point {x: 3.0, y: 3.0})
+            .line_to(Point {x: 3.0, y: 4.0})
+            .line_to(Point {x: 2.0, y: 4.0})
+            .close();
+        // Test
+        assert_eq!(
+            rasterize_path(&path, 5, 5),
+            Some(Mask {
+                x: 2,
+                y: 3,
+                width: 1,
+                height: 1,
+                data: vec![255]
+            })
+        );
+        // Split to subpixels
+        path.translate(-0.5, 0.5);
+        // Test
+        assert_eq!(
+            rasterize_path(&path, 5, 5),
+            Some(Mask {
+                x: 1,
+                y: 3,
+                width: 2,
+                height: 2,
+                data: vec![64,64,64,64]
+            })
+        );
+    }
 }
