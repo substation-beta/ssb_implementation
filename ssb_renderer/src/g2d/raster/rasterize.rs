@@ -1,13 +1,13 @@
 // Imports
 use crate::g2d::vector::{
-    point::{Point,PointMinMaxCollector},
-    path::{PathBase,FlatPath}
+    types::Coordinate,
+    point::{Point,PointMinMaxCollector,ORIGIN_POINT},
+    path::FlatPath
 };
 use super::{
     mask::Mask,
     scanlines::{scanlines_from_path,merge_and_order_scanlines}
 };
-use rayon::prelude::*;
 
 
 // Sampling configuration
@@ -22,37 +22,56 @@ const SAMPLE_WEIGHT: u8 = {let weight = 256 / SAMPLE_DEVIATIONS_NUMBER; weight -
 
 // Rasterize path to mask
 pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Option<Mask> {
-    // Calculate scanlines in parallel
-    let path_to_deviated_scanlines = |deviation: &Point| {
-        let mut new_path = path.clone();
-        new_path.translate(deviation.x, deviation.y);
-        scanlines_from_path(&new_path, area_width, area_height)
-    };
-    let scanlines = merge_and_order_scanlines(
-        if path.segments().len() > 1000 {
-            SAMPLE_DEVIATIONS.par_iter()
-            .map(path_to_deviated_scanlines)
-            .collect()
-        } else {
+    // Calculate path offset & dimensions for mask
+    let (path_bounding, deviations_bounding) = (
+        path.bounding()?,
+        SAMPLE_DEVIATIONS.iter().min_max()?
+    );
+    let (path_offset_rounded, path_peak_rounded) = (
+        (path_bounding.0 + deviations_bounding.0).round_half_down(),
+        (path_bounding.1 + deviations_bounding.1).round()
+    );
+    let (path_offset_trimmed, path_peak_trimmed) = (
+        path_offset_rounded.max(ORIGIN_POINT),
+        path_peak_rounded.min(Point {x: area_width as Coordinate, y: area_height as Coordinate})
+    );
+    let path_dimensions = (
+        path_peak_trimmed.x as u16 - path_offset_trimmed.x as u16,
+        path_peak_trimmed.y as u16 - path_offset_trimmed.y as u16
+    );
+    // Calculate scanlines & mask
+    let (scanlines, mut mask) = (
+        merge_and_order_scanlines(
             SAMPLE_DEVIATIONS.iter()
-            .map(path_to_deviated_scanlines)
+            .map(|deviation: &Point| {
+                let mut new_path = path.clone();
+                new_path.translate(-path_offset_rounded.x + deviation.x, -path_offset_rounded.y + deviation.y);
+                scanlines_from_path(&new_path, area_width, area_height)
+            })
             .collect()
+        ),
+        Mask {
+            x: path_offset_trimmed.x as u16,
+            y: path_offset_trimmed.y as u16,
+            width: path_dimensions.0,
+            height: path_dimensions.1,
+            data: vec![0; path_dimensions.0 as usize * path_dimensions.1 as usize]
         }
     );
-    // Create mask
-    let (path_bounding, deviations_bounding) = (path.bounding()?, SAMPLE_DEVIATIONS.iter().min_max()?);
-    let (path_offset, path_peak) = (path_bounding.0 + deviations_bounding.0, path_bounding.1 + deviations_bounding.1);
-    let _path_dimensions = path_peak - path_offset;
-
-
-    // TODO: min-max by scanlines (no bounding required)
-
-
     // Rasterize scanlines on mask (addition with top-trim)
-    for _scanline in scanlines {
-
-        // TODO
-
-    }
-    None
+    mask.data.chunks_exact_mut(mask.width as usize)
+    .enumerate()
+    .filter_map(|(row_index, row_data)|
+        scanlines.get(&(row_index as u16))
+        .map(|scanline| (scanline, row_data) )
+    )
+    .for_each(|(scanline, row_data)|
+        for range in scanline {
+            row_data.iter_mut()
+            .skip(range.start as usize)
+            .take((range.end - range.start) as usize)
+            .for_each(|pixel| *pixel = pixel.saturating_add(SAMPLE_WEIGHT) );
+        }
+    );
+    Some(mask)
 }

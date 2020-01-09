@@ -1,5 +1,6 @@
 // Imports
 use super::types::Coordinate;
+use crate::g2d::math::FloatExt;
 use std::ops::{Add,AddAssign,Sub,Mul};
 
 
@@ -51,6 +52,30 @@ impl Point {
     }
     pub fn grid_len(self) -> Coordinate {
         self.x.abs() + self.y.abs()
+    }
+    pub fn round(self) -> Self {
+        Self {
+            x: self.x.round(),
+            y: self.y.round()
+        }
+    }
+    pub fn round_half_down(self) -> Self {
+        Self {
+            x: self.x.round_half_down(),
+            y: self.y.round_half_down()
+        }
+    }
+    pub fn min(self, other: Self) -> Self {
+        Self {
+            x: self.x.min(other.x),
+            y: self.y.min(other.y)
+        }
+    }
+    pub fn max(self, other: Self) -> Self {
+        Self {
+            x: self.x.max(other.x),
+            y: self.y.max(other.y)
+        }
     }
 }
 
