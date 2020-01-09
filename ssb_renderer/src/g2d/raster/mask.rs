@@ -4,5 +4,5 @@ pub struct Mask {
     pub y: u16,
     pub width: u16,
     pub height: u16,
-    pub data: Vec<u8>
+    pub data: Vec<f32>
 }

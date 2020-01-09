@@ -22,7 +22,7 @@ const SAMPLE_DEVIATIONS: [Point;SAMPLE_DEVIATIONS_NUMBER] = [
     Point {x: -0.375, y: -0.125},     // Top-left-left
     Point {x: -0.125, y: -0.375}      // Top-top-left
 ];
-const SAMPLE_WEIGHT: u8 = {let weight = 256 / SAMPLE_DEVIATIONS_NUMBER; weight - ((weight & 256) >> 8)} as u8;
+const SAMPLE_WEIGHT: f32 = 1.0 / SAMPLE_DEVIATIONS_NUMBER as f32;
 
 // Rasterize path to mask
 pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Option<Mask> {
@@ -50,7 +50,7 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
             y: path_offset_trimmed.y as u16,
             width: path_dimensions.0,
             height: path_dimensions.1,
-            data: vec![0; path_dimensions.0 as usize * path_dimensions.1 as usize]
+            data: vec![0.0; path_dimensions.0 as usize * path_dimensions.1 as usize]
         },
         merge_and_order_scanlines(
             SAMPLE_DEVIATIONS.iter()
@@ -74,7 +74,7 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
             row_data.iter_mut()
             .skip(range.start as usize)
             .take((range.end - range.start) as usize)
-            .for_each(|pixel| *pixel = pixel.saturating_add(SAMPLE_WEIGHT) );
+            .for_each(|pixel| *pixel += SAMPLE_WEIGHT );
         }
     );
     Some(mask)
@@ -107,7 +107,7 @@ mod tests {
                 y: 3,
                 width: 1,
                 height: 1,
-                data: vec![255]
+                data: vec![1.0]
             })
         );
         // Split to subpixels
@@ -120,7 +120,7 @@ mod tests {
                 y: 3,
                 width: 2,
                 height: 2,
-                data: vec![64,64,64,64]
+                data: vec![0.25, 0.25, 0.25, 0.25]
             })
         );
     }
@@ -141,14 +141,14 @@ mod tests {
                 width: 8,
                 height: 8,
                 data: vec![
-                    0, 64, 160, 255, 255, 160, 64, 0,
-                    32, 255, 255, 255, 255, 255, 255, 32,
-                    160, 255, 255, 255, 255, 255, 255, 160,
-                    255, 255, 255, 255, 255, 255, 255, 255,
-                    255, 255, 255, 255, 255, 255, 255, 255,
-                    160, 255, 255, 255, 255, 255, 255, 160,
-                    32, 255, 255, 255, 255, 255, 255, 32,
-                    0, 64, 160, 255, 255, 160, 64, 0
+                    0.0, 0.25, 0.625, 1.0, 1.0, 0.625, 0.25, 0.0,
+                    0.125, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.125,
+                    0.625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                    0.625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625,
+                    0.125, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.125,
+                    0.0, 0.25, 0.625, 1.0, 1.0, 0.625, 0.25, 0.0
                 ]
             })
         );
