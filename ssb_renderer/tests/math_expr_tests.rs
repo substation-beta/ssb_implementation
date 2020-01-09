@@ -4,7 +4,7 @@ mod math_expr_tests {
 
     #[test]
     fn test_simple() {
-        assert_eq!(eval_str("1 + 2").unwrap(), 3.0);
+        assert_eq!(eval_str("1 + 2").unwrap(), 3.);
     }
 
     #[test]

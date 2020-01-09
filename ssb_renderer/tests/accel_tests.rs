@@ -89,8 +89,8 @@ mod accel_tests {
                 _mm_storeu_ps(
                     result.as_mut_ptr(),
                     _mm_mul_ps(
-                        _mm_set_ps(1.0, 2.0, 3.0, 4.0),
-                        _mm_set_ps(5.0, 6.0, 7.0, 8.0)
+                        _mm_set_ps(1., 2., 3., 4.),
+                        _mm_set_ps(5., 6., 7., 8.)
                     )
                 );
             }
