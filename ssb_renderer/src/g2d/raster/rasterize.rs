@@ -13,14 +13,14 @@ use super::{
 // Sampling configuration
 const SAMPLE_DEVIATIONS_NUMBER: usize = 8;
 const SAMPLE_DEVIATIONS: [Point;SAMPLE_DEVIATIONS_NUMBER] = [
-    Point {x: 0.125, y: -0.25},     // Top-top-right
-    Point {x: 0.25, y: -0.125},     // Top-right-right
-    Point {x: 0.25, y: 0.125},     // Bottom-right-right
-    Point {x: 0.125, y: 0.25},     // Bottom-bottom-right
-    Point {x: -0.125, y: 0.25},     // Bottom-bottom-left
-    Point {x: -0.25, y: 0.125},     // Bottom-left-left
-    Point {x: -0.25, y: -0.125},     // Top-left-left
-    Point {x: -0.125, y: -0.25}      // Top-top-left
+    Point {x: 0.125, y: -0.375},     // Top-top-right
+    Point {x: 0.375, y: -0.125},     // Top-right-right
+    Point {x: 0.375, y: 0.125},     // Bottom-right-right
+    Point {x: 0.125, y: 0.375},     // Bottom-bottom-right
+    Point {x: -0.125, y: 0.375},     // Bottom-bottom-left
+    Point {x: -0.375, y: 0.125},     // Bottom-left-left
+    Point {x: -0.375, y: -0.125},     // Top-left-left
+    Point {x: -0.125, y: -0.375}      // Top-top-left
 ];
 const SAMPLE_WEIGHT: u8 = {let weight = 256 / SAMPLE_DEVIATIONS_NUMBER; weight - ((weight & 256) >> 8)} as u8;
 
@@ -44,7 +44,14 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
         path_peak_trimmed.y as u16 - path_offset_trimmed.y as u16
     );
     // Calculate scanlines & mask
-    let (scanlines, mut mask) = (
+    let (mut mask, scanlines) = (
+        Mask {
+            x: path_offset_trimmed.x as u16,
+            y: path_offset_trimmed.y as u16,
+            width: path_dimensions.0,
+            height: path_dimensions.1,
+            data: vec![0; path_dimensions.0 as usize * path_dimensions.1 as usize]
+        },
         merge_and_order_scanlines(
             SAMPLE_DEVIATIONS.iter()
             .map(|deviation: &Point| {
@@ -53,14 +60,7 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
                 scanlines_from_path(&new_path, area_width, area_height)
             })
             .collect()
-        ),
-        Mask {
-            x: path_offset_trimmed.x as u16,
-            y: path_offset_trimmed.y as u16,
-            width: path_dimensions.0,
-            height: path_dimensions.1,
-            data: vec![0; path_dimensions.0 as usize * path_dimensions.1 as usize]
-        }
+        )
     );
     // Rasterize scanlines on mask (addition with top-trim)
     mask.data.chunks_exact_mut(mask.width as usize)
@@ -86,7 +86,7 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
 mod tests {
     use crate::g2d::vector::{
         point::Point,
-        path::PathBase
+        path::{PathBase,Path}
     };
     use super::{rasterize_path,FlatPath,Mask};
 
@@ -121,6 +121,35 @@ mod tests {
                 width: 2,
                 height: 2,
                 data: vec![64,64,64,64]
+            })
+        );
+    }
+
+    #[test]
+    fn rasterize_point() {
+        // Path
+        let mut path = Path::default();
+        path.move_to(Point {x: 5.0, y: 1.0})
+            .arc_by(Point {x: 5.0, y: 5.0}, 360.0)
+            .close();
+        // Test
+        assert_eq!(
+            rasterize_path(&FlatPath::from(path), 10, 10),
+            Some(Mask {
+                x: 1,
+                y: 1,
+                width: 8,
+                height: 8,
+                data: vec![
+                    0, 64, 160, 255, 255, 160, 64, 0,
+                    32, 255, 255, 255, 255, 255, 255, 32,
+                    160, 255, 255, 255, 255, 255, 255, 160,
+                    255, 255, 255, 255, 255, 255, 255, 255,
+                    255, 255, 255, 255, 255, 255, 255, 255,
+                    160, 255, 255, 255, 255, 255, 255, 160,
+                    32, 255, 255, 255, 255, 255, 255, 32,
+                    0, 64, 160, 255, 255, 160, 64, 0
+                ]
             })
         );
     }
