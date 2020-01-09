@@ -13,14 +13,14 @@ use super::{
 // Sampling configuration
 const SAMPLE_DEVIATIONS_NUMBER: usize = 8;
 const SAMPLE_DEVIATIONS: [Point;SAMPLE_DEVIATIONS_NUMBER] = [
-    Point {x: 0.125, y: -0.375},     // Top-top-right
-    Point {x: 0.375, y: -0.125},     // Top-right-right
+    Point {x: 0.125, y: -0.375},    // Top-top-right
+    Point {x: 0.375, y: -0.125},    // Top-right-right
     Point {x: 0.375, y: 0.125},     // Bottom-right-right
     Point {x: 0.125, y: 0.375},     // Bottom-bottom-right
-    Point {x: -0.125, y: 0.375},     // Bottom-bottom-left
-    Point {x: -0.375, y: 0.125},     // Bottom-left-left
-    Point {x: -0.375, y: -0.125},     // Top-left-left
-    Point {x: -0.125, y: -0.375}      // Top-top-left
+    Point {x: -0.125, y: 0.375},    // Bottom-bottom-left
+    Point {x: -0.375, y: 0.125},    // Bottom-left-left
+    Point {x: -0.375, y: -0.125},   // Top-left-left
+    Point {x: -0.125, y: -0.375}    // Top-top-left
 ];
 const SAMPLE_WEIGHT: f32 = 1.0 / SAMPLE_DEVIATIONS_NUMBER as f32;
 
@@ -31,23 +31,19 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
         path.bounding()?,
         SAMPLE_DEVIATIONS.iter().min_max()?
     );
-    let (path_offset_rounded, path_peak_rounded) = (
-        (path_bounding.0 + deviations_bounding.0).round_half_down(),
-        (path_bounding.1 + deviations_bounding.1).round()
-    );
-    let (path_offset_trimmed, path_peak_trimmed) = (
-        path_offset_rounded.max(ORIGIN_POINT),
-        path_peak_rounded.min(Point {x: area_width as Coordinate, y: area_height as Coordinate})
+    let (path_offset, path_peak) = (
+        (path_bounding.0 + deviations_bounding.0).round_half_down().max(ORIGIN_POINT),
+        (path_bounding.1 + deviations_bounding.1).round().min(Point {x: area_width as Coordinate, y: area_height as Coordinate})
     );
     let path_dimensions = (
-        path_peak_trimmed.x as u16 - path_offset_trimmed.x as u16,
-        path_peak_trimmed.y as u16 - path_offset_trimmed.y as u16
+        path_peak.x as u16 - path_offset.x as u16,
+        path_peak.y as u16 - path_offset.y as u16
     );
     // Calculate scanlines & mask
     let (mut mask, scanlines) = (
         Mask {
-            x: path_offset_trimmed.x as u16,
-            y: path_offset_trimmed.y as u16,
+            x: path_offset.x as u16,
+            y: path_offset.y as u16,
             width: path_dimensions.0,
             height: path_dimensions.1,
             data: vec![0.0; path_dimensions.0 as usize * path_dimensions.1 as usize]
@@ -56,7 +52,7 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
             SAMPLE_DEVIATIONS.iter()
             .map(|deviation: &Point| {
                 let mut new_path = path.clone();
-                new_path.translate(-path_offset_rounded.x + deviation.x, -path_offset_rounded.y + deviation.y);
+                new_path.translate(-path_offset.x + deviation.x, -path_offset.y + deviation.y);
                 scanlines_from_path(&new_path, area_width, area_height)
             })
             .collect()
@@ -149,6 +145,45 @@ mod tests {
                     0.625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625,
                     0.125, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.125,
                     0.0, 0.25, 0.625, 1.0, 1.0, 0.625, 0.25, 0.0
+                ]
+            })
+        );
+    }
+
+    #[test]
+    fn rasterize_simple_path() {
+        // Path
+        let mut path = Path::default();
+        path.move_to(Point {x: -1.0, y: 10.0})
+            .curve_to(Point {x: 5.0, y: 12.0}, Point {x: 15.0, y: 0.0}, Point {x: 20.0, y: 10.0})
+            .line_to(Point {x: 0.0, y: 19.0})
+            .close()
+            .move_to(Point {x: 19.0, y: 17.0})
+            .line_to(Point {x: 21.0, y: 17.0})
+            .line_to(Point {x: 21.0, y: 18.0})
+            .line_to(Point {x: 19.0, y: 18.0})
+            .close();
+        // Test
+        assert_eq!(
+            rasterize_path(&FlatPath::from(path), 20, 18),
+            Some(Mask {
+                x: 0,
+                y: 6,
+                width: 20,
+                height: 12,
+                data: vec![
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.5, 0.75, 1.0, 1.0, 0.75, 0.125, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.375, 0.875, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.25, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.125, 0.625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.375, 0.0,
+                    0.0, 0.0, 0.125, 0.375, 0.625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5,
+                    1.0, 0.875, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625, 0.375,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625, 0.125, 0.0, 0.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.875, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.875, 0.375, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625, 0.375, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.625, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    1.0, 1.0, 0.875, 0.375, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0
                 ]
             })
         );
