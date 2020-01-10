@@ -4,15 +4,13 @@ use crate::g2d::math::FloatExt;
 use std::ops::{Add,AddAssign,Sub,Mul};
 
 
-// Point of path segment
+// Generic point with math
 #[derive(Debug, PartialEq, Clone, Copy, Default)]
-pub struct Point {
-    pub x: Coordinate,
-    pub y: Coordinate
+pub struct GenericPoint<T> {
+    pub x: T,
+    pub y: T
 }
-
-// Point math
-impl Add for Point {
+impl<T: Add<Output = T>> Add for GenericPoint<T> {
     type Output = Self;
     fn add(self, other: Self) -> Self::Output {
         Self {
@@ -21,13 +19,13 @@ impl Add for Point {
         }
     }
 }
-impl AddAssign for Point {
+impl<T: AddAssign> AddAssign for GenericPoint<T> {
     fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
     }
 }
-impl Sub for Point {
+impl<T: Sub<Output = T>> Sub for GenericPoint<T> {
     type Output = Self;
     fn sub(self, other: Self) -> Self::Output {
         Self {
@@ -36,15 +34,19 @@ impl Sub for Point {
         }
     }
 }
-impl Mul<Coordinate> for Point {
+impl<T: Mul<Output = T> + Copy> Mul<T> for GenericPoint<T> {
     type Output = Self;
-    fn mul(self, factor: Coordinate) -> Self::Output {
+    fn mul(self, factor: T) -> Self::Output {
         Self {
             x: self.x * factor,
             y: self.y * factor
         }
     }
 }
+
+// Point as path segment
+pub type Point = GenericPoint<Coordinate>;
+
 #[allow(clippy::len_without_is_empty)]
 impl Point {
     pub fn len(self) -> Coordinate {

@@ -1,7 +1,7 @@
 // Imports
 use crate::g2d::vector::{
     types::Coordinate,
-    point::{Point,PointMinMaxCollector,ORIGIN_POINT},
+    point::{Point,PointMinMaxCollector,ORIGIN_POINT,GenericPoint},
     path::FlatPath
 };
 use super::{
@@ -35,18 +35,18 @@ pub fn rasterize_path(path: &FlatPath, area_width: u16, area_height: u16) -> Opt
         (path_bounding.0 + deviations_bounding.0).round_half_down().max(ORIGIN_POINT),
         (path_bounding.1 + deviations_bounding.1).round().min(Point {x: area_width as Coordinate, y: area_height as Coordinate})
     );
-    let path_dimensions = (
-        path_peak.x as u16 - path_offset.x as u16,
-        path_peak.y as u16 - path_offset.y as u16
-    );
+    let path_dimensions = GenericPoint {
+        x: path_peak.x as u16 - path_offset.x as u16,
+        y: path_peak.y as u16 - path_offset.y as u16
+    };
     // Calculate scanlines & mask
     let (mut mask, scanlines) = (
         Mask {
             x: path_offset.x as u16,
             y: path_offset.y as u16,
-            width: path_dimensions.0,
-            height: path_dimensions.1,
-            data: vec![0.0; path_dimensions.0 as usize * path_dimensions.1 as usize]
+            width: path_dimensions.x,
+            height: path_dimensions.y,
+            data: vec![0.0; path_dimensions.x as usize * path_dimensions.y as usize]
         },
         merge_and_order_scanlines(
             SAMPLE_DEVIATIONS.iter()

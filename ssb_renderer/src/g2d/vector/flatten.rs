@@ -1,7 +1,7 @@
 // Imports
 use super::{
     types::{Coordinate,Degree},
-    point::Point
+    point::{Point,GenericPoint}
 };
 
 
@@ -21,16 +21,19 @@ pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Ve
     // Add remaining points
     angle_rad /= lines_n as Degree;
     let (angle_sin, angle_cos) = (angle_rad.sin(), angle_rad.cos());
-    let mut precise_vector = (vector.x as Degree, vector.y as Degree);
+    let mut precise_vector = GenericPoint {
+        x: vector.x as Degree,
+        y: vector.y as Degree
+    };
     for _ in 0..lines_n {
         points.push(center_point + {
-            precise_vector = (
-                precise_vector.0 * angle_cos - precise_vector.1 * angle_sin,
-                precise_vector.0 * angle_sin + precise_vector.1 * angle_cos
-            );
+            precise_vector = GenericPoint {
+                x: precise_vector.x * angle_cos - precise_vector.y * angle_sin,
+                y: precise_vector.x * angle_sin + precise_vector.y * angle_cos
+            };
             Point {
-                x: precise_vector.0 as Coordinate,
-                y: precise_vector.1 as Coordinate
+                x: precise_vector.x as Coordinate,
+                y: precise_vector.y as Coordinate
             }
         });
     }
