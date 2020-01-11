@@ -18,6 +18,10 @@ use std::{
 pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> HashMap<u16,Vec<Range<u16>>> {
     // Scanlines buffer
     let mut scanlines = HashMap::with_capacity(1);
+    struct ScanlineStop {
+        x: Coordinate,
+        winding: i8
+    }
     // Path to lines
     let (mut last_point, mut last_move) = (&ORIGIN_POINT, &ORIGIN_POINT);
     path.segments().iter()
@@ -52,10 +56,15 @@ pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -
             (line.0.y.min(line.1.y).round_half_down() + 0.5).max(0.5),
             (line.0.y.max(line.1.y).round_half_down() - 0.5).min(area_height as Coordinate - 0.5)
         );
+        // Line direction as winding rule
+        let winding = (line.1.y - line.0.y).signum() as i8;
         // Straight vertical line
         if line.0.x.eq_close(line.1.x) {
             while cur_y <= last_y {
-                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(line.0.x);
+                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(ScanlineStop {
+                    x: line.0.x,
+                    winding
+                });
                 cur_y += 1.0;
             }
         }
@@ -63,7 +72,10 @@ pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -
         else {
             let slope_x_by_y = {let line_vector = *line.1 - *line.0; line_vector.x / line_vector.y};
             while cur_y <= last_y {
-                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(line.0.x + (cur_y - line.0.y) * slope_x_by_y);
+                scanlines.entry(cur_y.floor() as u16).or_insert_with(|| Vec::with_capacity(2) ).push(ScanlineStop {
+                    x: line.0.x + (cur_y - line.0.y) * slope_x_by_y,
+                    winding
+                });
                 cur_y += 1.0;
             }
         }
@@ -74,14 +86,32 @@ pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -
         row,
         {
             // Sort scanline stops
-            scanline.sort_by(|stop1, stop2| stop1.partial_cmp(stop2).expect("There isn't a not-number. Stop twitting me!") );
+            scanline.sort_by(|stop1, stop2| stop1.x.partial_cmp(&stop2.x).expect("There isn't a NAN. Stop twitting me!") );
             // Pair & trim scanline stops to ranges
-            scanline.chunks_exact(2)
-            .map(|stop_pair| (
-                FloatExt::clamp(stop_pair[0].round_half_down(), 0.0, area_width as Coordinate) as u16
-                ..
-                FloatExt::clamp(stop_pair[1].round(), 0.0, area_width as Coordinate) as u16
-            ))
+            let (mut coverage, mut range_start_option) = (0, None as Option<Coordinate>);
+            scanline.into_iter()
+            .filter_map(|stop| {
+                let range = match range_start_option {
+                    // Complete range
+                    Some(range_start) if coverage + stop.winding as i16 == 0 => {
+                        range_start_option = None;
+                        Some(
+                            FloatExt::clamp(range_start.round_half_down(), 0.0, area_width as Coordinate) as u16
+                            ..
+                            FloatExt::clamp(stop.x.round(), 0.0, area_width as Coordinate) as u16
+                        )
+                    }
+                    // Save range start
+                    None if coverage == 0 => {
+                        range_start_option = Some(stop.x);
+                        None
+                    }
+                    // Ignore over-coverage
+                    _ => None
+                };
+                coverage += stop.winding as i16;
+                range
+            })
             // Discard empty scanline ranges
             .filter(|stop_range| !RangeExt::is_empty(stop_range) )
             // Return ranges
@@ -129,6 +159,20 @@ mod tests {
     use super::{scanlines_from_path,HashMap,merge_and_order_scanlines};
 
     #[test]
+    fn scanlines_unclosed() {
+        // Path
+        let mut path = FlatPath::default();
+        path.move_to(Point {x: 1.0, y: 0.0})
+            .line_to(Point {x: 1.0, y: 3.0})
+            .line_to(Point {x: 4.0, y: 3.0});
+        // Test
+        assert_eq!(
+            scanlines_from_path(&path, 4, 3),
+            HashMap::new()
+        );
+    }
+
+    #[test]
     fn scanlines_quad_trimmed() {
         // Path
         let mut path = FlatPath::default();
@@ -145,20 +189,6 @@ mod tests {
                 (2, vec![1..5]),
                 (3, vec![1..5])
             ].into_iter().cloned().collect()    // To map for comparison
-        );
-    }
-
-    #[test]
-    fn scanlines_unclosed() {
-        // Path
-        let mut path = FlatPath::default();
-        path.move_to(Point {x: 1.0, y: 0.0})
-            .line_to(Point {x: 1.0, y: 3.0})
-            .line_to(Point {x: 4.0, y: 3.0});
-        // Test
-        assert_eq!(
-            scanlines_from_path(&path, 4, 3),
-            HashMap::new()
         );
     }
 
@@ -185,6 +215,38 @@ mod tests {
                 (2, vec![0..2, 7..9]),
                 (3, vec![0..2, 7..9]),
                 (4, vec![0..2, 7..9]),
+                (5, vec![0..9]),
+                (6, vec![0..9]),
+                (7, vec![0..9]),
+                (8, vec![0..9]),
+                (9, vec![0..9])
+            ].into_iter().cloned().collect()    // To map for comparison
+        );
+    }
+
+    #[test]
+    fn scanlines_winding() {
+        // Path
+        let mut path = FlatPath::default();
+        path.move_to(Point {x: 0.0, y: 0.0})
+            .line_to(Point {x: 9.0, y: 0.0})
+            .line_to(Point {x: 9.0, y: 10.0})
+            .line_to(Point {x: 0.0, y: 10.0})
+            .close()
+            .move_to(Point {x: 2.0, y: 2.0})
+            .line_to(Point {x: 7.0, y: 2.0})
+            .line_to(Point {x: 7.0, y: 5.0})
+            .line_to(Point {x: 2.0, y: 5.0})
+            .close();
+        // Test
+        assert_eq!(
+            scanlines_from_path(&path, 10, 10),
+            [
+                (0, vec![0..9]),
+                (1, vec![0..9]),
+                (2, vec![0..9]),
+                (3, vec![0..9]),
+                (4, vec![0..9]),
                 (5, vec![0..9]),
                 (6, vec![0..9]),
                 (7, vec![0..9]),
