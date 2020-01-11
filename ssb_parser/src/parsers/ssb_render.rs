@@ -549,9 +549,9 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                         }
                     }))
                 })
-                .map_err(|value_err| {
-                    let value = format!("Invalid animate '{}'!", value_err.0);
-                    value_err.1.map(|err| ParseError::new_with_source(&value, err) ).unwrap_or_else(|| ParseError::new(&value) )
+                .map_err(|(value,err)| {
+                    let value = format!("Invalid animate '{}'!", value);
+                    err.map(|err| ParseError::new_with_source(&value, err) ).unwrap_or_else(|| ParseError::new(&value) )
                 } )?
             )),
             "k" => objects.push(EventObject::TagKaraoke(

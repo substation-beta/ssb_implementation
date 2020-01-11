@@ -10,7 +10,7 @@ impl EscapedText {
         let text = source.replace("\\\\", "\x1B").replace(&("\\".to_owned() + TAG_START), "\x02").replace(&("\\".to_owned() + TAG_END), "\x03").replace("\\n", "\n").replace('\x1B', "\\");
         Self {
             text: text.replace('\x02', TAG_START).replace('\x03', TAG_END),
-            tag_starts_ends: text.char_indices().filter(|c| c.1 == TAG_START_CHAR || c.1 == TAG_END_CHAR).collect()
+            tag_starts_ends: text.char_indices().filter(|(_,c)| *c == TAG_START_CHAR || *c == TAG_END_CHAR).collect()
         }
     }
     pub fn iter(&self) -> TagGeometryIterator {
@@ -32,7 +32,7 @@ impl<'src> Iterator for TagGeometryIterator<'src> {
             return None;
         }
         // Find next tag start
-        let tag_start = self.source.tag_starts_ends.iter().find(|c| c.0 >= self.pos && c.1 == TAG_START_CHAR).map(|c| c.0);
+        let tag_start = self.source.tag_starts_ends.iter().find(|(pos,tag)| *pos >= self.pos && *tag == TAG_START_CHAR).map(|(pos,_)| *pos);
         // Match tag or geometry
         let is_tag;
         let text_chunk;
@@ -40,12 +40,12 @@ impl<'src> Iterator for TagGeometryIterator<'src> {
             is_tag = true;
             // Till tag end (considers nested tags)
             let mut tag_open_count = 0usize;
-            if let Some(end_pos) = self.source.tag_starts_ends.iter().find(|c| match c.1 {
-                _ if c.0 < self.pos + TAG_START.len() => false,
+            if let Some(end_pos) = self.source.tag_starts_ends.iter().find(|(pos,tag)| match *tag {
+                _ if *pos < self.pos + TAG_START.len() => false,
                 TAG_START_CHAR => {tag_open_count+=1; false}
                 TAG_END_CHAR => if tag_open_count == 0 {true} else {tag_open_count-=1; false}
                 _ => false
-            }).map(|c| c.0) {
+            }).map(|(pos,_)| *pos) {
                 text_chunk = &self.source.text[self.pos + TAG_START.len()..end_pos];
                 self.pos = end_pos + TAG_END.len();
             // Till end
@@ -91,12 +91,12 @@ impl<'src> Iterator for TagsIterator<'src> {
         }
         // Find next tag separator (considers nested tags)
         let mut tag_open_count = 0usize;
-        let tag_sep = self.text.char_indices().skip(self.pos).find(|c| match c.1 {
+        let tag_sep = self.text.char_indices().skip(self.pos).find(|(_,c)| match *c {
             TAG_START_CHAR => {tag_open_count+=1; false}
             TAG_END_CHAR => {if tag_open_count > 0 {tag_open_count-=1} false}
             TAG_SEPARATOR if tag_open_count == 0 => true,
             _ => false
-        }).map(|c| c.0);
+        }).map(|(index,_)| index);
         // Match till separator or end
         let tag_token;
         if let Some(tag_sep) = tag_sep {

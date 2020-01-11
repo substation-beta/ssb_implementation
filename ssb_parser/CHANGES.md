@@ -1,5 +1,6 @@
 # v0.4.1
 * improved error messages by inheritance
+* minor code cleaning
 
 # v0.4.0
 * updated dependencies

@@ -9,7 +9,7 @@ pub fn flatten_macro<'a>(macro_name: &str, history: &mut HashSet<&'a str>, macro
     }
     // Macro exists?
     let (macro_name, mut flat_macro_value) = macros.get_key_value(macro_name)
-        .map(|key_value| (key_value.0.as_str(), key_value.1.to_owned()))
+        .map(|(key,value)| (key.as_str(), value.to_owned()))
         .ok_or_else(|| MacroError::NotFound(macro_name.to_owned()))?;
     // Macro already in history (avoid infinite loop!)
     if history.contains(macro_name) {

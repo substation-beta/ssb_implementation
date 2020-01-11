@@ -99,11 +99,11 @@ pub fn merge_and_order_scanlines(mut scanlines_samples: Vec<HashMap<u16,Vec<Rang
     // Anything to do?
     if let Some((scanlines, other_scanlines_samples)) = scanlines_samples.split_first_mut() {
         // Merge all scanlines into first sample
-        for other_scanline in other_scanlines_samples.iter_mut().flatten() {
-            if let Some(scanline_ranges) = scanlines.get_mut(other_scanline.0) {
-                scanline_ranges.append(other_scanline.1);
+        for (row, other_scanline_ranges) in other_scanlines_samples.iter_mut().flatten() {
+            if let Some(scanline_ranges) = scanlines.get_mut(row) {
+                scanline_ranges.append(other_scanline_ranges);
             } else {
-                scanlines.insert(*other_scanline.0, other_scanline.1.drain(..).collect());
+                scanlines.insert(*row, other_scanline_ranges.drain(..).collect());
             }
         }
         // Convert scanlines to sorted map with sorted ranges
