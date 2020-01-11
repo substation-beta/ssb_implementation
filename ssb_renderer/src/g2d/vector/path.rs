@@ -2,7 +2,7 @@
 use super::{
     types::{Coordinate,Degree},
     point::{Point,ORIGIN_POINT,PointMinMaxCollector},
-    flatten::{flatten_curve, flatten_arc}
+    flatten::{flatten_curve,arc_to_curves}
 };
 
 
@@ -70,19 +70,11 @@ impl From<Path> for FlatPath {
                     new_last_point
                 }
                 // Flatten curve
-                PathSegment::CurveTo(control_point1, control_point2, end_point) => {
+                PathSegment::CurveTo(control_point1, control_point2, end_point) =>
                     flatten_curve(last_point, control_point1, control_point2, end_point).into_iter()
                         .skip(1)
                         .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
                         .last().unwrap_or(last_point)
-                }
-                // Flatten arc
-                PathSegment::ArcBy(center_point, angle) => {
-                    flatten_arc(last_point, center_point, angle).into_iter()
-                        .skip(1)
-                        .inspect(|point| flat_segments.push(FlatPathSegment::LineTo(*point)) )
-                        .last().unwrap_or(last_point)
-                }
             }
         });
         // Create flat path
@@ -115,8 +107,7 @@ impl FlatPath {
 #[derive(Debug, Clone, PartialEq)]
 pub enum PathSegment {
     Flat(FlatPathSegment),
-    CurveTo(Point, Point, Point),   // Control points + end point
-    ArcBy(Point, Degree),  // Orientation/center point + angle
+    CurveTo(Point, Point, Point)   // Control points + end point
 }
 
 // Path of 2d geometry
@@ -160,7 +151,16 @@ impl Path {
         self
     }
     pub fn arc_by(&mut self, center_point: Point, angle: Degree) -> &mut Self {
-        self.segments.push(PathSegment::ArcBy(center_point, angle));
+        let last_point = *match self.segments.last() {
+            Some(PathSegment::Flat(FlatPathSegment::MoveTo(point))) |
+            Some(PathSegment::Flat(FlatPathSegment::LineTo(point))) |
+            Some(PathSegment::CurveTo(_, _, point)) => point,
+            _ => &ORIGIN_POINT
+        };
+        self.segments.extend(
+            arc_to_curves(last_point, center_point, angle).into_iter()
+            .map(|curve_points| PathSegment::CurveTo(curve_points[1], curve_points[2], curve_points[3]) )
+        );
         self
     }
 }
@@ -188,7 +188,8 @@ mod tests {
             &[
                 PathSegment::Flat(FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})),
                 PathSegment::Flat(FlatPathSegment::LineTo(Point {x: 0.0, y: 0.0})),
-                PathSegment::ArcBy(Point {x: 0.0, y: 50.0}, 180.0),
+                PathSegment::CurveTo(Point {x: 27.5, y: 0.0}, Point {x: 50.0, y: 22.5}, Point {x: 50.0, y: 50.0}),
+                PathSegment::CurveTo(Point {x: 50.0, y: 77.5}, Point {x: 27.5, y: 100.0}, Point {x: 0.0, y: 100.0}),
                 PathSegment::CurveTo(Point {x: 35.0, y: 90.0}, Point {x: -75.0, y: 60.0}, Point {x: 0.0, y: 50.0}),
                 PathSegment::Flat(FlatPathSegment::Close)
             ]

@@ -17,7 +17,7 @@ pub fn arc_to_curves(start_point: Point, center_point: Point, angle: Degree) -> 
         let mut curves = Vec::with_capacity(if last_curve_angle != 0.0 {full_curves_n + 1} else {full_curves_n} as usize);
         // Magic numbers
         const CONTROL_POINT_DISTANCE: Degree = 0.388_908_729_652_601;
-        const SIN_COS_45: Coordinate = 0.707_106_781_186_548;
+        const SIN_COS_45: Coordinate = std::f64::consts::FRAC_1_SQRT_2 as Coordinate;
         // Generate full curves
         let mut vector = start_point - center_point;
         let angle_direction = angle.signum() as Coordinate;
@@ -81,36 +81,6 @@ pub fn arc_to_curves(start_point: Point, center_point: Point, angle: Degree) -> 
     }
 }
 
-// Flatten arc to polyline
-const ARC_LINE_LENGTH: Degree = 0.75;
-pub fn flatten_arc(start_point: Point, center_point: Point, angle: Degree) -> Vec<Point> {
-    // Anything to do?
-    if start_point == center_point || angle == 0.0 {
-        return vec![start_point];
-    }
-    // Number of required lines
-    let (vector, mut angle_rad) = (start_point - center_point, angle.to_radians());
-    let lines_n = (angle_rad.abs() * vector.len() as Degree / ARC_LINE_LENGTH).ceil() as usize;
-    // Points buffer with start point
-    let mut points = Vec::with_capacity(1 + lines_n);
-    points.push(start_point);
-    // Add remaining points
-    angle_rad /= lines_n as Degree;
-    let (angle_sin, angle_cos) = (angle_rad.sin(), angle_rad.cos());
-    let mut precise_vector = GenericPoint::<Degree>::from(vector);
-    for _ in 0..lines_n {
-        points.push(center_point + {
-            precise_vector = GenericPoint {
-                x: precise_vector.x * angle_cos - precise_vector.y * angle_sin,
-                y: precise_vector.x * angle_sin + precise_vector.y * angle_cos
-            };
-            Point::from(precise_vector)
-        });
-    }
-    // Return points
-    points
-}
-
 // Flatten curve to polyline
 const CURVE_DEVIATION_LENGTH: Coordinate = 0.25;
 #[inline]
@@ -160,7 +130,7 @@ pub fn flatten_curve(start_point: Point, control_point1: Point, control_point2: 
 // Tests
 #[cfg(test)]
 mod tests {
-    use super::{Point,arc_to_curves,flatten_curve,flatten_arc};
+    use super::{Point,arc_to_curves,flatten_curve};
 
     #[test]
     fn arc_curves() {
@@ -174,39 +144,16 @@ mod tests {
             "Short curve points unexpected: {:?}", curve
         );
         // Long negative-angled arc
-        let curves = arc_to_curves(Point {x: 0.0, y: 0.0}, Point {x: 0.0, y: 100.0}, -450.0);
         assert_eq!(
-            curves.iter().map(|curve| curve[3] ).collect::<Vec<_>>(),
+            arc_to_curves(Point {x: 0.0, y: 0.0}, Point {x: 0.0, y: 100.0}, -450.0),
             vec![
-                Point {x: -100.0, y: 100.0},
-                Point {x: 0.0, y: 200.0},
-                Point {x: 100.0, y: 100.0},
-                Point {x: 0.0, y: 0.0},
-                Point {x: -100.0, y: 100.0}
-            ],
-            "Long curve points unexpected: {:?}", curves
+                [Point { x: 0.0, y: 0.0 }, Point { x: -55.0, y: 0.0 }, Point { x: -100.0, y: 45.0 }, Point { x: -100.0, y: 100.0 }],
+                [Point { x: -100.0, y: 100.0 }, Point { x: -100.0, y: 155.0 }, Point { x: -55.0, y: 200.0 }, Point { x: 0.0, y: 200.0 }],
+                [Point { x: 0.0, y: 200.0 }, Point { x: 55.0, y: 200.0 }, Point { x: 100.0, y: 155.0 }, Point { x: 100.0, y: 100.0 }],
+                [Point { x: 100.0, y: 100.0 }, Point { x: 100.0, y: 45.0 }, Point { x: 55.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
+                [Point { x: 0.0, y: 0.0 }, Point { x: -55.0, y: 0.0 }, Point { x: -100.0, y: 45.0 }, Point { x: -100.0, y: 100.0 }]
+            ]
         );
-    }
-
-    #[test]
-    fn flat_arc() {
-        // Nothing to do
-        assert_eq!(
-            flatten_arc(Point {x: 42.5, y: 33.0}, Point {x: 42.5, y: 33.0}, 99.0),
-            vec![Point {x: 42.5, y: 33.0}]
-        );
-        assert_eq!(
-            flatten_arc(Point {x: 1.0, y: 2.0}, Point {x: 3.0, y: 4.0}, 0.0),
-            vec![Point {x: 1.0, y: 2.0}]
-        );
-        // Tiny angle = 2 points = 1 line
-        assert_eq!(
-            flatten_arc(Point {x: 0.0, y: -5.0}, Point {x: 0.0, y: 0.0}, 0.00001).len(),
-            2
-        );
-        // Complex
-        let points = flatten_arc(Point {x: 0.0, y: -4.0}, Point {x: 0.0, y: -2.0}, -270.0);
-        assert_eq!(points.last(), Some(&Point {x: 2.0, y: -2.0}), "Last point not fitting: {:?}", points);
     }
 
     #[test]
