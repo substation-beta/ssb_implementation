@@ -8,6 +8,7 @@ use crate::g2d::{
     }
 };
 use std::{
+    mem::replace as memory_replace,
     ops::Range,
     collections::{HashMap,BTreeMap}
 };
@@ -15,13 +16,6 @@ use std::{
 
 // Path to scanlines
 pub fn scanlines_from_path(path: &FlatPath, area_width: u16, area_height: u16) -> HashMap<u16,Vec<Range<u16>>> {
-    scanlines_ranges_trimmed(
-        scanlines_stops_from_path(path, area_height),
-        area_width
-    )
-}
-#[inline]
-fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,Vec<f32>> {
     // Scanlines buffer
     let mut scanlines = HashMap::with_capacity(1);
     // Path to lines
@@ -41,11 +35,7 @@ fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,V
         }
         FlatPathSegment::LineTo(point) =>
             Some((
-                {
-                    let old_last_point = last_point;
-                    last_point = point;
-                    old_last_point
-                },
+                memory_replace(&mut last_point, point),
                 point
             ))
     })
@@ -78,12 +68,7 @@ fn scanlines_stops_from_path(path: &FlatPath, area_height: u16) -> HashMap<u16,V
             }
         }
     });
-    // Return unordered scanlines
-    scanlines
-}
-#[inline]
-fn scanlines_ranges_trimmed(scanlines: HashMap<u16,Vec<f32>>, area_width: u16) -> HashMap<u16,Vec<Range<u16>>> {
-    // Convert scanline from stops to ranges
+    // Convert scanline stops to ranges
     scanlines.into_iter()
     .map(|(row,mut scanline)| (
         row,
