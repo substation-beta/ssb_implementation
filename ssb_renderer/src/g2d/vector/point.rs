@@ -1,7 +1,7 @@
 // Imports
-use super::types::Coordinate;
+use super::types::{Coordinate,Degree};
 use crate::g2d::math::FloatExt;
-use std::ops::{Add,AddAssign,Sub,Mul};
+use std::ops::{Add,AddAssign,Sub,Mul,Neg};
 
 
 // Generic point with math
@@ -43,6 +43,32 @@ impl<T: Mul<Output = T> + Copy> Mul<T> for GenericPoint<T> {
         }
     }
 }
+impl<T: Neg<Output = T>> Neg for GenericPoint<T> {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y
+        }
+    }
+}
+
+// Point conversions
+macro_rules! impl_From {
+    ($FROM:ty,$TO:ty) => {
+        impl From<GenericPoint<$FROM>> for GenericPoint<$TO> {
+            fn from(point: GenericPoint<$FROM>) -> Self {
+                Self {
+                    x: point.x as $TO,
+                    y: point.y as $TO
+                }
+            }
+        }
+    }
+}
+impl_From!(Degree,Coordinate);
+impl_From!(Coordinate,Degree);
+impl_From!(Coordinate,u16);
 
 // Point as path segment
 pub type Point = GenericPoint<Coordinate>;
@@ -81,6 +107,9 @@ impl Point {
     }
 }
 
+// Default point (possible to reference)
+pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
+
 // Point collections
 pub trait PointMinMaxCollector<'origin>: Iterator<Item=&'origin Point> {
     fn min_max(self) -> Option<(Point,Point)>;
@@ -103,6 +132,3 @@ impl <'origin, I: Iterator<Item=&'origin Point>> PointMinMaxCollector<'origin> f
         )
     }
 }
-
-// Default point (possible to reference)
-pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
