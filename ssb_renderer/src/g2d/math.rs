@@ -3,20 +3,26 @@ pub trait FloatExt<T> {
     fn round_half_down(self) -> T;
     fn eq_close(self, other: T) -> bool;
 }
-impl FloatExt<f32> for f32 {
-    #[inline]
-    fn clamp(self, min: f32, max: f32) -> f32 {
-        self.max(min).min(max)
-    }
-    #[inline]
-    fn round_half_down(self) -> f32 {
-        if self.fract() <= 0.5 {self.floor()} else {self.ceil()}
-    }
-    #[inline]
-    fn eq_close(self, other: f32) -> bool {
-        (self - other).abs() < std::f32::EPSILON
+macro_rules! impl_FloatExt {
+    ($T:tt) => {
+        impl FloatExt<$T> for $T {
+            #[inline]
+            fn clamp(self, min: $T, max: $T) -> $T {
+                self.max(min).min(max)
+            }
+            #[inline]
+            fn round_half_down(self) -> $T {
+                if self.fract() <= 0.5 {self.floor()} else {self.ceil()}
+            }
+            #[inline]
+            fn eq_close(self, other: $T) -> bool {
+                (self - other).abs() < std::$T::EPSILON
+            }
+        }
     }
 }
+impl_FloatExt!(f32);
+impl_FloatExt!(f64);
 
 pub trait RangeExt {
     fn is_empty(&self) -> bool; // Stabilization: <https://doc.rust-lang.org/std/ops/struct.Range.html#method.is_empty>
