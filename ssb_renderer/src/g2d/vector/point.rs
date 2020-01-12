@@ -78,9 +78,6 @@ impl Point {
     pub fn len(self) -> Coordinate {
         self.x.hypot(self.y)
     }
-    pub fn grid_len(self) -> Coordinate {
-        self.x.abs() + self.y.abs()
-    }
     pub fn round(self) -> Self {
         Self {
             x: self.x.round(),

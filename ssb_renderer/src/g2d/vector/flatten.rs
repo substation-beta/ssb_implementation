@@ -82,12 +82,12 @@ pub fn arc_to_curves(start_point: Point, center_point: Point, angle: Degree) -> 
 }
 
 // Flatten curve to polyline
-const CURVE_DEVIATION_LENGTH: Coordinate = 0.25;
+const CURVE_DEVIATION_LENGTH: Coordinate = 0.125;
 #[inline]
 fn is_curve_flat(p: &[Point;4]) -> bool {
-    (p[1] - p[0]).grid_len() + (p[2] - p[1]).grid_len() + (p[3] - p[2]).grid_len()
+    (p[1] - p[0]).len() + (p[2] - p[1]).len() + (p[3] - p[2]).len()
     <
-    (p[3] - p[0]).grid_len() + CURVE_DEVIATION_LENGTH
+    (p[3] - p[0]).len() + CURVE_DEVIATION_LENGTH
 }
 #[inline]
 fn split_curve_mid(p: [Point;4]) -> ([Point;4], [Point;4]) {

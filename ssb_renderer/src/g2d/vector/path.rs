@@ -155,7 +155,7 @@ impl Path {
             Some(PathSegment::Flat(FlatPathSegment::MoveTo(point))) |
             Some(PathSegment::Flat(FlatPathSegment::LineTo(point))) |
             Some(PathSegment::CurveTo(_, _, point)) => point,
-            _ => &ORIGIN_POINT
+            Some(PathSegment::Flat(FlatPathSegment::Close)) | None => &ORIGIN_POINT
         };
         self.segments.extend(
             arc_to_curves(last_point, center_point, angle).into_iter()
