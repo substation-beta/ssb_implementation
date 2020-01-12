@@ -188,8 +188,8 @@ mod tests {
             &[
                 PathSegment::Flat(FlatPathSegment::MoveTo(Point {x: 0.0, y: 50.0})),
                 PathSegment::Flat(FlatPathSegment::LineTo(Point {x: 0.0, y: 0.0})),
-                PathSegment::CurveTo(Point {x: 27.5, y: 0.0}, Point {x: 50.0, y: 22.5}, Point {x: 50.0, y: 50.0}),
-                PathSegment::CurveTo(Point {x: 50.0, y: 77.5}, Point {x: 27.5, y: 100.0}, Point {x: 0.0, y: 100.0}),
+                PathSegment::CurveTo(Point {x: 27.595749, y: 0.0}, Point {x: 50.0, y: 22.404251}, Point {x: 50.0, y: 50.0}),
+                PathSegment::CurveTo(Point {x: 50.0, y: 77.59575}, Point {x: 27.595749, y: 100.0}, Point {x: 0.0, y: 100.0}),
                 PathSegment::CurveTo(Point {x: 35.0, y: 90.0}, Point {x: -75.0, y: 60.0}, Point {x: 0.0, y: 50.0}),
                 PathSegment::Flat(FlatPathSegment::Close)
             ]

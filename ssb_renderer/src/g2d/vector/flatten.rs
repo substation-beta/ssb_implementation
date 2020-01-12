@@ -16,7 +16,7 @@ pub fn arc_to_curves(start_point: Point, center_point: Point, angle: Degree) -> 
         );
         let mut curves = Vec::with_capacity(if last_curve_angle != 0.0 {full_curves_n + 1} else {full_curves_n} as usize);
         // Magic numbers
-        const CONTROL_POINT_DISTANCE: Degree = 0.388_908_729_652_601;
+        const CONTROL_POINT_DISTANCE: Degree = 0.390_262_856_458_446_8; // 0.551915024494 / 1_f64.hypot(1.) | Perfect radial distance relative to start-to-end vector
         const SIN_COS_45: Coordinate = std::f64::consts::FRAC_1_SQRT_2 as Coordinate;
         // Generate full curves
         let mut vector = start_point - center_point;
@@ -147,11 +147,11 @@ mod tests {
         assert_eq!(
             arc_to_curves(Point {x: 0.0, y: 0.0}, Point {x: 0.0, y: 100.0}, -450.0),
             vec![
-                [Point { x: 0.0, y: 0.0 }, Point { x: -55.0, y: 0.0 }, Point { x: -100.0, y: 45.0 }, Point { x: -100.0, y: 100.0 }],
-                [Point { x: -100.0, y: 100.0 }, Point { x: -100.0, y: 155.0 }, Point { x: -55.0, y: 200.0 }, Point { x: 0.0, y: 200.0 }],
-                [Point { x: 0.0, y: 200.0 }, Point { x: 55.0, y: 200.0 }, Point { x: 100.0, y: 155.0 }, Point { x: 100.0, y: 100.0 }],
-                [Point { x: 100.0, y: 100.0 }, Point { x: 100.0, y: 45.0 }, Point { x: 55.0, y: 0.0 }, Point { x: 0.0, y: 0.0 }],
-                [Point { x: 0.0, y: 0.0 }, Point { x: -55.0, y: 0.0 }, Point { x: -100.0, y: 45.0 }, Point { x: -100.0, y: 100.0 }]
+                [Point {x: 0.0, y: 0.0}, Point {x: -55.191498, y: 0.0}, Point {x: -100.0, y: 44.808502}, Point {x: -100.0, y: 100.0}],
+                [Point {x: -100.0, y: 100.0}, Point {x: -100.0, y: 155.1915}, Point {x: -55.191498, y: 200.0}, Point {x: 0.0, y: 200.0}],
+                [Point {x: 0.0, y: 200.0}, Point {x: 55.191498, y: 200.0}, Point {x: 100.0, y: 155.1915}, Point {x: 100.0, y: 100.0}],
+                [Point {x: 100.0, y: 100.0}, Point {x: 100.0, y: 44.808502}, Point {x: 55.191498, y: 0.0}, Point {x: 0.0, y: 0.0}],
+                [Point {x: 0.0, y: 0.0}, Point {x: -55.191498, y: 0.0}, Point {x: -100.0, y: 44.808502}, Point {x: -100.0, y: 100.0}]
             ]
         );
     }

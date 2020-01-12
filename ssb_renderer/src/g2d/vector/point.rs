@@ -73,6 +73,10 @@ impl_From!(Coordinate,u16);
 // Point as path segment
 pub type Point = GenericPoint<Coordinate>;
 
+// Default point (possible to reference)
+pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
+
+// Point methods
 #[allow(clippy::len_without_is_empty)]
 impl Point {
     pub fn len(self) -> Coordinate {
@@ -103,9 +107,6 @@ impl Point {
         }
     }
 }
-
-// Default point (possible to reference)
-pub static ORIGIN_POINT: Point = Point {x: 0.0, y: 0.0};
 
 // Point collections
 pub trait PointMinMaxCollector<'origin>: Iterator<Item=&'origin Point> {
