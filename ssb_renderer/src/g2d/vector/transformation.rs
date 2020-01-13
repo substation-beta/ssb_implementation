@@ -67,11 +67,9 @@ impl Mul for Transformation {
         #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
         for row_index in (0..16).step_by(4) {
             for column in 0..4 {
-                transformation.matrix[row_index + column] =
-                    self.matrix[row_index] * other.matrix[column] +
-                    self.matrix[row_index + 1] * other.matrix[column + 4] +
-                    self.matrix[row_index + 2] * other.matrix[column + 8] +
-                    self.matrix[row_index + 3] * other.matrix[column + 12];
+                for offset in 0..4 {
+                    transformation.matrix[row_index + column] += self.matrix[row_index + offset] * other.matrix[column + (offset << 2)];
+                }
             }
         }
         transformation
@@ -91,10 +89,60 @@ impl Transformation {
             ]
         }
     }
+    pub fn scale(self, x: f32, y: f32, z: f32) -> Self {
+        self * Transformation {
+            matrix: [
+                x, 0., 0., 0.,
+                0., y, 0., 0.,
+                0., 0., z, 0.,
+                0., 0., 0., 1.
+            ]
+        }
+    }
+    pub fn shear(self, x: f32, y: f32) -> Self {
+        self * Transformation {
+            matrix: [
+                1., x, 0., 0.,
+                y, 1., 0., 0.,
+                0., 0., 1., 0.,
+                0., 0., 0., 1.
+            ]
+        }
+    }
+    pub fn rotate_x(self, rad: f32) -> Self {
+        let (sin, cos) = (rad.sin(), rad.cos());
+        self * Transformation {
+            matrix: [
+                1., 0., 0., 0.,
+                0., cos, -sin, 0.,
+                0., sin, cos, 0.,
+                0., 0., 0., 1.
+            ]
+        }
+    }
+    pub fn rotate_y(self, rad: f32) -> Self {
+        let (sin, cos) = (rad.sin(), rad.cos());
+        self * Transformation {
+            matrix: [
+                cos, 0., sin, 0.,
+                0., 1., 0., 0.,
+                -sin, 0., cos, 0.,
+                0., 0., 0., 1.
+            ]
+        }
+    }
+    pub fn rotate_z(self, rad: f32) -> Self {
+        let (sin, cos) = (rad.sin(), rad.cos());
+        self * Transformation {
+            matrix: [
+                cos, -sin, 0., 0.,
+                sin, cos, 0., 0.,
+                0., 0., 1., 0.,
+                0., 0., 0., 1.
+            ]
+        }
+    }
 
-    // TODO: scale
-    // TODO: rotate
-    // TODO: shear
     // TODO: transform_orthogonal
     // TODO: transform_perspective
 
