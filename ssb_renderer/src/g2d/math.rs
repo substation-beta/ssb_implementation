@@ -16,7 +16,7 @@ macro_rules! impl_FloatExt {
             }
             #[inline]
             fn eq_close(self, other: $T) -> bool {
-                (self - other).abs() < std::$T::EPSILON
+                (self - other).abs() <= std::$T::EPSILON
             }
         }
     }
