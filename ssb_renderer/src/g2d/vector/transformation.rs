@@ -330,17 +330,21 @@ mod tests {
         );
         // Perspective
         let mut points = [
-            Point {x: 0., y: 0.},
-            Point {x: 0., y: 2.}
+            Point {x: -50., y: 1.},
+            Point {x: 50., y: 2.},
+            Point {x: 0., y: 3.},
+            Point {x: -25., y: 4.}
         ];
         Transformation::perspective(50)
         .rotate_y(90_f32.to_radians())
-        .transform(points.iter_mut(), 1.);
+        .transform(points.iter_mut(), 0.);
         assert_eq!(
             points,
             [
-                Point {x: 1., y: 0.},
-                Point {x: 1., y: 2.}
+                Point {x: 0.000004371139, y: 2.0},
+                Point {x: 0.0, y: 0.0},
+                Point {x: 0.0, y: 3.0},
+                Point {x: 0.0000016391771, y: 6.0}
             ]
         );
     }
