@@ -154,55 +154,23 @@ impl Transformation {
             ]
         }
     }
-    pub fn transform_orthogonal<'origin, I: IntoIterator<Item = &'origin mut Point>>(&self, point_iter: I, z: Coordinate) {
-        let col2z_col3 = [
-            self.matrix[2] * z + self.matrix[3],
-            self.matrix[6] * z + self.matrix[7]
-        ];
-        for point in point_iter {
-            *point = Point {
-                x: self.matrix[0] * point.x + self.matrix[1] * point.y + col2z_col3[0],
-                y: self.matrix[4] * point.x + self.matrix[5] * point.y + col2z_col3[1]
-            };
-        }
-    }
-    pub fn transform_perspective<'origin, I: IntoIterator<Item = &'origin mut Point>>(&self, point_iter: I, z: Coordinate, depth: u16) {
-        // Depth in cheap-cost format
-        let depth = depth as f32;
-        let depth_abs_inv = depth.abs().recip();
+    pub fn transform<'origin, I: IntoIterator<Item = &'origin mut Point>>(&self, point_iter: I, z: Coordinate) {
         // Calculation native
         #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
         {
             let col2z_col3 = [
                 self.matrix[2] * z + self.matrix[3],
                 self.matrix[6] * z + self.matrix[7],
-                self.matrix[10] * z + self.matrix[11],
                 self.matrix[14] * z + self.matrix[15]
             ];
             for point in point_iter {
                 *point = {
-                    let (x, y, z) = (
+                    let (x, y, w) = (
                         self.matrix[0] * point.x + self.matrix[1] * point.y + col2z_col3[0],
                         self.matrix[4] * point.x + self.matrix[5] * point.y + col2z_col3[1],
-                        (self.matrix[8] * point.x + self.matrix[9] * point.y + col2z_col3[2]) *
-                            (self.matrix[12] * point.x + self.matrix[13] * point.y + col2z_col3[3])
+                        self.matrix[12] * point.x + self.matrix[13] * point.y + col2z_col3[2]
                     );
-                    if z == 0.0 {
-                        Point {x, y}
-                    } else if z <= -depth {
-                        ORIGIN_POINT
-                    } else if z >= depth {
-                        Point {
-                            x: x + x,
-                            y: y + y
-                        }
-                    } else {
-                        let scale = z * depth_abs_inv;
-                        Point {
-                            x: x + x * scale,
-                            y: y + y * scale
-                        }
-                    }
+                    point4d_to_2d(x, y, w)
                 }
             }
         }
@@ -230,28 +198,24 @@ impl Transformation {
                             )
                         )
                     );
-                    result.data[2] *= result.data[3];
-                    if result.data[2] == 0.0 {
-                        Point {
-                            x: result.data[0],
-                            y: result.data[1]
-                        }
-                    } else if result.data[2] <= -depth {
-                        ORIGIN_POINT
-                    } else if result.data[2] >= depth {
-                        Point {
-                            x: result.data[0] + result.data[0],
-                            y: result.data[1] + result.data[1]
-                        }
-                    } else {
-                        let scale = result.data[2] * depth_abs_inv;
-                        Point {
-                            x: result.data[0] + result.data[0] * scale,
-                            y: result.data[1] + result.data[1] * scale
-                        }
-                    }
+                    point4d_to_2d(result.data[0], result.data[1], result.data[3])
                 }
             }
+        }
+    }
+}
+
+// Helpers
+#[inline]
+fn point4d_to_2d(x: f32, y: f32, w: f32) -> Point {
+    if w == 1.0 {
+        Point {x, y}
+    } else if w == 0.0 {
+        ORIGIN_POINT
+    } else {
+        Point {
+            x: x / w,
+            y: y / w
         }
     }
 }
@@ -346,7 +310,7 @@ mod tests {
         Transformation::default()
         .scale(1., 5., 1.)
         .translate(9., 8., 7.)
-        .transform_orthogonal(points.iter_mut(), 0.);
+        .transform(points.iter_mut(), 0.);
         assert_eq!(
             points,
             [
@@ -356,6 +320,7 @@ mod tests {
             ]
         );
         // Perspective
+        /*
         let mut points = [
             Point {x: 0., y: 0.},
             Point {x: 0., y: 2.}
@@ -370,5 +335,6 @@ mod tests {
                 Point {x: 1., y: 2.}
             ]
         );
+        */
     }
 }
