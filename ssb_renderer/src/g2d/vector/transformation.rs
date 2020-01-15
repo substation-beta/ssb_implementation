@@ -1,5 +1,6 @@
 // Imports
 use std::ops::Mul;
+use crate::g2d::math::FloatExt;
 use super::{
     types::Coordinate,
     point::{Point,ORIGIN_POINT}
@@ -10,28 +11,12 @@ use std::arch::x86::*;
 use std::arch::x86_64::*;
 
 
-// Aligned memory for fast SSE result storage
-#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-#[repr(align(128))]
-#[derive(Default)]
-struct M128 {
-    data: [f32; 4]
-}
-
-// Matrix without any transformation
-const IDENTITY_MATRIX: [f32; 16] = [
-    1., 0., 0., 0.,
-    0., 1., 0., 0.,
-    0., 0., 1., 0.,
-    0., 0., 0., 1.
-];
-
 // 4x4 matrix for transformation of points
-#[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(
     any(target_arch = "x86", target_arch = "x86_64"),
     repr(align(128))
 )]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Transformation {
     pub matrix: [f32; 16]
 }
@@ -44,6 +29,7 @@ impl Default for Transformation {
 }
 impl Mul for Transformation {
     type Output = Self;
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn mul(self, other: Self) -> Self::Output {
         // Output buffer
         let mut transformation = Self {
@@ -90,6 +76,14 @@ impl Mul for Transformation {
 impl Transformation {
     pub fn is_identity(&self) -> bool {
         self.matrix == IDENTITY_MATRIX
+    }
+    pub fn perspective(depth: u16) -> Self {
+        Self {matrix: [
+            1., 0., 0., 0.,
+            0., 1., 0., 0.,
+            0., 0., 1., 0.,
+            0., 0., (depth as f32).recip(), 1.
+        ]}
     }
     pub fn translate(self, x: f32, y: f32, z: f32) -> Self {
         self * Transformation {
@@ -182,7 +176,10 @@ impl Transformation {
                 _mm_set_ps(self.matrix[12], self.matrix[8], self.matrix[4], self.matrix[0]),
                 _mm_set_ps(self.matrix[13], self.matrix[9], self.matrix[5], self.matrix[1]),
                 _mm_add_ps(
-                    _mm_mul_ps(_mm_set_ps(self.matrix[14], self.matrix[10], self.matrix[6], self.matrix[2]), _mm_set1_ps(z)),
+                    _mm_mul_ps(
+                        _mm_set_ps(self.matrix[14], self.matrix[10], self.matrix[6], self.matrix[2]),
+                        _mm_set1_ps(z)
+                    ),
                     _mm_set_ps(self.matrix[15], self.matrix[11], self.matrix[7], self.matrix[3])
                 )
             );
@@ -208,16 +205,28 @@ impl Transformation {
 // Helpers
 #[inline]
 fn point4d_to_2d(x: f32, y: f32, w: f32) -> Point {
-    if w == 1.0 {
+    if w.eq_close(1.0) {
         Point {x, y}
     } else if w == 0.0 {
         ORIGIN_POINT
     } else {
         Point {
-            x: x / w,
-            y: y / w
+            x: x * w,
+            y: y * w
         }
     }
+}
+const IDENTITY_MATRIX: [f32; 16] = [
+    1., 0., 0., 0.,
+    0., 1., 0., 0.,
+    0., 0., 1., 0.,
+    0., 0., 0., 1.
+];
+#[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+#[repr(align(128))]
+#[derive(Default)]
+struct M128 {
+    data: [f32; 4]
 }
 
 
@@ -320,14 +329,13 @@ mod tests {
             ]
         );
         // Perspective
-        /*
         let mut points = [
             Point {x: 0., y: 0.},
             Point {x: 0., y: 2.}
         ];
-        Transformation::default()
+        Transformation::perspective(50)
         .rotate_y(90_f32.to_radians())
-        .transform_perspective(points.iter_mut(), 1., 50);
+        .transform(points.iter_mut(), 1.);
         assert_eq!(
             points,
             [
@@ -335,6 +343,5 @@ mod tests {
                 Point {x: 1., y: 2.}
             ]
         );
-        */
     }
 }
