@@ -6,6 +6,8 @@ pub mod point;
 pub mod path;
 // Path points modification by transformation matrix.
 pub mod transformation;
+// Path converter to stroke variant.
+pub mod stroke;
 
 // Path flattening algorithms.
 mod flatten;
