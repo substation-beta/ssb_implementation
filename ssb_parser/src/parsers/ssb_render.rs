@@ -10,7 +10,7 @@ use crate::{
             macros::flatten_macro,
             event_iter::{EscapedText,TagsIterator},
             convert::{bool_from_str,alpha_from_str,rgb_from_str},
-            option::{map_or_err_str,map_else_err_str}
+            option::OptionExt
         }
     },
     objects::{
@@ -121,31 +121,31 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
         #[allow(clippy::redundant_closure)] // Remove wrong hint because of missing lifetime on closure reduction
         match tag_name {
             "font" => objects.push(EventObject::TagFont(
-                map_else_err_str(tag_value, |value| Some(value.to_owned()) )
+                tag_value.map_else_err_str(|value| Some(value.to_owned()) )
                 .map_err(|value| ParseError::new(&format!("Invalid font '{}'!", value)) )?
             )),
             "size" => objects.push(EventObject::TagSize(
-                map_or_err_str(tag_value, |value| value.parse() )
+                tag_value.map_or_err_str(|value| value.parse() )
                 .map_err(|value| ParseError::new(&format!("Invalid size '{}'!", value)) )?
             )),
             "bold" => objects.push(EventObject::TagBold(
-                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                tag_value.map_or_err_str(|value| bool_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid bold '{}'!", value)) )?
             )),
             "italic" => objects.push(EventObject::TagItalic(
-                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                tag_value.map_or_err_str(|value| bool_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid italic '{}'!", value)) )?
             )),
             "underline" => objects.push(EventObject::TagUnderline(
-                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                tag_value.map_or_err_str(|value| bool_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid underline '{}'!", value)) )?
             )),
             "strikeout" => objects.push(EventObject::TagStrikeout(
-                map_or_err_str(tag_value, |value| bool_from_str(value) )
+                tag_value.map_or_err_str(|value| bool_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid strikeout '{}'!", value)) )?
             )),
             "position" => objects.push(EventObject::TagPosition(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                     Some(Point3D {
                         x: tokens.next()?.parse().ok()?,
@@ -156,7 +156,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid position '{}'!", value)) )?
             )),
             "alignment" => objects.push(EventObject::TagAlignment(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     Some(
                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                             Alignment::Offset(Point2D {
@@ -171,7 +171,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid alignment '{}'!", value)) )?
             )),
             "margin" => objects.push(EventObject::TagMargin(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(4, VALUE_SEPARATOR);
                     Some(
                         if let (Some(top), Some(right), Some(bottom), Some(left)) = (tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
@@ -195,31 +195,31 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid margin '{}'!", value)) )?
             )),
             "margin-top" => objects.push(EventObject::TagMargin(
-                map_else_err_str(tag_value, |value| Some(Margin::Top(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Margin::Top(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid margin top '{}'!", value)) )?
             )),
             "margin-right" => objects.push(EventObject::TagMargin(
-                map_else_err_str(tag_value, |value| Some(Margin::Right(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Margin::Right(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid margin right '{}'!", value)) )?
             )),
             "margin-bottom" => objects.push(EventObject::TagMargin(
-                map_else_err_str(tag_value, |value| Some(Margin::Bottom(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Margin::Bottom(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid margin bottom '{}'!", value)) )?
             )),
             "margin-left" => objects.push(EventObject::TagMargin(
-                map_else_err_str(tag_value, |value| Some(Margin::Left(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Margin::Left(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid margin left '{}'!", value)) )?
             )),
             "wrap-style" => objects.push(EventObject::TagWrapStyle(
-                map_or_err_str(tag_value, |value| WrapStyle::try_from(value) )
+                tag_value.map_or_err_str(|value| WrapStyle::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid wrap style '{}'!", value)) )?
             )),
             "direction" => objects.push(EventObject::TagDirection(
-                map_or_err_str(tag_value, |value| Direction::try_from(value) )
+                tag_value.map_or_err_str(|value| Direction::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid direction '{}'!", value)) )?
             )),
             "space" => objects.push(EventObject::TagSpace(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     Some(
                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                             Space::All(
@@ -235,27 +235,27 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid space '{}'!", value)) )?
             )),
             "space-h" => objects.push(EventObject::TagSpace(
-                map_else_err_str(tag_value, |value| Some(Space::Horizontal(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Space::Horizontal(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid space horizontal '{}'!", value)) )?
             )),
             "space-v" => objects.push(EventObject::TagSpace(
-                map_else_err_str(tag_value, |value| Some(Space::Vertical(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Space::Vertical(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid space vertical '{}'!", value)) )?
             )),
             "rotate-x" => objects.push(EventObject::TagRotate(
-                map_else_err_str(tag_value, |value| Some(Rotate::X(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Rotate::X(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid rotate x '{}'!", value)) )?
             )),
             "rotate-y" => objects.push(EventObject::TagRotate(
-                map_else_err_str(tag_value, |value| Some(Rotate::Y(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Rotate::Y(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid rotate y '{}'!", value)) )?
             )),
             "rotate-z" => objects.push(EventObject::TagRotate(
-                map_else_err_str(tag_value, |value| Some(Rotate::Z(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Rotate::Z(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid rotate z '{}'!", value)) )?
             )),
             "scale" => objects.push(EventObject::TagScale(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                     Some(Scale::All(
                         tokens.next()?.parse().ok()?,
@@ -266,19 +266,19 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid scale '{}'!", value)) )?
             )),
             "scale-x" => objects.push(EventObject::TagScale(
-                map_else_err_str(tag_value, |value| Some(Scale::X(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Scale::X(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid scale x '{}'!", value)) )?
             )),
             "scale-y" => objects.push(EventObject::TagScale(
-                map_else_err_str(tag_value, |value| Some(Scale::Y(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Scale::Y(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid scale y '{}'!", value)) )?
             )),
             "scale-z" => objects.push(EventObject::TagScale(
-                map_else_err_str(tag_value, |value| Some(Scale::Z(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Scale::Z(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid scale z '{}'!", value)) )?
             )),
             "translate" => objects.push(EventObject::TagTranslate(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(3, VALUE_SEPARATOR);
                     Some(Translate::All(
                         tokens.next()?.parse().ok()?,
@@ -289,19 +289,19 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid translate '{}'!", value)) )?
             )),
             "translate-x" => objects.push(EventObject::TagTranslate(
-                map_else_err_str(tag_value, |value| Some(Translate::X(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Translate::X(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid translate x '{}'!", value)) )?
             )),
             "translate-y" => objects.push(EventObject::TagTranslate(
-                map_else_err_str(tag_value, |value| Some(Translate::Y(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Translate::Y(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid translate y '{}'!", value)) )?
             )),
             "translate-z" => objects.push(EventObject::TagTranslate(
-                map_else_err_str(tag_value, |value| Some(Translate::Z(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Translate::Z(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid translate z '{}'!", value)) )?
             )),
             "shear" => objects.push(EventObject::TagShear(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let sep = value.find(VALUE_SEPARATOR)?;
                     Some(Shear::All(
                         value[..sep].parse().ok()?,
@@ -311,15 +311,15 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid shear '{}'!", value)) )?
             )),
             "shear-x" => objects.push(EventObject::TagShear(
-                map_else_err_str(tag_value, |value| Some(Shear::X(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Shear::X(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid shear x '{}'!", value)) )?
             )),
             "shear-y" => objects.push(EventObject::TagShear(
-                map_else_err_str(tag_value, |value| Some(Shear::Y(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Shear::Y(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid shear y '{}'!", value)) )?
             )),
             "matrix" => objects.push(EventObject::TagMatrix(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(16, VALUE_SEPARATOR).filter_map(|value| value.parse().ok() );
                     Some(Box::new([
                         tokens.next()?, tokens.next()?, tokens.next()?, tokens.next()?,
@@ -335,10 +335,10 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .ok_or_else(|| ParseError::new("Reset must have no value!") )?
             ),
             "mode" if mode.is_some() => **mode.as_mut().expect("Impossible :O Checked right before!") =
-                map_or_err_str(tag_value, |value| Mode::try_from(value) )
+                tag_value.map_or_err_str(|value| Mode::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid mode '{}'!", value)) )?,
             "border" => objects.push(EventObject::TagBorder(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     Some(
                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                             Border::All(
@@ -354,26 +354,26 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid border '{}'!", value)) )?
             )),
             "border-h" => objects.push(EventObject::TagBorder(
-                map_else_err_str(tag_value, |value| Some(Border::Horizontal(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Border::Horizontal(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid border horizontal '{}'!", value)) )?
             )),
             "border-v" => objects.push(EventObject::TagBorder(
-                map_else_err_str(tag_value, |value| Some(Border::Vertical(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Border::Vertical(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid border vertical '{}'!", value)) )?
             )),
             "join" => objects.push(EventObject::TagJoin(
-                map_or_err_str(tag_value, |value| Join::try_from(value) )
+                tag_value.map_or_err_str(|value| Join::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid join '{}'!", value)) )?
             )),
             "cap" => objects.push(EventObject::TagCap(
-                map_or_err_str(tag_value, |value| Cap::try_from(value) )
+                tag_value.map_or_err_str(|value| Cap::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid cap '{}'!", value)) )?
             )),
             "texture" => objects.push(EventObject::TagTexture(
                 tag_value.map(ToOwned::to_owned).unwrap_or_else(|| "".to_owned() )
             )),
             "texfill" => objects.push(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                     Some(EventObject::TagTexFill {
                         x0: tokens.next()?.parse().ok()?,
@@ -386,7 +386,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid texture filling '{}'!", value)) )?
             ),
             "color" | "bordercolor" => objects.push({
-                let color = map_or_err_str(tag_value, |value| {
+                let color = tag_value.map_or_err_str(|value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
                         (Some(color1), Some(color2), Some(color3), Some(color4), Some(color5)) =>
@@ -433,7 +433,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 }
             }),
             "alpha" | "borderalpha" => objects.push({
-                let alpha = map_or_err_str(tag_value, |value| {
+                let alpha = tag_value.map_or_err_str(|value| {
                     let mut tokens = value.splitn(5, VALUE_SEPARATOR);
                     Ok(match (tokens.next(), tokens.next(), tokens.next(), tokens.next(), tokens.next()) {
                         (Some(alpha1), Some(alpha2), Some(alpha3), Some(alpha4), Some(alpha5)) =>
@@ -480,7 +480,7 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 }
             }),
             "blur" => objects.push(EventObject::TagBlur(
-                map_else_err_str(tag_value, |value| {
+                tag_value.map_else_err_str(|value| {
                     Some(
                         if let Some(sep) = value.find(VALUE_SEPARATOR) {
                             Blur::All(
@@ -496,23 +496,23 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 .map_err(|value| ParseError::new(&format!("Invalid blur '{}'!", value)) )?
             )),
             "blur-h" => objects.push(EventObject::TagBlur(
-                map_else_err_str(tag_value, |value| Some(Blur::Horizontal(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Blur::Horizontal(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid blur horizontal '{}'!", value)) )?
             )),
             "blur-v" => objects.push(EventObject::TagBlur(
-                map_else_err_str(tag_value, |value| Some(Blur::Vertical(value.parse().ok()?)) )
+                tag_value.map_else_err_str(|value| Some(Blur::Vertical(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid blur vertical '{}'!", value)) )?
             )),
             "blend" => objects.push(EventObject::TagBlend(
-                map_or_err_str(tag_value, |value| Blend::try_from(value) )
+                tag_value.map_or_err_str(|value| Blend::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid blend '{}'!", value)) )?
             )),
             "target" => objects.push(EventObject::TagTarget(
-                map_or_err_str(tag_value, |value| Target::try_from(value) )
+                tag_value.map_or_err_str(|value| Target::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid target '{}'!", value)) )?
             )),
             "mask-mode" => objects.push(EventObject::TagMaskMode(
-                map_or_err_str(tag_value, |value| MaskMode::try_from(value) )
+                tag_value.map_or_err_str(|value| MaskMode::try_from(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid mask mode '{}'!", value)) )?
             )),
             "mask-clear" => objects.push(Some(EventObject::TagMaskClear)
@@ -544,15 +544,15 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 } )?
             )),
             "k" => objects.push(EventObject::TagKaraoke(
-                map_or_err_str(tag_value, |value| value.parse() )
+                tag_value.map_or_err_str(|value| value.parse() )
                 .map_err(|value| ParseError::new(&format!("Invalid karaoke '{}'!", value)) )?
             )),
             "kset" => objects.push(EventObject::TagKaraokeSet(
-                map_or_err_str(tag_value, |value| value.parse() )
+                tag_value.map_or_err_str(|value| value.parse() )
                 .map_err(|value| ParseError::new(&format!("Invalid karaoke set '{}'!", value)) )?
             )),
             "kcolor" => objects.push(EventObject::TagKaraokeColor(
-                map_or_err_str(tag_value, |value| rgb_from_str(value) )
+                tag_value.map_or_err_str(|value| rgb_from_str(value) )
                 .map_err(|value| ParseError::new(&format!("Invalid karaoke color '{}'!", value)) )?
             )),
             _ => return Err(ParseError::new(&format!("Invalid tag '{}'!", tag_name)))
@@ -599,32 +599,32 @@ fn parse_geometries<'a>(data: &str, objects: &'a mut Vec<EventObject>, mode: &Mo
                     _ => match segment_type {
                         ShapeSegmentType::Move => segments.push(ShapeSegment::MoveTo(Point2D {
                             x: token.parse().map_err(|_| ParseError::new(&format!("Invalid X coordinate of move '{}'!", token)) )?,
-                            y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of move '{}'!", token)) )?
+                            y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of move '{}'!", token)) )?
                         })),
                         ShapeSegmentType::Line => segments.push(ShapeSegment::LineTo(Point2D {
                             x: token.parse().map_err(|_| ParseError::new(&format!("Invalid X coordinate of line '{}'!", token)) )?,
-                            y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of line '{}'!", token)) )?
+                            y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of line '{}'!", token)) )?
                         })),
                         ShapeSegmentType::Curve => segments.push(ShapeSegment::CurveTo(
                             Point2D {
                                 x: token.parse().map_err(|_| ParseError::new(&format!("Invalid X coordinate of curve first point '{}'!", token)) )?,
-                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve first point '{}'!", token)) )?
+                                y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve first point '{}'!", token)) )?
                             },
                             Point2D {
-                                x: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid X coordinate of curve second point '{}'!", token)) )?,
-                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve second point '{}'!", token)) )?
+                                x: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid X coordinate of curve second point '{}'!", token)) )?,
+                                y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve second point '{}'!", token)) )?
                             },
                             Point2D {
-                                x: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid X coordinate of curve third point '{}'!", token)) )?,
-                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve third point '{}'!", token)) )?
+                                x: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid X coordinate of curve third point '{}'!", token)) )?,
+                                y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of curve third point '{}'!", token)) )?
                             }
                         )),
                         ShapeSegmentType::Arc => segments.push(ShapeSegment::ArcBy(
                             Point2D {
                                 x: token.parse().map_err(|_| ParseError::new(&format!("Invalid X coordinate of arc '{}'!", token)) )?,
-                                y: map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of arc '{}'!", token)) )?
+                                y: tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid Y coordinate of arc '{}'!", token)) )?
                             },
-                            map_or_err_str(tokens.next(), |token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid degree of arc '{}'!", token)) )?
+                            tokens.next().map_or_err_str(|token| token.parse()).map_err(|token| ParseError::new(&format!("Invalid degree of arc '{}'!", token)) )?
                         )),
                     }
                 }
