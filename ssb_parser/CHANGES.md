@@ -1,6 +1,7 @@
 # v0.4.1
 * improved error messages by inheritance
 * minor code cleaning
+* removed rotate tag with 3 dimensions
 
 # v0.4.0
 * updated dependencies

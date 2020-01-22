@@ -289,9 +289,6 @@ Texture: Fancy,data,RmFuY3k=
                             EventObject::TagSpace(Space::Vertical(
                                 3.0
                             )),
-                            EventObject::TagRotate(Rotate::All(
-                                5.0, 9.0, 1.0
-                            )),
                             EventObject::TagRotate(Rotate::X(
                                 45.0
                             )),

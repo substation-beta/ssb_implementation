@@ -242,17 +242,6 @@ fn parse_tags<'a>(data: &str, objects: &'a mut Vec<EventObject>, mut mode: Optio
                 map_else_err_str(tag_value, |value| Some(Space::Vertical(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid space vertical '{}'!", value)) )?
             )),
-            "rotate" => objects.push(EventObject::TagRotate(
-                map_else_err_str(tag_value, |value| {
-                    let mut tokens = value.splitn(3, VALUE_SEPARATOR);
-                    Some(Rotate::All(
-                        tokens.next()?.parse().ok()?,
-                        tokens.next()?.parse().ok()?,
-                        tokens.next()?.parse().ok()?
-                    ))
-                } )
-                .map_err(|value| ParseError::new(&format!("Invalid rotate '{}'!", value)) )?
-            )),
             "rotate-x" => objects.push(EventObject::TagRotate(
                 map_else_err_str(tag_value, |value| Some(Rotate::X(value.parse().ok()?)) )
                 .map_err(|value| ParseError::new(&format!("Invalid rotate x '{}'!", value)) )?

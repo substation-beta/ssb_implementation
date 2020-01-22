@@ -170,7 +170,6 @@ pub enum Space {
 #[derive(Debug, PartialEq, Clone)]
 #[cfg_attr(feature = "serialization", derive(serde::Serialize,serde::Deserialize))]
 pub enum Rotate {
-    All(Degree, Degree, Degree),
     X(Degree),
     Y(Degree),
     Z(Degree)
