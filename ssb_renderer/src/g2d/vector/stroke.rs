@@ -17,19 +17,20 @@ pub enum LineCap {
     SQUARE
 }
 
-// Processing
-pub fn stroke_path(path: &Path, width_x: f32, width_y: f32, join: LineJoin, cap: LineCap) -> Option<Path> {
+// Stroke processing
+pub fn stroke_path(path: &Path, width_x: f32, width_y: f32, join: LineJoin, cap: LineCap) -> Path {
+    let stroke_path_segments = vec![];
+    for sub_path in SubPathIterator::new(path.segments()) {
 
-    // TODO: split to subpaths with close flags
+        // TODO: prepare join & cap function (or macro?)
 
-    // TODO: prepare join & cap function (or macro?)
+        // TODO: create & connect offset paths
 
-    // TODO: create & connect offset paths
-
-    None
+    }
+    Path::new(stroke_path_segments)
 }
 
-// Helpers
+// Sub paths
 #[derive(Debug,PartialEq)]
 enum SubPathSegment {
     LineTo(Point),
@@ -50,45 +51,62 @@ struct SubPath {
     segments: Vec<SubPathSegment>,
     closed: bool
 }
-fn extract_sub_paths(path: &Path) -> Vec<SubPath> {
-    // Out- & input
-    let mut sub_paths = vec![];
-    let mut segments = path.segments();
-    // Extract sub paths
-    let mut start_point = &ORIGIN_POINT;
-    while !segments.is_empty() {
-        if let Some((move_close_pos, move_close_segment)) = segments.iter().enumerate().find(|(_, segment)| match segment {
-            PathSegment::Flat(FlatPathSegment::MoveTo(_)) | PathSegment::Flat(FlatPathSegment::Close) => true,
-            _ => false
-        }) {
-            // Found subpath
-            if move_close_pos > 0 {
-                sub_paths.push(SubPath {
-                    start: *start_point,
-                    segments: SubPathSegment::from_path_segments(&segments[..move_close_pos]),
-                    closed: move_close_segment == &PathSegment::Flat(FlatPathSegment::Close)
-                });
-            }
-            start_point = if let PathSegment::Flat(FlatPathSegment::MoveTo(point)) = move_close_segment {point} else {&ORIGIN_POINT};
-            segments = &segments[move_close_pos+1..];
-        } else {
-            // Subpath by remainings
-            sub_paths.push(SubPath {
-                start: *start_point,
-                segments: SubPathSegment::from_path_segments(segments),
-                closed: false
-            });
-            break;
+struct SubPathIterator<'origin> {
+    segments: &'origin [PathSegment],
+    start_point: &'origin Point
+}
+impl<'origin> SubPathIterator<'origin> {
+    pub fn new(segments: &'origin [PathSegment]) -> Self {
+        Self {
+            segments,
+            start_point: &ORIGIN_POINT
         }
     }
-    sub_paths
+}
+impl<'origin> Iterator for SubPathIterator<'origin> {
+    type Item = SubPath;
+    fn next(&mut self) -> Option<Self::Item> {
+        // More path segments to process?
+        while !self.segments.is_empty() {
+            if let Some((move_close_pos, move_close_segment)) = self.segments.iter().enumerate().find(|(_, segment)| match segment {
+                PathSegment::Flat(FlatPathSegment::MoveTo(_)) | PathSegment::Flat(FlatPathSegment::Close) => true,
+                _ => false
+            }) {
+                // Found subpath
+                let sub_path = if move_close_pos > 0 {
+                    Some(SubPath {
+                        start: *self.start_point,
+                        segments: SubPathSegment::from_path_segments(&self.segments[..move_close_pos]),
+                        closed: move_close_segment == &PathSegment::Flat(FlatPathSegment::Close)
+                    })
+                } else {
+                    None
+                };
+                self.start_point = if let PathSegment::Flat(FlatPathSegment::MoveTo(point)) = move_close_segment {point} else {&ORIGIN_POINT};
+                self.segments = &self.segments[move_close_pos+1..];
+                if sub_path.is_some() {
+                    return sub_path;
+                }
+            } else {
+                // Subpath by remainings
+                let sub_path = Some(SubPath {
+                    start: *self.start_point,
+                    segments: SubPathSegment::from_path_segments(self.segments),
+                    closed: false
+                });
+                self.segments = &self.segments[0..0];
+                return sub_path;
+            }
+        }
+        None
+    }
 }
 
 
 // Tests
 #[cfg(test)]
 mod tests {
-    use super::{extract_sub_paths,PathBase,Path,Point,SubPath,SubPathSegment};
+    use super::{SubPathIterator,PathBase,Path,Point,SubPath,SubPathSegment};
 
     #[test]
     fn sub_paths() {
@@ -102,7 +120,7 @@ mod tests {
             .line_to(Point {x: 0.0, y: -9999.0});
         // Test
         assert_eq!(
-            extract_sub_paths(&path),
+            SubPathIterator::new(path.segments()).collect::<Vec<_>>(),
             vec![
                 SubPath {
                     start: Point {x: 0.0, y: 0.0},
