@@ -45,11 +45,11 @@ gpgpu = ["ssb_renderer/gpgpu"]
 # Depend on renderer module
 ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
-failure = {version = "~0.1.6", optional = true}   # https://crates.io/crates/failure
+failure = {version = "~0.1.7", optional = true}   # https://crates.io/crates/failure
 # Interface frameworks
-libc = "~0.2.66"    # https://crates.io/crates/libc
+libc = "~0.2.67"    # https://crates.io/crates/libc
 vapoursynth = {version = "~0.3.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
-gstreamer = {version = "~0.15.0", optional = true}   # https://crates.io/crates/gstreamer
+gstreamer = {version = "~0.15.3", optional = true}   # https://crates.io/crates/gstreamer
 
 [target.'cfg(windows)'.dependencies]
 # Interface frameworks
@@ -61,7 +61,7 @@ libloading = "~0.5.2"   # https://crates.io/crates/libloading
 
 [build-dependencies]
 # C header generation
-cbindgen = "~0.12.0" # https://crates.io/crates/cbindgen
+cbindgen = "~0.13.1" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest
