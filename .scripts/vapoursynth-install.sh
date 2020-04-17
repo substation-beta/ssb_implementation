@@ -20,11 +20,11 @@ apt-get install -y build-essential autoconf libtool pkg-config python3-pip && pi
 download_and_build https://github.com/sekrit-twc/zimg/archive/release-2.9.2.tar.gz zimg-release-2.9.2
 # Install vapoursynth (from source)
 download_and_build https://github.com/vapoursynth/vapoursynth/archive/R47.2.tar.gz vapoursynth-R47.2
-# Load vapoursynth into system libraries cache
-ldconfig /usr/local/lib
 # Fix vapoursynth (native) python path
 PYTHON3_LOCAL_LIB_PATH=$(echo /usr/local/lib/python3.*)
 ln -s $PYTHON3_LOCAL_LIB_PATH/site-packages/vapoursynth.so $PYTHON3_LOCAL_LIB_PATH/dist-packages/vapoursynth.so
+# Load vapoursynth into system libraries cache
+ldconfig /usr/local/lib
 
 # Test installation
 python3 -c "from vapoursynth import core;print(core.version())"

@@ -4,8 +4,7 @@
 
 Crates | [![Crate Version](https://img.shields.io/crates/v/ssb_parser.svg?label=ssb_parser&logo=rust)](https://crates.io/crates/ssb_parser) [![Crate Version](https://img.shields.io/crates/v/ssb_renderer.svg?label=ssb_renderer&logo=rust)](https://crates.io/crates/ssb_renderer) [![Crate Version](https://img.shields.io/crates/v/ssb_filter.svg?label=ssb_filter&logo=rust)](https://crates.io/crates/ssb_filter)
 :---|:---
-Documentation | [![Crate Docs Version](https://img.shields.io/crates/v/ssb_parser.svg?label=ssb_parser&logo=rust&color=informational)](https://docs.rs/ssb_parser) [![Crate Docs Version](https://img.shields.io/crates/v/ssb_renderer.svg?label=ssb_renderer&logo=rust&color=informational)](https://docs.rs/ssb_renderer) [![Crate Docs Version](https://img.shields.io/crates/v/ssb_filter.svg?label=ssb_filter&logo=rust&color=informational)](https://docs.rs/ssb_filter)
-Code quality | [![Build Status](https://img.shields.io/travis/com/substation-beta/ssb_implementation.svg?logo=travis)](https://travis-ci.com/substation-beta/ssb_implementation) [![Build Status](https://img.shields.io/appveyor/ci/Youka/ssb-implementation.svg?logo=appveyor)](https://ci.appveyor.com/project/Youka/ssb-implementation) [![Code Coverage](https://img.shields.io/codecov/c/github/substation-beta/ssb_implementation.svg?logo=Codecov)](https://codecov.io/gh/substation-beta/ssb_implementation) [![dependency status](https://deps.rs/repo/github/substation-beta/ssb_implementation/status.svg)](https://deps.rs/repo/github/substation-beta/ssb_implementation)
+Code quality | [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/substation-beta/ssb_implementation/Build%20workspace?logo=github)](https://github.com/substation-beta/ssb_implementation/actions?query=workflow%3A%22Build+workspace%22) [![Code Coverage](https://img.shields.io/codecov/c/github/substation-beta/ssb_implementation.svg?logo=Codecov)](https://codecov.io/gh/substation-beta/ssb_implementation) [![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/substation-beta/ssb_implementation)](https://libraries.io/github/substation-beta/ssb_implementation)
 Properties | [![License](https://img.shields.io/github/license/substation-beta/ssb_implementation.svg?logo=github)](https://github.com/substation-beta/ssb_implementation/blob/master/LICENSE) [![Minimal rust version](https://img.shields.io/badge/rust-v1.40%2B-blue?logo=rust)](https://github.com/rust-lang/rust/blob/master/RELEASES.md#version-1400-2019-12-19)  [![Last commit](https://img.shields.io/github/last-commit/substation-beta/ssb_implementation.svg?logo=github)](https://github.com/substation-beta/ssb_implementation/graphs/commit-activity)
 Platforms | [![Windows support](https://img.shields.io/badge/Windows-supported-success.svg?logo=Windows)](https://en.wikipedia.org/wiki/Microsoft_Windows) [![Linux support](https://img.shields.io/badge/Linux-supported-success.svg?logo=Linux)](https://en.wikipedia.org/wiki/Linux) [![Mac support](https://img.shields.io/badge/OSX-not%20willingly-inactive.svg?logo=Apple)](https://en.wikipedia.org/wiki/MacOS)
 Contact | [![Discord channel](https://img.shields.io/discord/586927398277087235.svg?logo=discord)](https://discord.gg/H8HnPSv) [![Github issues](https://img.shields.io/github/issues/substation-beta/ssb_implementation.svg?logo=github)](https://github.com/substation-beta/ssb_implementation/issues)
@@ -80,8 +79,8 @@ All components are projects inside a **rust** workspace - the ssb_implementation
 
 1) Install [rust](https://www.rust-lang.org/tools/install)
 2) Get [ssb_implementation](https://github.com/substation-beta/ssb_implementation)
-	* [HTTPS download](https://github.com/substation-beta/ssb_implementation/archive/master.zip)
 	* Git clone: `git clone https://github.com/substation-beta/ssb_implementation.git`
+	* [HTTPS download](https://github.com/substation-beta/ssb_implementation/archive/master.zip)
 3) Change current directory to new...
 	* `./ssb_implementation` (git)
     * `./ssb_implementation-master` (https)
@@ -95,9 +94,7 @@ All components are projects inside a **rust** workspace - the ssb_implementation
 	1) Libraries: `./target/release/*.{rlib,dll,so,dylib,lib,a,h}`
     2) Documentation: `./target/doc/**/*`
 
-For references see continuous-integration scripts:
-* [linux (travis-ci)](https://github.com/substation-beta/ssb_implementation/blob/master/.travis.yml)
-* [windows (appveyor)](https://github.com/substation-beta/ssb_implementation/blob/master/.appveyor.yml)
+For references see [CI](https://en.wikipedia.org/wiki/Continuous_integration) by `github actions` [script](https://github.com/substation-beta/ssb_implementation/blob/master/.github/workflows/build_workspace.yml).
 
 # Contributing
 We welcome contributers but insist on working by our rules. The principle **quality > quantity** has to be followed through every part of this project.

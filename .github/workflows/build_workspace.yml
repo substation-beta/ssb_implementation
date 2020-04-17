@@ -1,0 +1,89 @@
+# Reference: <https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions>
+
+
+# Workflow label
+name: Build workspace
+
+# Workflow trigger
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+# Workflow global environment
+env:
+  RUST_BACKTRACE: 1
+  IS_RELEASE: ${{ startsWith(github.event.head_commit.message, 'release') }}
+
+# Workflow tasks
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        toolchain:
+          - stable
+          - nightly
+    runs-on: ${{ matrix.os }}
+    env:
+      IS_WINDOWS: ${{ startsWith(matrix.os, 'windows') }}
+      IS_UBUNTU: ${{ startsWith(matrix.os, 'ubuntu') }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2.1.0 # https://github.com/marketplace/actions/checkout
+      - name: Cache build
+        uses: actions/cache@v1.1.2  # https://github.com/marketplace/actions/cache
+        with:
+          path: target
+          key: cargo-build-target-${{ matrix.os }}-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.toml') }}
+      - name: Select rust toolchain
+        uses: actions-rs/toolchain@v1.0.6 # https://github.com/marketplace/actions/rust-toolchain
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          profile: minimal
+          default: true
+      - name: Install vapoursynth (linux)
+        if: env.IS_UBUNTU == 'true'
+        run: sudo bash .scripts/vapoursynth-install.sh
+      - name: Install windows fonts
+        if: env.IS_UBUNTU == 'true'
+        run: echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections && sudo apt-get install -y ttf-mscorefonts-installer
+      - name: Install vapoursynth (windows)
+        if: env.IS_WINDOWS == 'true'
+        run: powershell .scripts/vapoursynth64-install.ps1
+      - name: Build
+        run: cargo build --verbose
+      - name: Run tests
+        run: cargo test --verbose
+      - name: Report test coverage
+        if: env.IS_UBUNTU == 'true' && matrix.toolchain == 'stable'
+        run: sudo -E bash .scripts/kcov.sh
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Publish crates
+        if: env.IS_RELEASE == 'true' && env.IS_UBUNTU == 'true' && matrix.toolchain == 'stable'
+        run: |
+          cargo login $CRATES_TOKEN
+          cargo publish --manifest-path ssb_parser/Cargo.toml || true
+          cargo publish --manifest-path ssb_renderer/Cargo.toml || true
+          cargo publish --manifest-path ssb_filter/Cargo.toml || true
+        env:
+          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+      - name: Collect ssb_filter binaries
+        if: env.IS_RELEASE == 'true' && env.IS_WINDOWS == 'true' && matrix.toolchain == 'stable'
+        run: |
+          cargo build --release
+          Copy-Item -Destination (New-Item -Path bin -ItemType Directory).Name -Path target/release/* -Include ssb_filter.dll,ssb_filter.dll.lib,ssb_filter.h
+      - name: Upload ssb_filter binaries
+        if: env.IS_RELEASE == 'true' && env.IS_WINDOWS == 'true' && matrix.toolchain == 'stable'
+        uses: actions/upload-artifact@v1.0.0  # https://github.com/marketplace/actions/upload-artifact
+        with:
+          name: ssb_filter
+          path: bin
