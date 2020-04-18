@@ -188,7 +188,7 @@ mod tests {
                 (1, vec![1..5]),
                 (2, vec![1..5]),
                 (3, vec![1..5])
-            ].into_iter().cloned().collect()    // To map for comparison
+            ].iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -220,7 +220,7 @@ mod tests {
                 (7, vec![0..9]),
                 (8, vec![0..9]),
                 (9, vec![0..9])
-            ].into_iter().cloned().collect()    // To map for comparison
+            ].iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -252,7 +252,7 @@ mod tests {
                 (7, vec![0..9]),
                 (8, vec![0..9]),
                 (9, vec![0..9])
-            ].into_iter().cloned().collect()    // To map for comparison
+            ].iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -278,7 +278,7 @@ mod tests {
                 (4, vec![2..10]),
                 (5, vec![2..10]),
                 (6, vec![2..10])
-            ].into_iter().cloned().collect()    // To map for comparison
+            ].iter().cloned().collect()    // To map for comparison
         );
     }
 
@@ -290,19 +290,19 @@ mod tests {
                     (0, vec![0..33]),
                     (1, vec![1..5]),
                     (3, vec![0..50, 4..7])
-                ].into_iter().cloned().collect(),
+                ].iter().cloned().collect(),
                 [
                     (1, vec![0..6]),
                     (2, vec![2..8]),
                     (3, vec![1..20, 1..3])
-                ].into_iter().cloned().collect()
+                ].iter().cloned().collect()
             ]),
             [
                 (0, vec![0..33]),
                 (1, vec![0..6, 1..5]),
                 (2, vec![2..8]),
                 (3, vec![0..50, 1..20, 1..3, 4..7])
-            ].into_iter().cloned().collect()
+            ].iter().cloned().collect()
         );
     }
 }

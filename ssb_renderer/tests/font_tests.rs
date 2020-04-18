@@ -50,7 +50,7 @@ mod font_tests {
         // See <https://gitlab.redox-os.org/redox-os/rusttype/blob/master/examples/simple.rs>
 
         // Construct font object
-        let font = Font::from_bytes(data).expect("Font data should be valid!");
+        let font = Font::try_from_vec(data).expect("Font data should be valid!");
         // Font size
         let font_scale = Scale::uniform(54.7);
         // Get glyphs from text (as vector to not consume items by reading)
