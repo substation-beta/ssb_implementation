@@ -211,10 +211,9 @@ impl<'origin> Iterator for SubPathIterator<'origin> {
     fn next(&mut self) -> Option<Self::Item> {
         // More path segments to process?
         while !self.segments.is_empty() {
-            if let Some((move_close_pos, move_close_segment)) = self.segments.iter().enumerate().find(|(_, segment)| match segment {
-                PathSegment::Flat(FlatPathSegment::MoveTo(_)) | PathSegment::Flat(FlatPathSegment::Close) => true,
-                _ => false
-            }) {
+            if let Some((move_close_pos, move_close_segment)) = self.segments.iter().enumerate().find(|(_, segment)|
+                matches!(segment, PathSegment::Flat(FlatPathSegment::MoveTo(_)) | PathSegment::Flat(FlatPathSegment::Close))
+            ) {
                 // Found subpath
                 let sub_path = if move_close_pos > 0 {
                     Some(SubPath {
@@ -287,10 +286,7 @@ mod tests {
             flat_path_segments.into_iter()
                 .skip(2)
                 .take(flat_path_segments.len()-3)
-                .all(|segment| match segment {
-                    FlatPathSegment::LineTo(point) if (-70.0..=50.0).contains(&point.x) && (0.0..=100.0).contains(&point.y) => true,
-                    _ => false
-                }),
+                .all(|segment| matches!(segment, FlatPathSegment::LineTo(point) if (-70.0..=50.0).contains(&point.x) && (0.0..=100.0).contains(&point.y)) ),
             "Flattening curves & arcs failed: {:?}", flat_path
         );
     }
