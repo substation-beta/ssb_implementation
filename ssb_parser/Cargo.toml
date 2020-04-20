@@ -16,13 +16,6 @@ repository = "https://github.com/substation-beta/ssb_implementation"
 # Don't package development stuff
 exclude = ["tests/**/*", "benches/**/*"]
 
-[badges]
-# Development status
-travis-ci = {repository = "substation-beta/ssb_implementation", branch = "master"}
-appveyor = {repository = "Youka/ssb_implementation", branch = "master", service = "github"}
-codecov = {repository = "substation-beta/ssb_implementation", branch = "master", service = "github"}
-maintenance = {status = "actively-developed"}
-
 [lib]
 # Compile to Rust static library
 crate-type = ["rlib"]
