@@ -38,14 +38,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout source
-        uses: actions/checkout@v2.1.0 # https://github.com/marketplace/actions/checkout
+        uses: actions/checkout@v2 # https://github.com/marketplace/actions/checkout
       - name: Cache build
-        uses: actions/cache@v1.1.2  # https://github.com/marketplace/actions/cache
+        uses: actions/cache@v2  # https://github.com/marketplace/actions/cache
         with:
           path: target
           key: cargo-build-target-${{ matrix.os }}-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.toml') }}
       - name: Select rust toolchain
-        uses: actions-rs/toolchain@v1.0.6 # https://github.com/marketplace/actions/rust-toolchain
+        uses: actions-rs/toolchain@v1 # https://github.com/marketplace/actions/rust-toolchain
         with:
           toolchain: ${{ matrix.toolchain }}
           profile: minimal
@@ -84,7 +84,7 @@ jobs:
           Copy-Item -Destination (New-Item -Path bin -ItemType Directory).Name -Path target/release/* -Include ssb_filter.dll,ssb_filter.dll.lib,ssb_filter.h
       - name: Upload ssb_filter binaries
         if: env.IS_RELEASE == 'true' && env.IS_WINDOWS == 'true' && matrix.toolchain == 'stable'
-        uses: actions/upload-artifact@v1.0.0  # https://github.com/marketplace/actions/upload-artifact
+        uses: actions/upload-artifact@v2  # https://github.com/marketplace/actions/upload-a-build-artifact
         with:
           name: ssb_filter
           path: bin
