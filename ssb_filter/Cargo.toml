@@ -38,26 +38,26 @@ gpgpu = ["ssb_renderer/gpgpu"]
 # Depend on renderer module
 ssb_renderer = {path = "../ssb_renderer", version = "0.0.1"}
 # Debugging
-failure = {version = "~0.1.7", optional = true}   # https://crates.io/crates/failure
+failure = {version = "~0.1.8", optional = true}   # https://crates.io/crates/failure
 # Interface frameworks
-libc = "~0.2.69"    # https://crates.io/crates/libc
+libc = "~0.2.86"    # https://crates.io/crates/libc
 vapoursynth = {version = "~0.3.0", features = ["vapoursynth-functions", "vsscript-functions"], optional = true}  # https://crates.io/crates/vapoursynth
-gstreamer = {version = "~0.15.4", optional = true}   # https://crates.io/crates/gstreamer
+gstreamer = {version = "~0.16.5", optional = true}   # https://crates.io/crates/gstreamer
 
 [target.'cfg(windows)'.dependencies]
 # Interface frameworks
-winapi = {version = "~0.3.8", optional = true}   # https://crates.io/crates/winapi
+winapi = {version = "~0.3.9", optional = true}   # https://crates.io/crates/winapi
 
 [dev-dependencies]
 # DLL loading
-libloading = "~0.6.1"   # https://crates.io/crates/libloading
+libloading = "~0.7.0"   # https://crates.io/crates/libloading
 
 [build-dependencies]
 # C header generation
-cbindgen = "~0.14.1" # https://crates.io/crates/cbindgen
+cbindgen = "~0.17.0" # https://crates.io/crates/cbindgen
 
 [target.'cfg(windows)'.build-dependencies]
 # Manifest
-embed-resource = "~1.3.3"   # https://crates.io/crates/embed-resource
+embed-resource = "~1.5.1"   # https://crates.io/crates/embed-resource
 # Date & time
-chrono = "~0.4.11"   # https://crates.io/crates/chrono
+chrono = "~0.4.19"   # https://crates.io/crates/chrono
