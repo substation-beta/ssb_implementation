@@ -10,8 +10,8 @@ mod c_tests {
 
     #[test]
     fn test_version() {
-        let lib = Library::new(platform::dll_path()).expect("Couldn't load DLL!");
         unsafe {
+            let lib = Library::new(platform::dll_path()).expect("Couldn't load DLL!");
             let version_fn = lib.get::<unsafe extern fn() -> *const c_char>(b"ssb_version\0").expect("Couldn't load symbol 'ssb_version' from DLL!");
             assert_eq!(
                 CStr::from_ptr(version_fn()).to_string_lossy(),
@@ -23,8 +23,8 @@ mod c_tests {
     #[test]
     fn test_renderer() {
         // Get DLL functions
-        let lib = Library::new(platform::dll_path()).expect("Couldn't load DLL!");
         unsafe {
+            let lib = Library::new(platform::dll_path()).expect("Couldn't load DLL!");
             let new_renderer_by_file_fn = lib.get::<unsafe extern fn(*const c_char, *mut c_char, c_ushort) -> *mut c_void>(b"ssb_new_renderer_by_file\0").expect("Couldn't load symbol 'ssb_new_renderer_by_file' from DLL!");
             let new_renderer_by_script_fn = lib.get::<unsafe extern fn(*const c_char, *mut c_char, c_ushort) -> *mut c_void>(b"ssb_new_renderer_by_script\0").expect("Couldn't load symbol 'ssb_new_renderer_by_script' from DLL!");
             let destroy_renderer_fn = lib.get::<unsafe extern fn(*mut c_void)>(b"ssb_destroy_renderer\0").expect("Couldn't load symbol 'ssb_destroy_renderer' from DLL!");

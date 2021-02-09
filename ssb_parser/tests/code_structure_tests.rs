@@ -6,6 +6,6 @@ mod code_structure_tests {
     #[test]
     fn test_sizes() {
         let event_object_size = size_of::<EventObject>();
-        assert!(event_object_size <= 40, format!("EventObject is larger than 40 bytes: {}!", event_object_size));
+        assert!(event_object_size <= 40, "EventObject is larger than 40 bytes: {}!", event_object_size);
     }
 }
