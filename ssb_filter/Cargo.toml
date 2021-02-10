@@ -26,7 +26,7 @@ doctest = false
 
 [features]
 # Add at least one media framework
-default = []
+default = ["vapoursynth-interface"]
 # Modern media frameworks
 vapoursynth-interface = ["vapoursynth", "failure"]
 mediafoundation-interface = ["winapi"]

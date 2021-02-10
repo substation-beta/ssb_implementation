@@ -50,6 +50,10 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           profile: minimal
           default: true
+      - name: Select python version
+        uses: actions/setup-python@v2 # https://github.com/marketplace/actions/setup-python
+        with:
+          python-version: '3.8'
       - name: Install vapoursynth (linux)
         if: env.IS_UBUNTU == 'true'
         run: sudo bash .scripts/vapoursynth-install.sh
