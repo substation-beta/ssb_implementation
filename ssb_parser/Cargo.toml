@@ -13,8 +13,6 @@ categories = ["parsing"]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/substation-beta/ssb_implementation"
-# Don't package development stuff
-exclude = ["tests/**/*", "benches/**/*"]
 
 [lib]
 # Compile to Rust static library
