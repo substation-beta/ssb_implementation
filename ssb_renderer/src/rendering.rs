@@ -3,8 +3,8 @@ use ssb_parser::{
     SsbRender,
     objects::ssb_objects::EventTrigger
 };
-use crate::g2d::raster::image::ImageView;
-use super::error::RenderingError;
+use puny2d::raster::image::ImageView;
+use crate::error::RenderingError;
 
 
 /// Condition to trigger rendering on specific image.

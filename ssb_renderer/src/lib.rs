@@ -11,14 +11,13 @@ Renderer component of subtitle format implementation.
     html_root_url = "https://substation-beta.github.io"
 )]
 
-// Rendering backend for general 2D graphics.
-// TODO: mod g2d;
-pub mod g2d;
-pub use g2d::raster::image;
+// Project modules
+mod error;
+mod rendering;
 
-// Rendering frontend for SSB output.
-mod ssb;
-pub use ssb::{error::RenderingError,rendering::*};
+// Exports
+pub use crate::{error::RenderingError, rendering::*};
 
 // Re-exports (interfaces required by public users).
+pub use puny2d::raster::image;
 pub use ssb_parser;

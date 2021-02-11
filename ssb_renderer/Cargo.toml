@@ -30,21 +30,15 @@ harness = false
 
 [features]
 # Acceleration by General-Purpose-GPU
-gpgpu = ["ocl"]
+gpgpu = ["puny2d/gpgpu"]
 
 [dependencies]
 # Depend on parser module
 ssb_parser = {path = "../ssb_parser", version = "0.4.0", default-features = false}
-# Fonts & text
-font-loader = "~0.11.0"   # https://crates.io/crates/font-loader
-rusttype = "~0.9.2"  # https://crates.io/crates/rusttype
-glyph_brush_layout = "~0.2.1"   # https://crates.io/crates/glyph_brush_layout
+# Depend on puny2d library
+puny2d = {path = "../../puny2d", version = "0.0.1"}
 # Math expressions
 meval = "~0.2.0"  # https://crates.io/crates/meval
-# Acceleration
-lru = "~0.6.4" # https://crates.io/crates/lru
-rayon = "~1.5.0"    # https://crates.io/crates/rayon
-ocl = {version = "~0.19.3", optional = true} # https://crates.io/crates/ocl
 
 [dev-dependencies]
 # Profiling

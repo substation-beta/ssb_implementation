@@ -7,7 +7,7 @@ use std::{
         Result
     }
 };
-use crate::g2d::error::GraphicsError;
+use puny2d::error::GraphicsError;
 
 
 /// SSB rendering specific error type.
