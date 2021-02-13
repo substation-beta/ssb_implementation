@@ -1,5 +1,5 @@
-<p align="center">
-    <img src="https://substation-beta.github.io/assets/img/logo.png" alt="Logo"/>
+<p align="left">
+    <img src="https://substation-beta.github.io/assets/img/logo.png" height="250" alt="Logo"/>
 </p>
 
 Crates | [![Crate Version](https://img.shields.io/crates/v/ssb_parser.svg?label=ssb_parser&logo=rust)](https://crates.io/crates/ssb_parser) [![Crate Version](https://img.shields.io/crates/v/ssb_renderer.svg?label=ssb_renderer&logo=rust)](https://crates.io/crates/ssb_renderer) [![Crate Version](https://img.shields.io/crates/v/ssb_filter.svg?label=ssb_filter&logo=rust)](https://crates.io/crates/ssb_filter)
