@@ -10,3 +10,9 @@ Cargo.lock
 # Editor configurations
 .idea/
 .vscode/
+
+# Downloaded artifacts
+VapourSynth**.7z
+
+# Generated files
+utfile
