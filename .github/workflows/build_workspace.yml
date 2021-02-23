@@ -53,7 +53,7 @@ jobs:
       - name: Select python version
         uses: actions/setup-python@v2 # https://github.com/marketplace/actions/setup-python
         with:
-          python-version: '3.8'
+          python-version: '3.5'
       - name: Install vapoursynth (linux)
         if: env.IS_UBUNTU == 'true'
         run: sudo bash .scripts/vapoursynth-install.sh

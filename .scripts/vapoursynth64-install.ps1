@@ -1,9 +1,9 @@
 # Get python home
 $Env:PYTHON = split-path (Get-Command python).Source
-# Load vapoursynth R52
-wget https://github.com/vapoursynth/vapoursynth/releases/download/R52/VapourSynth64-Portable-R52.7z -Outfile VapourSynth64-Portable-R52.7z
+# Load vapoursynth R47.2
+wget https://github.com/vapoursynth/vapoursynth/releases/download/R47.2/VapourSynth64-Portable-R47.2.7z -Outfile VapourSynth64-Portable-R47.2.7z
 # Extract vapoursynth archive into python
-7z x VapourSynth64-Portable-R52.7z -o"$Env:PYTHON" -y
+7z x VapourSynth64-Portable-R47.2.7z -o"$Env:PYTHON" -y
 # Show vapoursynth version
 python -c "import vapoursynth; print(vapoursynth.core.version())"
 # Add compiler access to vapoursynth sdk
