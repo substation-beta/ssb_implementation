@@ -26,15 +26,11 @@ name = "rendering_benches"
 # Disable standard benchmarking harness in favor of microbench
 harness = false
 
-[features]
-# Acceleration by General-Purpose-GPU
-gpgpu = ["puny2d/gpgpu"]
-
 [dependencies]
 # Depend on parser module
 ssb_parser = {path = "../ssb_parser", version = "0.4.0", default-features = false}
 # 2d graphics
-puny2d = "~0.0.1"
+puny2d = "~0.0.2"   # https://crates.io/crates/puny2d
 # Math expressions
 meval = "~0.2.0"  # https://crates.io/crates/meval
 
