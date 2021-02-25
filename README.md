@@ -86,7 +86,6 @@ All components are projects inside a **rust** workspace - the ssb_implementation
     * `./ssb_implementation-master` (https)
 4) Install software for [features](https://doc.rust-lang.org/cargo/reference/manifest.html#usage-in-end-products)
 	1) [Vapoursynth](http://www.vapoursynth.com/doc/installation.html) for [ssb_filter](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_filter/Cargo.toml) *vapoursynth-interface* (! on by default !)
-    2) [OpenCL](https://developer.nvidia.com/cuda-downloads) for [ssb_renderer](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_renderer/Cargo.toml) *gpgpu* (passed down by [ssb_filter](https://github.com/substation-beta/ssb_implementation/blob/master/ssb_filter/Cargo.toml) as well)
 5) Build components by [cargo](https://doc.rust-lang.org/cargo/commands/)
 	1) Libraries with release profile: `cargo build --release`
     2) Documentation without dependencies: `cargo doc --no-deps`
